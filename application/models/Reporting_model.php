@@ -18,11 +18,17 @@ class Reporting_model extends CI_Model {
   
   
   function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
-    //canonicalize start and end times (new short ternary operator form (see <http://php.net/manual/en/language.operators.comparison.php>))
-    $start_date = false;
-    $end_date = false;
+    //canonicalize start and end times (yields $start_time & $end_time)
+    extract($this->canonicalize_date_range($start_date, $end_date));
     
-    //both start and end times are filled in
+    //get transactions for time period & instrument combination
+    
+    
+  }
+  
+  
+  private function canonicalize_date_range($start_date, $end_date){
+    //both start and end times are filled in and valid
     if(strtotime($start_date) && strtotime($end_date)){
       //check for validity and ordering
       $start_time = date_create($start_date);
@@ -40,9 +46,9 @@ class Reporting_model extends CI_Model {
     }else{
       $start_time = date_create('00:00:00');
       $end_time = date_create('+1 day 00:00:00');
-    }        
+    }
     
-    //get transactions for time period
+    return array('start_time' => $start_time, 'end_time' => $end_time);
   }
   
   
