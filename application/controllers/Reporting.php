@@ -12,7 +12,7 @@ class Reporting extends Baseline_controller {
 
 
   public function index(){
-    $this->rep->summarize_uploads_by_instrument(34218, '2015-06-01');
+    $this->rep->summarize_uploads_by_instrument(34218, '2015-12-01');
   }
 
   public function get_uploads_for_instrument($instrument_id,$start_date,$end_date = false){
