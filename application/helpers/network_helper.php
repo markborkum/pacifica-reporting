@@ -48,15 +48,15 @@ function send_json_array($response_array){
   $array_size = sizeof($response_array);
   $status_header = $array_size > 0 ? 200 : 404;
   $CI->output->set_status_header($status_header);
-  $CI->output->set_header("Operation-message:{$array_size} transaction".$array_size != 1 ? 's' : ''." returned");
+  $CI->output->set_header("Operation-message:{$array_size} record".$array_size != 1 ? 's' : ''." returned");
   
-  if($status_header == 200){
+  // if($status_header == 200){
     $CI->output->set_output(json_encode($response_array));
     $CI->output->set_header("Operation-status:ok");
-  }else{
-    $CI->output->set_output("");
-    $CI->output->set_header("Operation-status:fail");
-  }
+  // }else{
+    // $CI->output->set_output("");
+    // $CI->output->set_header("Operation-status:fail");
+  // }
   
 }
 

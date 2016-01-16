@@ -19,18 +19,9 @@ class Reporting_model extends CI_Model {
   
   
   
-  
-  function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
-    //canonicalize start and end times (yields $start_time & $end_time)
+  private function get_transactions_from_group_list($group_list, $start_date, $end_date){
     extract($this->canonicalize_date_range($start_date, $end_date));
-    
-    $results = array('transactions' => array());
-    
-    //get instrument group_id list
-    $group_collection = $this->get_instrument_group_list($eus_instrument_id);
-    $group_list = array_keys($group_collection);
-    
-    //get transactions for time period & instrument combination
+    $transactions = array();
     $where_clause = array('stime >=' => $start_time->format('Y-m-d H:i:s'));
     if($end_time){
       $where_clause['stime <'] = $end_time->format('Y-m-d H:i:s');
@@ -41,67 +32,116 @@ class Reporting_model extends CI_Model {
     $this->db->where_in('gi.group_id',$group_list);
     $this->db->order_by('t.transaction desc');
     $transaction_query = $this->db->get();
-    
+        
     if($transaction_query && $transaction_query->num_rows()>0){
       foreach($transaction_query->result() as $row){
         $stime = date_create($row->submit_time);
-        $results['transactions'][$row->transaction] = array(
+        $transactions[$row->transaction] = array(
           'submit_time' => $stime->format('Y-m-d H:i:s')
         );
       }
     }
+    return $transactions;
+  }
+
+
+
+  
+  function summarize_uploads_by_user($eus_person_id,$start_date, $end_date, $instrument_filter = "", $proposal_filter = ""){
+    //get user transactions
     
+    
+  }
+  
+  
+  
+  
+  function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date){
+    //canonicalize start and end times (yields $start_time & $end_time)
+    //extract($this->canonicalize_date_range($start_date, $end_date));
+    
+    $results = array('transactions' => array());
+    
+    //get proposal_group_list
+    $group_collection = $this->get_proposal_group_list($eus_proposal_id);
+    $group_list = array_keys($group_collection);
+        
+    //get transactions for time period & group_list
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
+
+    //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
-      $this->db->where_in('transaction', array_keys($results['transactions']));
-      $this->db->group_by('transaction');
-      $this->db->select(
-        array(
-          'transaction',
-          'SUM(size) as file_size_in_bytes',
-          'COUNT(transaction) as file_count'
-          )
-        );
-      $total_file_size_summary = 0;
-      $total_file_count_summary = 0;  
-      
-      $file_info_query = $this->db->get(FILES_TABLE);
-      if($file_info_query && $file_info_query->num_rows() > 0){
-        foreach($file_info_query->result() as $file_row){
-          if(array_key_exists($file_row->transaction, $results['transactions'])){
-            $results['transactions'][$file_row->transaction]['size_bytes'] = $file_row->file_size_in_bytes;
-            $results['transactions'][$file_row->transaction]['size_string'] = format_bytes($file_row->file_size_in_bytes);
-            $results['transactions'][$file_row->transaction]['count'] = $file_row->file_count;
-            $total_file_count_summary += $file_row->file_count;
-            $total_file_size_summary += $file_row->file_size_in_bytes;
-          }
-        }
-      }
-      $results['summary_totals'] = array(
-        'total_file_count' => $total_file_count_summary,
-        'total_size_bytes' => $total_file_size_summary,
-        'total_size_string' => format_bytes($total_file_size_summary)
-      );
-      
-      $day_graph = $this->generate_day_graph_summary($results['transactions']);
-      
+      $results = $this->generate_summary_data($results);
+      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
+    }else{
+      return array();
+    }
+    return array($eus_proposal_id => $results);
+  }
+    
+ 
+ 
+  
+  
+  
+  function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
+    //get instrument group_id list
+    $group_collection = $this->get_instrument_group_list($eus_instrument_id);
+    $group_list = array_keys($group_collection);
+    
+    if(empty($group_list)){
+      //no results returned for group list => bail out
     }
     
+    //get transactions for time period & group_list
+    $transactions = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
+        
+    //use the transaction list to retrieve summary info
+    if(!empty($results['transactions'])){
+      $results = $this->generate_summary_data($results);
+      $day_graph = $this->generate_day_graph_summary($transactions);
+    }else{
+      return array();
+    }
     return array($eus_instrument_id => $results);
   }
   
   
-  
-  
-  function summarize_uploads_by_user($eus_person_id){
+  function generate_summary_data($results){
+    $this->db->where_in('transaction', array_keys($results['transactions']));
+    $this->db->group_by('transaction');
+    $this->db->select(
+      array(
+        'transaction',
+        'SUM(size) as file_size_in_bytes',
+        'COUNT(transaction) as file_count'
+        )
+      );
+    $total_file_size_summary = 0;
+    $total_file_count_summary = 0;  
     
+    $file_info_query = $this->db->get(FILES_TABLE);
+    if($file_info_query && $file_info_query->num_rows() > 0){
+      foreach($file_info_query->result() as $file_row){
+        if(array_key_exists($file_row->transaction, $results['transactions'])){
+          $results['transactions'][$file_row->transaction]['size_bytes'] = $file_row->file_size_in_bytes;
+          $results['transactions'][$file_row->transaction]['size_string'] = format_bytes($file_row->file_size_in_bytes);
+          $results['transactions'][$file_row->transaction]['count'] = $file_row->file_count;
+          $total_file_count_summary += $file_row->file_count;
+          $total_file_size_summary += $file_row->file_size_in_bytes;
+        }
+      }
+    }
+    $results['summary_totals'] = array(
+      'total_file_count' => $total_file_count_summary,
+      'total_size_bytes' => $total_file_size_summary,
+      'total_size_string' => format_bytes($total_file_size_summary)
+    );
+    
+    return $results;
   }
   
   
-  
-  
-  function summarize_uploads_by_proposal($eus_proposal_id){
-    
-  }
   
   
   /* 
@@ -166,46 +206,15 @@ class Reporting_model extends CI_Model {
     }
     unset($summary_list['by_hour_list']);
     
-    echo "<pre>";
-    var_dump($summary_list);
-    echo "</pre>";
-    
-    // var_dump($summary_list);
-    // sort($date_list);
-    // $dl = $date_list;
-    // $first_date = $start_date ? $start_date : array_shift($dl);
-    // $last_date = $end_date ? $end_date : array_pop($dl);
-    // $first_date->setTime(0,0,0);
-    // $last_date->setTime(11,59,59);
-    
-    
-    //ok, got the earliest and latest dates we care about, now to partition the transactions...
-    //build the full range of dates...
-    // $date_collection = array();
-    // $new_date = clone $first_date;
-    // while($new_date->getTimestamp() <= $last_date->getTimestamp()){
-      // $date_collection[$new_date->format('Y-m-d')] = array(
-        // 'file_size' => 0,
-        // 'file_count' => 0
-      // );
-      // $new_date->modify('+1 day');
-    // }
-    
-    //foreach($transaction_list as $trans_id => $info)
-    
-    
-    
-    // echo "<pre>";
-    // var_dump($date_collection);
-    // echo "</pre>";
+    return $summary_list;
     
   }
   
   
   private function canonicalize_date_range($start_date, $end_date){
     //both start and end times are filled in and valid
-    $start_time = strtotime($start_date) ? date_create($start_date) : date_create('00:00:00');
-    $end_time = strtotime($end_date) ? date_create($end_date) : false;
+    $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('00:00:00');
+    $end_time = strtotime($end_date) ? date_create($end_date)->setTime(11,59,59) : false;
     
     if($end_time < $start_time && !empty($end_time)){
       //flipped??
@@ -217,20 +226,33 @@ class Reporting_model extends CI_Model {
     return array('start_time' => $start_time, 'end_time' => $end_time);
   }
   
+  private function get_proposal_group_list($proposal_id_filter = ""){
+    $this->db->select(array('group_id','name as proposal_id'))->where('type','proposal');
+    if(!empty($proposal_id_filter)){
+      $this->db->where('name',$proposal_id_filter);
+    }
+    $query = $this->db->get('groups');
+    
+    $results_by_proposal = array();
+    if($query && $query->num_rows()){
+      foreach($query->result() as $row){
+        $results_by_proposal[$row->group_id] = $row->proposal_id;
+      }
+    }
+    return $results_by_proposal;  
+  }
+  
   
   private function get_instrument_group_list($inst_id_filter = ""){
-    $DB_myemsl = $this->load->database('default',TRUE);
-    
-    $DB_myemsl->select(array('group_id','name','type'));
+    $this->db->select(array('group_id','name','type'));
     // if(!empty($inst_id_filter) && intval($inst_id_filter) >= 0){
       // $where_clause = "(type = 'omics.dms.instrument' or type ilike 'instrument.%') and name not in ('foo') and (group_id = '{$inst_id_filter}' or type like 'Instrument.{$inst_id_filter}')";
     // }else{
       $where_clause = "(type = 'omics.dms.instrument_id' or type ilike 'instrument.%') and name not in ('foo')";
     // }
     
-    $DB_myemsl->where($where_clause);
-    $query = $DB_myemsl->order_by('name')->get('groups');
-    $results_by_group = array();
+    $this->db->where($where_clause);
+    $query = $this->db->order_by('name')->get('groups');
     $results_by_inst_id = array();
     if($query && $query->num_rows() > 0){
       foreach($query->result() as $row){
