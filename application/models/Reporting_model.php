@@ -19,6 +19,84 @@ class Reporting_model extends CI_Model {
   
   
   
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *    Publicly available API calls 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  function summarize_uploads_by_user($eus_person_id,$start_date, $end_date, $instrument_filter = "", $proposal_filter = ""){
+    //get user transactions
+    $results = array('transactions' => array());
+    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_date, $end_date);
+    
+    //use the transaction list to retrieve summary info
+    if(!empty($results['transactions'])){
+      $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
+      $results = $this->generate_summary_data($results);
+      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
+    }else{
+      return array();
+    }
+    return array($eus_person_id => $results);
+  }
+  
+  
+  
+  
+  function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date){
+    //canonicalize start and end times (yields $start_time & $end_time)
+    //extract($this->canonicalize_date_range($start_date, $end_date));
+    
+    $results = array('transactions' => array());
+    
+    //get proposal_group_list
+    $group_collection = $this->get_proposal_group_list($eus_proposal_id);
+    $group_list = array_keys($group_collection);
+        
+    //get transactions for time period & group_list
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
+
+    //use the transaction list to retrieve summary info
+    if(!empty($results['transactions'])){
+      $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);      
+      $results = $this->generate_summary_data($results);
+      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
+    }else{
+      return array();
+    }
+    return array($eus_proposal_id => $results);
+  }
+    
+ 
+ 
+  
+  function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
+    //get instrument group_id list
+    $group_collection = $this->get_instrument_group_list($eus_instrument_id);
+    $group_list = array_keys($group_collection);
+    
+    if(empty($group_list)){
+      //no results returned for group list => bail out
+    }
+    
+    //get transactions for time period & group_list
+    $transactions = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
+        
+    //use the transaction list to retrieve summary info
+    if(!empty($results['transactions'])){
+      $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);      
+      $results = $this->generate_summary_data($results);
+      $day_graph = $this->generate_day_graph_summary($transactions);
+    }else{
+      return array();
+    }
+    return array($eus_instrument_id => $results);
+  }
+  
+  
+  
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+ *    Private functionality for behind the scenes data retrieval 
+ * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
   private function get_transactions_from_group_list($group_list, $start_date, $end_date){
     extract($this->canonicalize_date_range($start_date, $end_date));
     $transactions = array();
@@ -45,69 +123,76 @@ class Reporting_model extends CI_Model {
   }
 
 
+  private function get_transactions_for_user($eus_user_id, $start_date, $end_date){
+    extract($this->canonicalize_date_range($start_date, $end_date));
+    $transactions = array();
+    $where_clause = array('stime >=' => $start_time->format('Y-m-d H:i:s'));
+    if($end_time){
+      $where_clause['stime <'] = $end_time->format('Y-m-d H:i:s');
+    }
+    $this->db->select(array('t.transaction','t.stime as submit_time','ing.person_id'))->where($where_clause);
+    $this->db->from('transactions as t')->join('ingest_state as ing', 't.transaction = ing.trans_id');
+    $this->db->where('ing.message','completed')->where('ing.person_id',$eus_user_id);
+    $this->db->order_by('t.transaction desc');
+    $transaction_query = $this->db->get();
+    
+    if($transaction_query && $transaction_query->num_rows() > 0){
+      foreach($transaction_query->result() as $row){
+        $stime = date_create($row->submit_time);
+        $transactions[$row->transaction] = array(
+          'submit_time' => $stime->format('Y-m-d H:i:s')
+        );
+      }
+    }
+    return $transactions;
+  }
+  
+  
+  
+  private function get_info_for_transactions($transaction_info){
+    //get proposals
+    $transaction_list = array_keys($transaction_info);
+    $this->db->select(array('f.transaction','g.name as proposal_id'));
+    $this->db->where_in('f.transaction',$transaction_list)->where('g.type','proposal');
+    $this->db->from('group_items gi');
+    $this->db->join('files f','gi.item_id = f.item_id');
+    $this->db->join('groups g','g.group_id = gi.group_id');
+    $proposal_query = $this->db->get();
+    
+    $trans_prop_lookup = array();
+    if($proposal_query && $proposal_query->num_rows() > 0){
+      foreach($proposal_query->result() as $row){
+
+        $trans_prop_lookup[$row->transaction]['eus_proposal_id'] = $row->proposal_id;
+      }
+    }
+    
+    //get instruments
+    $this->db->select(array('f.transaction','g.name as group_name','g.type as group_type'));
+    $this->db->where("(g.type = 'omics.dms.instrument_id' or g.type ilike 'instrument.%')");
+    $this->db->where_in('f.transaction',$transaction_list);
+    $this->db->from('group_items gi');
+    $this->db->join('files f','gi.item_id = f.item_id');
+    $this->db->join('groups g','g.group_id = gi.group_id');
+    $inst_query = $this->db->get();
+    
+    if($inst_query && $inst_query->num_rows() > 0){
+      foreach($inst_query->result() as $row){
+        $instrument_id = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.','',$row->group_type);
+        $trans_prop_lookup[$row->transaction]['eus_instrument_id'] = $instrument_id + 0;
+      }
+    }
+    
+    return $trans_prop_lookup;
+    
+  }
+  
+
 
   
-  function summarize_uploads_by_user($eus_person_id,$start_date, $end_date, $instrument_filter = "", $proposal_filter = ""){
-    //get user transactions
-    
-    
-  }
   
   
-  
-  
-  function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date){
-    //canonicalize start and end times (yields $start_time & $end_time)
-    //extract($this->canonicalize_date_range($start_date, $end_date));
-    
-    $results = array('transactions' => array());
-    
-    //get proposal_group_list
-    $group_collection = $this->get_proposal_group_list($eus_proposal_id);
-    $group_list = array_keys($group_collection);
-        
-    //get transactions for time period & group_list
-    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
-
-    //use the transaction list to retrieve summary info
-    if(!empty($results['transactions'])){
-      $results = $this->generate_summary_data($results);
-      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
-    }else{
-      return array();
-    }
-    return array($eus_proposal_id => $results);
-  }
-    
- 
- 
-  
-  
-  
-  function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
-    //get instrument group_id list
-    $group_collection = $this->get_instrument_group_list($eus_instrument_id);
-    $group_list = array_keys($group_collection);
-    
-    if(empty($group_list)){
-      //no results returned for group list => bail out
-    }
-    
-    //get transactions for time period & group_list
-    $transactions = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
-        
-    //use the transaction list to retrieve summary info
-    if(!empty($results['transactions'])){
-      $results = $this->generate_summary_data($results);
-      $day_graph = $this->generate_day_graph_summary($transactions);
-    }else{
-      return array();
-    }
-    return array($eus_instrument_id => $results);
-  }
-  
-  
-  function generate_summary_data($results){
+  private function generate_summary_data($results){
     $this->db->where_in('transaction', array_keys($results['transactions']));
     $this->db->group_by('transaction');
     $this->db->select(
@@ -127,6 +212,14 @@ class Reporting_model extends CI_Model {
           $results['transactions'][$file_row->transaction]['size_bytes'] = $file_row->file_size_in_bytes;
           $results['transactions'][$file_row->transaction]['size_string'] = format_bytes($file_row->file_size_in_bytes);
           $results['transactions'][$file_row->transaction]['count'] = $file_row->file_count;
+          $results['transactions'][$file_row->transaction]['eus_instrument_id'] = 
+            array_key_exists('eus_instrument_id',$results['transaction_info'][$file_row->transaction]) ? 
+              $results['transaction_info'][$file_row->transaction]['eus_instrument_id'] : 0;
+          $results['transactions'][$file_row->transaction]['eus_proposal_id'] = 
+            array_key_exists('eus_proposal_id', $results['transaction_info'][$file_row->transaction]) ?
+              $results['transaction_info'][$file_row->transaction]['eus_proposal_id'] : "0";          
+          // $results['transactions'][$file_row->transaction]['instrument_id'] = $eus_instrument_id;
+          // $results['transactions'][$file_row->transaction]['proposal_id'] = '';
           $total_file_count_summary += $file_row->file_count;
           $total_file_size_summary += $file_row->file_size_in_bytes;
         }
@@ -137,6 +230,8 @@ class Reporting_model extends CI_Model {
       'total_size_bytes' => $total_file_size_summary,
       'total_size_string' => format_bytes($total_file_size_summary)
     );
+    
+    unset($results['transaction_info']);
     
     return $results;
   }
@@ -170,12 +265,14 @@ class Reporting_model extends CI_Model {
           $summary_list['by_date'][$date_key] = array(
             'file_size' => $info['size_bytes'] + 0, 
             'file_count' => $info['count'] + 0,
-            'upload_count' => 1
+            'upload_count' => 1,
+            'transaction_list' => array($trans_id)
           );
         }else{
           $summary_list['by_date'][$date_key]['file_size'] += ($info['size_bytes'] + 0);
           $summary_list['by_date'][$date_key]['file_count'] += ($info['count'] + 0);
           $summary_list['by_date'][$date_key]['upload_count'] += 1;
+          $summary_list['by_date'][$date_key]['transaction_list'][] = $trans_id;
         }
         $summary_list['by_hour_list'][$time_key]['sizes'][] = $info['size_bytes'] + 0;
         $summary_list['by_hour_list'][$time_key]['counts'][] = $info['count'] + 0;
@@ -213,7 +310,7 @@ class Reporting_model extends CI_Model {
   
   private function canonicalize_date_range($start_date, $end_date){
     //both start and end times are filled in and valid
-    $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('00:00:00');
+    $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('1983-01-01 00:00:00');
     $end_time = strtotime($end_date) ? date_create($end_date)->setTime(11,59,59) : false;
     
     if($end_time < $start_time && !empty($end_time)){

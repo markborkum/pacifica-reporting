@@ -42,6 +42,14 @@ class Reporting extends Baseline_controller {
   public function test_get_proposals($proposal_name_fragment, $active = 'active'){
     $this->eus->get_proposals_by_name($proposal_name_fragment,$active);
   }
+  
+  public function test_get_uploads_for_user($eus_person_id,$start_date = false,$end_date = false){
+    $results = $this->rep->summarize_uploads_by_user($eus_person_id,$start_date,$end_date);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+    
+  }
 
 }
 
