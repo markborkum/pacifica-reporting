@@ -50,16 +50,19 @@ $active_record = TRUE;
 
 $myemsl_array = parse_ini_file("/etc/myemsl/general.ini", TRUE);
 
-$db['default']['hostname'] = $myemsl_array['metadata']['host'];
-$db['default']['username'] = $myemsl_array['metadata']['user'];
-$db['default']['password'] = $myemsl_array['metadata']['password'];
-$db['default']['database'] = $myemsl_array['metadata']['database'];
-$db['default']['dbdriver'] = "postgre";
-$db['default']['dbprefix'] = "myemsl.";
-$db['default']['pconnect'] = TRUE;
-$db['default']['db_debug'] = TRUE;
-$db['default']['cache_on'] = FALSE;
-$db['default']['cachedir'] = "";
+$db['default'] = array(
+  'hostname' => $myemsl_array['metadata']['host'],
+  'username' => $myemsl_array['metadata']['user'],
+  'password' => $myemsl_array['metadata']['password'],
+  'database' => $myemsl_array['metadata']['database'],
+  'dbdriver' => "postgre",
+  'dbprefix' => "myemsl.",
+  'pconnect' => TRUE,
+  'db_debug' => TRUE,
+  'cache_on' => FALSE,
+  'cachedir' => ""
+);
+
 
 
 $db['ws_info']['hostname'] = 'sqlite:'.APPPATH.'config/database/myemsl_status_site_info.sqlite:';
@@ -78,29 +81,33 @@ $db['ws_info']['swap_pre'] = '';
 $db['ws_info']['autoinit'] = TRUE;
 $db['ws_info']['stricton'] = FALSE;
 
-$db['eus_for_myemsl']['hostname'] = $myemsl_array['metadata']['host'];
-$db['eus_for_myemsl']['username'] = $myemsl_array['metadata']['user'];
-$db['eus_for_myemsl']['password'] = $myemsl_array['metadata']['password'];
-$db['eus_for_myemsl']['database'] = $myemsl_array['metadata']['database'];
-$db['eus_for_myemsl']['dbdriver'] = "postgre";
-$db['eus_for_myemsl']['dbprefix'] = "eus.";
-$db['eus_for_myemsl']['pconnect'] = TRUE;
-$db['eus_for_myemsl']['db_debug'] = TRUE;
-$db['eus_for_myemsl']['cache_on'] = FALSE;
-$db['eus_for_myemsl']['cachedir'] = "";
+$db['eus_for_myemsl'] = array(
+  'hostname' => $myemsl_array['metadata']['host'],
+  'username' => $myemsl_array['metadata']['user'],
+  'password' => $myemsl_array['metadata']['password'],
+  'database' => $myemsl_array['metadata']['database'],
+  'dbdriver' => "postgre",
+  'dbprefix' => "eus.",
+  'pconnect' => TRUE,
+  'db_debug' => TRUE,
+  'cache_on' => FALSE,
+  'cachedir' => ""
+);
 
 
-$db['ers']['hostname'] = "eusi.emsl.pnl.gov";
-$db['ers']['username'] = "auberry_user";
-$db['ers']['password'] = "l0Ve2getEUSd3ta";
-$db['ers']['database'] = "Auberry";
-$db['ers']['dbdriver'] = "mysql";
-$db['ers']['dbprefix'] = "";
-$db['ers']['active_r'] = TRUE;
-$db['ers']['pconnect'] = FALSE;
-$db['ers']['db_debug'] = FALSE;
-$db['ers']['cache_on'] = FALSE;
-$db['ers']['cachedir'] = "";
+$db['ers'] = array(
+  'hostname' => "eusi.emsl.pnl.gov",
+  'username' => "auberry_user",
+  'password' => "l0Ve2getEUSd3ta",
+  'database' => "Auberry",
+  'dbdriver' => "mysql",
+  'dbprefix' => "",
+  'active_r' => TRUE,
+  'pconnect' => FALSE,
+  'db_debug' => FALSE,
+  'cache_on' => FALSE,
+  'cachedir' => ""
+);
 
 
 /* End of file database.php */

@@ -6,7 +6,8 @@ class Reporting extends Baseline_controller {
   function __construct() {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
-    $this->load->model('EUS_model','eus');
+    // $this->load->model('EUS_model','eus');
+    $this->load->library('myemsl-eus-library/EUS','','eus');
     $this->load->helper(array('network'));
   }
 
