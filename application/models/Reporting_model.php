@@ -8,13 +8,16 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 class Reporting_model extends CI_Model {
   
+  protected $selected_objects;
+  
   function __construct(){
     parent::__construct();
     define("TRANS_TABLE", 'transactions');
     define("FILES_TABLE", 'files');
     $this->load->database();
     $this->load->helper(array('item'));
-
+    
+    $this->selected_objects = $this->get_selected_objects($this->user_id);
   }
   
   
@@ -22,10 +25,10 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  *    Publicly available API calls 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  function summarize_uploads_by_user($eus_person_id,$start_date, $end_date, $instrument_filter = "", $proposal_filter = ""){
+  function summarize_uploads_by_user($eus_person_id,$start_date, $end_date,$unfiltered = false){
     //get user transactions
     $results = array('transactions' => array());
-    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_date, $end_date);
+    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_date, $end_date, $unfiltered);
     
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
@@ -123,7 +126,7 @@ class Reporting_model extends CI_Model {
   }
 
 
-  private function get_transactions_for_user($eus_user_id, $start_date, $end_date){
+  private function get_transactions_for_user($eus_user_id, $start_date, $end_date, $unfiltered = false){
     extract($this->canonicalize_date_range($start_date, $end_date));
     $transactions = array();
     $where_clause = array('stime >=' => $start_time->format('Y-m-d H:i:s'));
@@ -310,6 +313,9 @@ class Reporting_model extends CI_Model {
   
   private function canonicalize_date_range($start_date, $end_date){
     //both start and end times are filled in and valid
+    $start_date = $this->convert_short_date($start_date);
+    $end_date = $this->convert_short_date($end_date);
+    
     $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('1983-01-01 00:00:00');
     $end_time = strtotime($end_date) ? date_create($end_date)->setTime(11,59,59) : false;
     
@@ -321,6 +327,16 @@ class Reporting_model extends CI_Model {
     }
     
     return array('start_time' => $start_time, 'end_time' => $end_time);
+  }
+  
+  private function convert_short_date($date_string){
+    if(preg_match('/(\d{4})$/',$date_string,$matches)){
+      //looks like just a year
+      $date_string = "{$matches[1]}-01-01";
+    }elseif(preg_match('/^(\d{4})-(\d{1,2})$/',$date_string,$matches)){
+      $date_string = "{$matches[1]}-{$matches[2]}-01";
+    }
+    return $date_string;
   }
   
   private function get_proposal_group_list($proposal_id_filter = ""){
@@ -369,6 +385,34 @@ class Reporting_model extends CI_Model {
       $results = $results_by_inst_id;
     }
     
+    return $results;
+  }
+  
+  
+  public function get_selected_objects($eus_person_id){
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $DB_prefs->select(array('eus_person_id','item_type','item_id'));
+    $DB_prefs->where('deleted is null');
+    $DB_prefs->order_by('item_type');
+    $query = $DB_prefs->get_where('reporting_selection_prefs',array('eus_person_id' => $eus_person_id));
+    
+    $results = array();
+    if($query && $query->num_rows()>0){
+      foreach($query->result() as $row){
+        switch($row->item_type){
+          case 'instrument':
+            $group_list = $this->get_instrument_group_list($row->item_id);
+            break;
+          case 'proposal':
+            $group_list = $this->get_proposal_group_list($row->item_id);
+            break;
+          default:
+            $group_list = array();
+            
+        }
+        $results[$row->item_type][$row->item_id] = $group_list;
+      }
+    }
     return $results;
   }
   
