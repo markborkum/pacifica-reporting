@@ -65,21 +65,25 @@ $db['default'] = array(
 
 
 
-$db['ws_info']['hostname'] = 'sqlite:'.APPPATH.'config/database/myemsl_status_site_info.sqlite:';
-$db['ws_info']['username'] = '';
-$db['ws_info']['password'] = '';
-$db['ws_info']['database'] = '';
-$db['ws_info']['dbdriver'] = 'pdo';
-$db['ws_info']['dbprefix'] = '';
-$db['ws_info']['pconnect'] = TRUE;
-$db['ws_info']['db_debug'] = TRUE;
-$db['ws_info']['cache_on'] = FALSE;
-$db['ws_info']['cachedir'] = '';
-$db['ws_info']['char_set'] = 'utf8';
-$db['ws_info']['dbcollat'] = 'utf8_general_ci';
-$db['ws_info']['swap_pre'] = '';
-$db['ws_info']['autoinit'] = TRUE;
-$db['ws_info']['stricton'] = FALSE;
+$db['ws_info'] = array(
+  'hostname' => 'sqlite:'.APPPATH.'config/database/myemsl_status_site_info.sqlite:',
+  'username' => '',
+  'password' => '',
+  'database' => '',
+  'dbdriver' => 'pdo',
+  'dbprefix' => '',
+  'pconnect' => TRUE,
+  'db_debug' => TRUE,
+  'cache_on' => FALSE,
+  'cachedir' => '',
+  'char_set' => 'utf8',
+  'dbcollat' => 'utf8_general_ci',
+  'swap_pre' => '',
+  'autoinit' => TRUE,
+  'stricton' => FALSE
+);
+
+
 
 $db['eus_for_myemsl'] = array(
   'hostname' => $myemsl_array['metadata']['host'],
@@ -88,6 +92,20 @@ $db['eus_for_myemsl'] = array(
   'database' => $myemsl_array['metadata']['database'],
   'dbdriver' => "postgre",
   'dbprefix' => "eus.",
+  'pconnect' => TRUE,
+  'db_debug' => TRUE,
+  'cache_on' => FALSE,
+  'cachedir' => ""
+);
+
+
+$db['website_prefs'] = array(
+  'hostname' => $myemsl_array['metadata']['host'],
+  'username' => $myemsl_array['metadata']['user'],
+  'password' => $myemsl_array['metadata']['password'],
+  'database' => $myemsl_array['metadata']['database'],
+  'dbdriver' => "postgre",
+  'dbprefix' => "website_prefs.",
   'pconnect' => TRUE,
   'db_debug' => TRUE,
   'cache_on' => FALSE,
