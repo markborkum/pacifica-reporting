@@ -37,22 +37,28 @@
   <body>
     <div class="page_content">
       <header class="secondary">
-          <div class="page_header">
-              <div class="logo_container">
-                  <div class="logo_image">&nbsp;</div>
-              </div>
-              <div class="site_slogan">Environmental Molecular Sciences Laboratory</div>
-              <div id="menu_block_container" style="display:none;">
-                  <nav>
-                      <ul id="page_menu">
-                          <li><a href="https://www.emsl.pnl.gov/emslweb/">Home</a><span class='menu_separator'>|</span></li>
-                          <li>About<span class='menu_separator'>|</span></li>
-                          <li>Science<span class='menu_separator'>|</span></li>
-                          <li>Capabilities<span class='menu_separator'>|</span></li>
-                          <li>Working With Us<span class='menu_separator'>|</span></li>
-                          <li>News</li>
-                      </ul>
-                  </nav>
-              </div>
+        <div class="page_header">
+          <div class="logo_container">
+            <div class="logo_image">&nbsp;</div>
           </div>
+          <div class="site_slogan">Environmental Molecular Sciences Laboratory</div>
+          <div id="menu_block_container" style="display:none;">
+            <nav>
+              <ul id="page_menu">
+                <li><a href="https://www.emsl.pnl.gov/emslweb/">Home</a><span class='menu_separator'>|</span></li>
+                <li>About<span class='menu_separator'>|</span></li>
+                <li>Science<span class='menu_separator'>|</span></li>
+                <li>Capabilities<span class='menu_separator'>|</span></li>
+                <li>Working With Us<span class='menu_separator'>|</span></li>
+                <li>News</li>
+              </ul>
+            </nav>
+          </div>
+        </div>
+        <div id="header_container">
+          <h1 class="underline"><?= $page_header ?></h1>
+          <div id="login_id_container">
+            <em><?= $this->nav_info['current_page_info']['logged_in_user'] ?></em>
+          </div>
+        </div>
       </header>
