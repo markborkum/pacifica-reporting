@@ -943,19 +943,19 @@ abstract class CI_DB_query_builder extends CI_DB_driver {
 
 			if ($side === 'none')
 			{
-				$like_statement = "{$prefix} {$k} {$not} LIKE '{$v}'";
+				$like_statement = "{$prefix} {$k} {$not} ILIKE '{$v}'";
 			}
 			elseif ($side === 'before')
 			{
-				$like_statement = "{$prefix} {$k} {$not} LIKE '%{$v}'";
+				$like_statement = "{$prefix} {$k} {$not} ILIKE '%{$v}'";
 			}
 			elseif ($side === 'after')
 			{
-				$like_statement = "{$prefix} {$k} {$not} LIKE '{$v}%'";
+				$like_statement = "{$prefix} {$k} {$not} ILIKE '{$v}%'";
 			}
 			else
 			{
-				$like_statement = "{$prefix} {$k} {$not} LIKE '%{$v}%'";
+				$like_statement = "{$prefix} {$k} {$not} ILIKE '%{$v}%'";
 			}
 
 			// some platforms require an escape sequence definition for LIKE wildcards

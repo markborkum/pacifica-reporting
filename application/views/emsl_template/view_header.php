@@ -6,7 +6,7 @@
 ?>  
 <html>
   <head>
-    <title>MyEMSL Status - <?= $title ?></title>
+    <title>MyEMSL Reporting - <?= $title ?></title>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <meta  name="description" content="" />
     <meta name="keywords" content="" />

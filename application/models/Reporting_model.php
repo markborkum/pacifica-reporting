@@ -8,7 +8,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 class Reporting_model extends CI_Model {
   
-  protected $selected_objects;
+  // protected $selected_objects;
   
   function __construct(){
     parent::__construct();
@@ -17,7 +17,7 @@ class Reporting_model extends CI_Model {
     $this->load->database();
     $this->load->helper(array('item'));
     
-    $this->selected_objects = $this->get_selected_objects($this->user_id);
+    //$this->selected_objects = $this->get_selected_objects($this->user_id);
   }
   
   
@@ -389,13 +389,15 @@ class Reporting_model extends CI_Model {
   }
   
   
-  public function get_selected_objects($eus_person_id){
+  public function get_selected_objects($eus_person_id,$restrict_type = false){
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     $DB_prefs->select(array('eus_person_id','item_type','item_id'));
     $DB_prefs->where('deleted is null');
+    if(!empty($restrict_type)){
+      $DB_prefs->where('item_type',$restrict_type);
+    }
     $DB_prefs->order_by('item_type');
     $query = $DB_prefs->get_where('reporting_selection_prefs',array('eus_person_id' => $eus_person_id));
-    
     $results = array();
     if($query && $query->num_rows()>0){
       foreach($query->result() as $row){
@@ -407,10 +409,11 @@ class Reporting_model extends CI_Model {
             $group_list = $this->get_proposal_group_list($row->item_id);
             break;
           default:
-            $group_list = array();
+            $group_list = $row->item_id;
             
         }
-        $results[$row->item_type][$row->item_id] = $group_list;
+        $item_id = "{$row->item_id}";
+        $results[$row->item_type][$item_id] = $group_list;
       }
     }
     return $results;
