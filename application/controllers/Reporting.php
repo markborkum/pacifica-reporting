@@ -10,7 +10,7 @@ class Reporting extends Baseline_controller {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
     $this->load->library('myemsl-eus-library/EUS','','eus');
-    $this->load->helper(array('network','file_info'));
+    $this->load->helper(array('network','file_info','inflector'));
     $this->last_update_time = get_last_update(APPPATH);
   }
 
@@ -20,29 +20,46 @@ class Reporting extends Baseline_controller {
     redirect('reporting/view');
   }
   
-  public function view(){
-    $this->page_data['page_header'] = "Instrument Overview";
+  public function view($object_type, $start_date = false, $end_date = false){
+    $object_type = singular($object_type);
+    $accepted_object_types = array('instrument','proposal','user');
+    if(!in_array($object_type,$accepted_object_types)){
+      redirect('reporting/view/instrument');
+    }
+    $this->page_data['page_header'] = "MyEMSL Uploads per ".ucwords($object_type);
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status.css",
       "/resources/stylesheets/status_style.css",
-      "/resources/scripts/select2/select2.css"//,
-      // "/resources/scripts/fancytree/skin-lion/ui.fancytree.css",
-      // "/resources/stylesheets/file_directory_styling.css",
-      // "/resources/stylesheets/bread_crumbs.css"      
+      "/resources/scripts/select2/select2.css",
+      base_url()."resources/stylesheets/reporting.css"   
     );
     $this->page_data['script_uris'] = array(
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/jquery-crypt/jquery.crypt.js",
       "/resources/scripts/status_common.js",
       "/resources/scripts/select2/select2.js",
-      "/resources/scripts/moment.min.js"//,
-      // "/resources/scripts/fancytree/jquery.fancytree-all.js",
-      // "/resources/scripts/myemsl_file_download.js",
-      // "/resources/scripts/emsl_mgmt_view.js",
+      "/resources/scripts/moment.min.js"
     );
-
+    
+    $this->page_data['my_objects'] = '';
+    $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
+    $object_list = array_map('strval', array_keys($my_object_list[$object_type]));
+    
+    $object_info = $this->eus->get_object_info($object_list,$object_type);
+    //$transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
+    //$transaction_info = $this->rep->$transaction_retrieval_func(43751,'2015-09-01','2015-12-01');
+    
+    $this->page_data['content_view'] = "selection_prefs/{$object_type}.html";
+    $this->page_data['my_objects'] = $object_info;
+    
+    // echo "<pre>";
+    // var_dump($object_info);
+    // echo "</pre>";
+    
     $this->load->view('reporting_view.html',$this->page_data);
   }
+  
+  
   
   public function preferences($object_type){
     $accepted_object_types = array('instrument','proposal','user');

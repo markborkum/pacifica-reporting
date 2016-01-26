@@ -1,0 +1,47 @@
+.reporting_object_container {
+  border-radius: 6px;
+  margin-bottom:1em;
+}
+
+.reporting_object_container > .header{
+  padding: 3px 10px 3px 10px;
+  font-size:1em;
+  font-weight:bold;
+  background-color:#999;
+  color:#fff;
+   border-radius: 5px 5px 0px 0px;
+  -moz-border-radius-bottomleft: 0px;
+  -moz-border-radius-bottomright: 0px;
+  -moz-border-radius-topleft: 5px;
+  -moz-border-radius-topright: 5px;
+}
+
+.reporting_object_container > .body{
+  position:relative;
+  padding:8px;
+  padding-bottom:15px;
+  font-size:0.85em;
+  min-height:180px;
+  border: 1px solid #ccc;
+}
+
+.reporting_object_container > .footer{
+  border: 1px solid #ccc;
+  background-color:#eee;
+  border-radius: 0px 0px 5px 5px;
+  -moz-border-radius-bottomleft: 5px;
+  -moz-border-radius-bottomright: 5px;
+  -moz-border-radius-topleft: 0px;
+  -moz-border-radius-topright: 0px;
+  padding:3px 5px 3px 5px;
+  margin-top:-1px;
+  position:relative;
+}
+
+.reporting_object_container .object_name {
+
+}
+
+.reporting_object_container .object_date_range {
+  float:right;
+}
