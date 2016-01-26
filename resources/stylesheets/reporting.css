@@ -1,6 +1,6 @@
 .reporting_object_container {
   border-radius: 6px;
-  margin-bottom:1em;
+  margin-bottom:2em;
 }
 
 .reporting_object_container > .header{
@@ -45,3 +45,10 @@
 .reporting_object_container .object_date_range {
   float:right;
 }
+
+@media (max-width: 960px){
+  .reporting_object_container > .header{
+    font-size:0.85em;
+  }
+}
+
