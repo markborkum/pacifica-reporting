@@ -1,45 +1,71 @@
 .reporting_object_container {
-  border-radius: 6px;
   margin-bottom:2em;
 }
 
-.reporting_object_container > .header{
+.reporting_object_container > .object_header{
   padding: 3px 10px 3px 10px;
   font-size:1em;
   font-weight:bold;
   background-color:#999;
   color:#fff;
    border-radius: 5px 5px 0px 0px;
-  -moz-border-radius-bottomleft: 0px;
-  -moz-border-radius-bottomright: 0px;
-  -moz-border-radius-topleft: 5px;
-  -moz-border-radius-topright: 5px;
 }
 
-.reporting_object_container > .body{
+.reporting_object_container > .object_body{
   position:relative;
   padding:8px;
   padding-bottom:15px;
-  font-size:0.85em;
+  font-size:1.0em;
   min-height:180px;
   border: 1px solid #ccc;
 }
 
-.reporting_object_container > .footer{
+.reporting_object_container > .object_footer{
   border: 1px solid #ccc;
   background-color:#eee;
   border-radius: 0px 0px 5px 5px;
-  -moz-border-radius-bottomleft: 5px;
-  -moz-border-radius-bottomright: 5px;
-  -moz-border-radius-topleft: 0px;
-  -moz-border-radius-topright: 0px;
   padding:3px 5px 3px 5px;
   margin-top:-1px;
   position:relative;
 }
 
-.reporting_object_container .object_name {
+.reporting_object_container .instrument_body_container {
+  position:relative;
+}
 
+.instrument_body_container > .totals_container {
+  position:absolute;
+  top:0px;
+  right:5px;
+  width:auto;
+  text-align:center;
+}
+
+.instrument_body_container > .totals_container ul{
+  margin:0;
+  padding:0 0.5em 0.5em 0.5em;
+}
+
+.instrument_body_container > .totals_container li {
+  list-style:none;
+  text-align:left;
+}
+
+.instrument_body_container .stats_header{
+  font-weight:bold;
+  border-bottom:1px #222 solid;
+  margin-top:0.5em;
+}
+
+.instrument_body_container .stats_graph {
+  min-width:1500px;
+  height:200px;
+  max-width:300px;
+  margin: 0 auto;
+}
+
+.reporting_object_container .object_name_short {
+  display:none;
 }
 
 .reporting_object_container .object_date_range {
@@ -47,8 +73,25 @@
 }
 
 @media (max-width: 960px){
-  .reporting_object_container > .header{
+  .reporting_object_container > .object_header{
     font-size:0.85em;
   }
 }
+
+@media (max-width: 700px){
+  .reporting_object_container .object_name {
+    display:none;
+  }
+  .reporting_object_container .object_name_short {
+    display:block;
+  }
+  .reporting_object_container > .object_header{
+    border-radius:0;
+  }
+  .reporting_object_container > .object_footer{
+    border-radius:0;
+  }
+  
+}
+
 

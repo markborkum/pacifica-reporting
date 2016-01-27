@@ -38,7 +38,7 @@ class Reporting_model extends CI_Model {
     }else{
       return array();
     }
-    return array($eus_person_id => $results);
+    return $results;
   }
   
   
@@ -65,7 +65,7 @@ class Reporting_model extends CI_Model {
     }else{
       return array();
     }
-    return array($eus_proposal_id => $results);
+    return $results;
   }
     
  
@@ -75,23 +75,21 @@ class Reporting_model extends CI_Model {
     //get instrument group_id list
     $group_collection = $this->get_instrument_group_list($eus_instrument_id);
     $group_list = array_keys($group_collection);
-    
     if(empty($group_list)){
       //no results returned for group list => bail out
     }
-    
+    $results = array('transactions' => array());
     //get transactions for time period & group_list
-    $transactions = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
-        
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
       $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);      
       $results = $this->generate_summary_data($results);
-      $day_graph = $this->generate_day_graph_summary($transactions);
+      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
     }else{
       return array();
     }
-    return array($eus_instrument_id => $results);
+    return $results;
   }
   
   
@@ -161,7 +159,6 @@ class Reporting_model extends CI_Model {
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('groups g','g.group_id = gi.group_id');
     $proposal_query = $this->db->get();
-    
     $trans_prop_lookup = array();
     if($proposal_query && $proposal_query->num_rows() > 0){
       foreach($proposal_query->result() as $row){
@@ -178,11 +175,20 @@ class Reporting_model extends CI_Model {
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('groups g','g.group_id = gi.group_id');
     $inst_query = $this->db->get();
-    
     if($inst_query && $inst_query->num_rows() > 0){
       foreach($inst_query->result() as $row){
         $instrument_id = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.','',$row->group_type);
         $trans_prop_lookup[$row->transaction]['eus_instrument_id'] = $instrument_id + 0;
+      }
+    }
+    
+    //get_users
+    $this->db->select(array('person_id','trans_id as transaction'))->where_in('trans_id',$transaction_list)->order_by('step desc');
+    $user_query = $this->db->get('ingest_state');
+    
+    if($user_query && $user_query->num_rows() > 0){
+      foreach($user_query->result() as $row){
+        $trans_prop_lookup[$row->transaction]['eus_person_id'] = $row->person_id;
       }
     }
     
@@ -206,34 +212,83 @@ class Reporting_model extends CI_Model {
         )
       );
     $total_file_size_summary = 0;
-    $total_file_count_summary = 0;  
+    $total_file_count_summary = 0;
+    $transaction_stats = array(
+      'proposal' => array(),
+      'instrument' => array(),
+      'user' => array()
+    );
     
     $file_info_query = $this->db->get(FILES_TABLE);
     if($file_info_query && $file_info_query->num_rows() > 0){
+      $transaction_records = array(
+        'most_files' => array('transaction_id' => false, 'file_count' => 0),
+        'largest_upload' => array('transaction_id' => false, 'file_size' => 0),
+        'most_prolific' => array('person_id' => FALSE, 'file_size' => 0)
+      );
       foreach($file_info_query->result() as $file_row){
         if(array_key_exists($file_row->transaction, $results['transactions'])){
-          $results['transactions'][$file_row->transaction]['size_bytes'] = $file_row->file_size_in_bytes;
-          $results['transactions'][$file_row->transaction]['size_string'] = format_bytes($file_row->file_size_in_bytes);
-          $results['transactions'][$file_row->transaction]['count'] = $file_row->file_count;
-          $results['transactions'][$file_row->transaction]['eus_instrument_id'] = 
-            array_key_exists('eus_instrument_id',$results['transaction_info'][$file_row->transaction]) ? 
-              $results['transaction_info'][$file_row->transaction]['eus_instrument_id'] : 0;
-          $results['transactions'][$file_row->transaction]['eus_proposal_id'] = 
-            array_key_exists('eus_proposal_id', $results['transaction_info'][$file_row->transaction]) ?
-              $results['transaction_info'][$file_row->transaction]['eus_proposal_id'] : "0";          
-          // $results['transactions'][$file_row->transaction]['instrument_id'] = $eus_instrument_id;
-          // $results['transactions'][$file_row->transaction]['proposal_id'] = '';
+          $tx = $results['transactions'][$file_row->transaction];
+          $tx_i = $results['transaction_info'][$file_row->transaction];
+          
+          $tx['size_bytes'] = $file_row->file_size_in_bytes;
+          $tx['size_string'] = format_bytes($file_row->file_size_in_bytes);
+          $tx['count'] = $file_row->file_count;
+          
+          if($file_row->file_size_in_bytes > $transaction_records['largest_upload']['file_size'] + 0){
+            $transaction_records['largest_upload'] = array(
+              'transaction_id' => $file_row->transaction,
+              'file_size' => $file_row->file_size_in_bytes
+            );
+          }
+          if($file_row->file_count > $transaction_records['most_files']['file_count']){
+            $transaction_records['most_files'] = array(
+              'transaction_id' => $file_row->transaction,
+              'file_count' => $file_row->file_count
+            );
+          }
+          
+          $tx['eus_instrument_id'] = array_key_exists('eus_instrument_id',$tx_i) ? $tx_i['eus_instrument_id'] : 0;
+          $tx['eus_proposal_id'] = array_key_exists('eus_proposal_id', $tx_i) ? $tx_i['eus_proposal_id'] : "0";
+          $tx['eus_person_id'] = array_key_exists('eus_person_id', $tx_i) ? $tx_i['eus_person_id'] : "0";
+          
+          $results['transactions'][$file_row->transaction] = $tx;
+          
           $total_file_count_summary += $file_row->file_count;
           $total_file_size_summary += $file_row->file_size_in_bytes;
+          
+          //transaction based stats for user/instrument/proposal
+          if(!array_key_exists($tx_i['eus_person_id'], $transaction_stats['user'])){
+            $transaction_stats['user'][$tx_i['eus_person_id']] = 1;
+          }else{
+            $transaction_stats['user'][$tx_i['eus_person_id']] += 1;
+          }
+          if(!array_key_exists($tx_i['eus_instrument_id'], $transaction_stats['instrument'])){
+            $transaction_stats['instrument'][$tx_i['eus_instrument_id']] = 1;
+          }else{
+            $transaction_stats['instrument'][$tx_i['eus_instrument_id']] += 1;
+          }
+          if(!array_key_exists($tx_i['eus_proposal_id'], $transaction_stats['proposal'])){
+            $transaction_stats['proposal'][$tx_i['eus_proposal_id']] = 1;
+          }else{
+            $transaction_stats['proposal'][$tx_i['eus_proposal_id']] += 1;
+          }
+          
         }
       }
     }
+
+    // foreach($results['transaction_info'])
+
     $results['summary_totals'] = array(
+      'transaction_count' => sizeof($results['transaction_info']),
+      'transaction_records' => $transaction_records,
+      'transaction_stats' => $transaction_stats,
       'total_file_count' => $total_file_count_summary,
       'total_size_bytes' => $total_file_size_summary,
       'total_size_string' => format_bytes($total_file_size_summary)
     );
-    
+        
     unset($results['transaction_info']);
     
     return $results;
