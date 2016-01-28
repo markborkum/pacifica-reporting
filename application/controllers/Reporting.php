@@ -51,7 +51,7 @@ class Reporting extends Baseline_controller {
     $object_info = $this->eus->get_object_info($object_list,$object_type);
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
     foreach($object_list as $object_id){
-      $transaction_info[$object_id] = $this->rep->$transaction_retrieval_func($object_id,'2015-09-01','2015-12-01');
+      $transaction_info[$object_id] = $this->rep->$transaction_retrieval_func($object_id,'2015-10-01','2015-12-01');
     }
     
     $this->page_data['content_view'] = "selection_prefs/{$object_type}.html";

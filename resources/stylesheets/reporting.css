@@ -57,12 +57,9 @@
   margin-top:0.5em;
 }
 
-.instrument_body_container .stats_graph {
-  min-width:1500px;
-  height:200px;
-  max-width:300px;
-  margin: 0 auto;
-}
+/*.stats_graph_container > .stats_graph {
+  border:thin solid green;
+}*/
 
 .reporting_object_container .object_name_short {
   display:none;
@@ -75,6 +72,14 @@
 @media (max-width: 960px){
   .reporting_object_container > .object_header{
     font-size:0.85em;
+  }
+  .stats_graph_container {
+    width:100% !important;
+  }
+  .stats_graph {
+    position:relative !important;
+    width:65% !important;
+    height:300px !important;
   }
 }
 
@@ -91,7 +96,25 @@
   .reporting_object_container > .object_footer{
     border-radius:0;
   }
-  
+  .page_content {
+    width:auto !important;
+  }
+  .stats_graph {
+    position:relative !important;
+    width:100% !important;
+    height:300px !important;
+  }
+  .totals_container {
+    width:55% !important;
+    position:relative !important;
+    margin-left:auto;
+    margin-right:auto;
+    border-bottom: 4px solid #666;
+    margin-bottom:2em;
+  }
+  .stats_list > li {
+     text-align: center !important;
+  }
 }
 
 

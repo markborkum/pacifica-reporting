@@ -1,9 +1,5 @@
 <div id='instrument_body_container_<?= $instrument_id ?>' class='instrument_body_container'>
-  <div id='stats_graph_container_<?= $instrument_id ?>' class='stats_graph_container' style='border:thin solid red;'>
-    <span id='proposal_stats_graph_<?= $instrument_id ?>' class='stats_graph'></span>
-    <span id='user_stats_graph_<?= $instrument_id ?>' class='stats_graph'></span>
-  </div>
-  <div id='totals_container_<?= $instrument_id ?>' class='totals_container'>
+  <div id='totals_container_<?= $instrument_id ?>' class='totals_container' style='vertical-align: middle;'>
     <?php $transaction_plural = $summary_totals['transaction_count'] != 1 ? "s" : ""; ?>
     <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
     <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Upload Totals</div>
@@ -14,21 +10,22 @@
     <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Transaction Statistics</div>
     <ul id='upload_stats_<?= $instrument_id ?>' class='stats_list'>
       <li>Largest Upload: <?= format_bytes($summary_totals['transaction_records']['largest_upload']['file_size']) ?></li>
-      <li>Greatest Number of Files: <?= $summary_totals['transaction_records']['most_files']['file_count'] ?></li>
-      
-      
+      <li>Greatest Number of Files: <?= $summary_totals['transaction_records']['most_files']['file_count'] ?></li> 
     </ul>
-    
-    
   </div>
+  <div id='stats_graph_container_<?= $instrument_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
+    <div id='proposal_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_left' style="min-width:250px;height:250px;width:50%;"></div>
+    <div id='user_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_right' style="min-width:250px;height:250px;width:50%;position:absolute;right:0;top:0;"></div>
+  </div>
+  
   <script>
 $(function () {
     // Make monochrome colors and set them as default for all pies
     Highcharts.getOptions().plotOptions.pie.colors = (function () {
         var colors = [],
-            base = Highcharts.getOptions().colors[0],
+            // base = Highcharts.getOptions().colors[2],
+            base = '#81aa00',
             i;
-
         for (i = 0; i < 10; i += 1) {
             // Start out with a darkened base color (negative brighten), and end
             // up with a much brighter color
@@ -38,72 +35,104 @@ $(function () {
     }());
 
     // Build the chart
-    $('#proposal_stats_graph_<?= $instrument_id ?>').highcharts({
+    var proposal_chart_<?= $instrument_id ?> = $('#proposal_stats_graph_<?= $instrument_id ?>').highcharts({
+        credits: false,
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
             plotShadow: false,
+            spacing: [10,0,0,0],
+            style: {
+              fontFamily: '"Helvetica Neue", Helvetica, Arial, san-serif',
+              fontSize: '12px'
+            },            
             type: 'pie'
         },
+        title: {
+            text: 'Uploads By Proposal',
+            style: {'fontSize':'13px','fontWeight':'bold'}
+        },
+        legend: {
+            layout: 'vertical',
+            align:'right',
+            margin:'2'
+        },
         tooltip: {
-            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+            pointFormat: 'Proposal {point.name}: <b>{point.percentage:.1f}%</b>',
+            headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
         },
         plotOptions: {
             pie: {
                 allowPointSelect: true,
                 cursor: 'pointer',
                 dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                    style: {
-                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                    }
-                }
+                  enabled: false,
+                  floating:true
+                },
+                center: [100, 80],
+                showInLegend: true
             }
         },
         series: [{
-            name: 'Proposals',
-            data: [
-            <?php $proposal_data = array(); ?>
-            <?php foreach($summary_totals['transaction_stats']['proposal'] as $proposal_id => $proposal_count): ?>
-              <?php $proposal_data[] = "{ name: '{$proposal_id}', y: ".round($proposal_count / $summary_totals['transaction_count'],2)." }"; ?>
-            <?php endforeach; ?>
-            <?= implode(',',$proposal_data) ?>
-            ]
+            name: 'Uploads',
+            <?php
+            $proposal_data = array();
+            foreach($summary_totals['transaction_stats']['proposal'] as $proposal_id => $proposal_count){
+              $proposal_Data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['transaction_count'],2));
+            }
+            ?>  
+            data: <?= json_encode($proposal_Data); ?>
         }]
     });
-    $('#user_stats_graph_<?= $instrument_id ?>').highcharts({
+    
+    var user_chart_<?= $instrument_id ?> = $('#user_stats_graph_<?= $instrument_id ?>').highcharts({
+        credits: false,
         chart: {
             plotBackgroundColor: null,
             plotBorderWidth: null,
             plotShadow: false,
+            spacing: [10,0,0,0],
+            style: {
+              fontFamily: '"Helvetica Neue", Helvetica, Arial, san-serif',
+              fontSize: '12px'
+            },
             type: 'pie'
         },
+        title: {
+            text: 'Uploads By User',
+            style: {'fontSize':'13px','fontWeight':'bold'}
+        },
+        legend: {
+            layout: 'vertical',
+            align:'right',
+            margin:'2'
+        },
         tooltip: {
-            pointFormat: '{point.name}: <b>{point.percentage:.1f}%</b>'
+            pointFormat: '{point.name}: <b>{point.percentage:.1f}%</b>',
+            headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
         },
         plotOptions: {
             pie: {
                 allowPointSelect: true,
                 cursor: 'pointer',
                 dataLabels: {
-                    enabled: true,
-                    format: '<b>{point.name}</b>: {point.percentage:.1f} %',
-                    style: {
-                        color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
-                    }
-                }
+                  enabled: false,
+                  floating: true
+                },
+                center: [100,80],
+                showInLegend: true
             }
         },
         series: [{
-            name: 'By User',
-            data: [
-            <?php $user_data = array(); ?>
-            <?php foreach($summary_totals['transaction_stats']['user'] as $person_id => $trans_count): ?>
-              <?php $user_data[] = "{ name: '{$person_id}', y: ".round($trans_count / $summary_totals['transaction_count'],2)." }"; ?>
-            <?php endforeach; ?>
-            <?= implode(',',$user_data) ?>
-            ]
+            name: 'Uploads',
+            <?php
+            $user_data = array();
+            foreach($summary_totals['transaction_stats']['user'] as $person_id => $trans_count){
+              $user_info = $this->eus->get_name_from_eus_id($person_id);
+              $user_data[] = array('name' => $user_info['display_name'], 'y' => round($trans_count / $summary_totals['transaction_count'],2));
+            }
+            ?>  
+            data: <?= json_encode($user_data); ?>
         }]
     });
     
