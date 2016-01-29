@@ -4,9 +4,9 @@
     <div class="object_name"><?= $inst_info['display_name'] ?></div>
     <div class="object_name_short"><?= $inst_info['abbreviation'] ?></div>
   </div>
-  <div class="object_body">
+  <div class="object_body" id="object_body_<?= $inst_id ?>">
     <?php $transaction_info[$inst_id]['instrument_id'] = $inst_id; ?>
-    <?php $this->load->view('selection_prefs/instrument_body_insert.html',$transaction_info[$inst_id]); ?>
+    <?php $this->load->view('object_types/object_body_placeholder.html',$placeholder_info[$inst_id]); ?>
   </div>
   <div class="object_footer">&nbsp;</div>
 </div>

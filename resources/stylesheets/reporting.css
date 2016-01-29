@@ -29,11 +29,11 @@
   position:relative;
 }
 
-.reporting_object_container .instrument_body_container {
+.reporting_object_container .object_body_container {
   position:relative;
 }
 
-.instrument_body_container > .totals_container {
+.object_body_container > .totals_container {
   position:absolute;
   top:0px;
   right:5px;
@@ -41,17 +41,17 @@
   text-align:center;
 }
 
-.instrument_body_container > .totals_container ul{
+.object_body_container > .totals_container ul{
   margin:0;
   padding:0 0.5em 0.5em 0.5em;
 }
 
-.instrument_body_container > .totals_container li {
+.object_body_container > .totals_container li {
   list-style:none;
   text-align:left;
 }
 
-.instrument_body_container .stats_header{
+.object_body_container .stats_header{
   font-weight:bold;
   border-bottom:1px #222 solid;
   margin-top:0.5em;
@@ -82,6 +82,24 @@
     height:300px !important;
   }
 }
+
+.loading_progress_text{
+  color: #444;
+  font-size: 22px;
+  font-weight: bold;
+  font-style: italic;
+  text-align: center;
+  margin-top: 2em;  
+  width:100%;
+}
+
+.loading_progress_indicator{
+  height:100px;
+  margin-top: 2em;  
+  width:100%;
+}
+
+
 
 @media (max-width: 700px){
   .reporting_object_container .object_name {

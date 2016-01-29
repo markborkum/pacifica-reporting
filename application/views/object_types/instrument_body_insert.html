@@ -1,4 +1,5 @@
-<div id='instrument_body_container_<?= $instrument_id ?>' class='instrument_body_container'>
+<?php extract($transaction_info); ?>
+<div id='instrument_body_container_<?= $instrument_id ?>' class='object_body_container'>
   <div id='totals_container_<?= $instrument_id ?>' class='totals_container' style='vertical-align: middle;'>
     <?php $transaction_plural = $summary_totals['transaction_count'] != 1 ? "s" : ""; ?>
     <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>

@@ -1,0 +1,19 @@
+<div id='object_body_container_<?= $object_id ?>' class='object_body_container'>
+  <div class="loading_progress_text" id="loading_text_<?= $object_id ?>">
+    Loading Info for <?= ucwords($object_type) ?> ID <?= $object_id ?>
+  </div>
+  <div class="loading_progress_indicator" id="loading_status_<?= $object_id ?>">
+    &nbsp;
+  </div>
+  <script>
+$(function(){
+  $('#loading_status_<?= $object_id ?>').spin();
+  var url = base_url + 'index.php/reporting/get_reporting_info/<?= $object_type ?>/<?= $object_id ?>';
+  var getter = $.get(url);
+  getter.done(function(data,status){
+    $('#loading_status_<?= $object_id ?>').spin(false);
+    $('#object_body_container_<?= $object_id ?>').replaceWith(data);
+  });
+});
+  </script>
+</div>
