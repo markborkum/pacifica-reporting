@@ -25,11 +25,7 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  *    Publicly available API calls 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  function summarize_uploads_by_user($eus_person_id,$start_date, $end_date,$unfiltered = false){
-    //get user transactions
-    $results = array('transactions' => array());
-    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_date, $end_date, $unfiltered);
-    
+  private function transactions_to_results($results){
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
       $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
@@ -40,31 +36,45 @@ class Reporting_model extends CI_Model {
     }
     return $results;
   }
+ 
+ 
+  function summarize_uploads_by_user($eus_person_id, $start_date, $end_date,$unfiltered = false){
+    //canonicalize start and end times (yields $start_time & $end_time)
+    extract($this->canonicalize_date_range($start_date, $end_date));
+
+    //get user transactions
+    $results = array(
+      'transactions' => array(),
+      'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
+    );
+    
+    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_time, $end_time, $unfiltered);
+    $results = $this->transactions_to_results($results);
+    
+    return $results;
+  }
   
   
   
   
   function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date){
     //canonicalize start and end times (yields $start_time & $end_time)
-    //extract($this->canonicalize_date_range($start_date, $end_date));
+    extract($this->canonicalize_date_range($start_date, $end_date));
     
-    $results = array('transactions' => array());
+    $results = array(
+      'transactions' => array(),
+      'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
+    );
     
     //get proposal_group_list
     $group_collection = $this->get_proposal_group_list($eus_proposal_id);
     $group_list = array_keys($group_collection);
         
     //get transactions for time period & group_list
-    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
 
-    //use the transaction list to retrieve summary info
-    if(!empty($results['transactions'])){
-      $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);      
-      $results = $this->generate_summary_data($results);
-      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
-    }else{
-      return array();
-    }
+    $results = $this->transactions_to_results($results);
+
     return $results;
   }
     
@@ -72,23 +82,22 @@ class Reporting_model extends CI_Model {
  
   
   function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
+    extract($this->canonicalize_date_range($start_date, $end_date));
+    
     //get instrument group_id list
     $group_collection = $this->get_instrument_group_list($eus_instrument_id);
     $group_list = array_keys($group_collection);
     if(empty($group_list)){
       //no results returned for group list => bail out
     }
-    $results = array('transactions' => array());
+    $results = array(
+      'transactions' => array(),
+      'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
+    );
     //get transactions for time period & group_list
-    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_date, $end_date);
-    //use the transaction list to retrieve summary info
-    if(!empty($results['transactions'])){
-      $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);      
-      $results = $this->generate_summary_data($results);
-      $results['day_graph'] = $this->generate_day_graph_summary($results['transactions']);
-    }else{
-      return array();
-    }
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+    $results = $this->transactions_to_results($results);
+
     return $results;
   }
   
@@ -98,12 +107,12 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  *    Private functionality for behind the scenes data retrieval 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  private function get_transactions_from_group_list($group_list, $start_date, $end_date){
-    extract($this->canonicalize_date_range($start_date, $end_date));
+  private function get_transactions_from_group_list($group_list, $start_time, $end_time){
+    // extract($this->canonicalize_date_range($start_date, $end_date));
     $transactions = array();
-    $where_clause = array('stime >=' => $start_time->format('Y-m-d H:i:s'));
+    $where_clause = array('stime >=' => $start_time);
     if($end_time){
-      $where_clause['stime <'] = $end_time->format('Y-m-d H:i:s');
+      $where_clause['stime <'] = $end_time;
     }
     $this->db->select(array('t.transaction','gi.group_id','t.stime as submit_time'))->where($where_clause);
     $this->db->from('transactions as t')->join('files as f','f.transaction = t.transaction');
@@ -197,10 +206,6 @@ class Reporting_model extends CI_Model {
   }
   
 
-
-  
-  
-  
   private function generate_summary_data($results){
     $this->db->where_in('transaction', array_keys($results['transactions']));
     $this->db->group_by('transaction');
@@ -364,12 +369,33 @@ class Reporting_model extends CI_Model {
     return $summary_list;
     
   }
+
+
+  public function latest_available_data($instrument_id){
+    $group_collection = $this->get_instrument_group_list($instrument_id);
+    $group_list = array_keys($group_collection);
+    
+    $this->db->select('MAX(t.stime) as most_recent_upload');
+    $this->db->from('group_items gi');
+    $this->db->join('files f','gi.item_id = f.item_id');
+    $this->db->join('transactions t', 'f.transaction = t.transaction');
+    $this->db->where_in('gi.group_id',$group_list)->limit(1);
+    $query = $this->db->get();
+    
+    if($query && $query->num_rows() > 0){
+      if(strtotime($query->row()->most_recent_upload)){      
+        $latest_time = $query->row()->most_recent_upload;
+        $latest_time = new DateTime($latest_time);
+      }
+      return $latest_time->format('Y-m-d H:i');
+    }
+  }
   
   
-  private function canonicalize_date_range($start_date, $end_date){
+  public function canonicalize_date_range($start_date, $end_date){
     //both start and end times are filled in and valid
     $start_date = $this->convert_short_date($start_date);
-    $end_date = $this->convert_short_date($end_date);
+    $end_date = $this->convert_short_date($end_date, 'end');
     
     $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('1983-01-01 00:00:00');
     $end_time = strtotime($end_date) ? date_create($end_date)->setTime(11,59,59) : false;
@@ -381,15 +407,19 @@ class Reporting_model extends CI_Model {
       $start_time = $temp_start;
     }
     
-    return array('start_time' => $start_time, 'end_time' => $end_time);
+    return array(
+      'start_time_object' => $start_time, 'end_time_object' => $end_time,
+      'start_time' => $start_time->format('Y-m-d H:i:s'),
+      'end_time' => $end_time->format('Y-m-d H:i:s')
+    );
   }
   
-  private function convert_short_date($date_string){
+  private function convert_short_date($date_string, $type = 'start'){
     if(preg_match('/(\d{4})$/',$date_string,$matches)){
       //looks like just a year
-      $date_string = "{$matches[1]}-01-01";
+      $date_string = $type == 'start' ? "{$matches[1]}-01-01" : "{$matches[1]}-12-31";
     }elseif(preg_match('/^(\d{4})-(\d{1,2})$/',$date_string,$matches)){
-      $date_string = "{$matches[1]}-{$matches[2]}-01";
+      $date_string = $type == 'start' ? "{$matches[1]}-{$matches[2]}-01" : "{$matches[1]}-{$matches[2]}-31";
     }
     return $date_string;
   }
@@ -473,7 +503,6 @@ class Reporting_model extends CI_Model {
     }
     return $results;
   }
-  
   
   
   

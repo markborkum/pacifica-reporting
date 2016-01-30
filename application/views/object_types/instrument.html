@@ -8,6 +8,12 @@
     <?php $transaction_info[$inst_id]['instrument_id'] = $inst_id; ?>
     <?php $this->load->view('object_types/object_body_placeholder.html',$placeholder_info[$inst_id]); ?>
   </div>
-  <div class="object_footer">&nbsp;</div>
+  <div class="object_footer">
+    <div id="time_range_container_<?= $inst_id ?>" class="time_range_container">
+      Data Uploaded Between 
+      <span id="start_time_<?= $inst_id ?>"><time datetime="<?= $placeholder_info[$inst_id]['times']['start_time'] ?>"><?= $placeholder_info[$inst_id]['times']['start_time_object']->format('n/j/Y g:i a') ?></time></span>&ndash;
+      <span id="end_time_<?= $inst_id ?>"><time datetime="<?= $placeholder_info[$inst_id]['times']['end_time'] ?>"><?= $placeholder_info[$inst_id]['times']['end_time_object']->format('n/j/Y g:i a') ?></time></span>
+    </div>
+  </div>
 </div>
 <?php endforeach; ?>

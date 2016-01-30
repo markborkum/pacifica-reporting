@@ -101,4 +101,22 @@ if(!defined('BASEPATH'))
     
   }
   
+  function time_range_to_date_pair($time_range){
+    $today = new DateTime();
+    $today->setTime(11,59,59);
+    $earlier = clone($today);
+    $earlier->modify("-{$time_range}")->setTime(0,0,0);
+    $times = array(
+      'start_date' => $earlier->format('Y-m-d H:i:s'),
+      'end_date' => $today->format('Y-m-d H:i:s'),
+      'time_range' => $time_range
+    );
+    return $times;
+    
+  }
+  
+  
+  
+  
+  
 ?>

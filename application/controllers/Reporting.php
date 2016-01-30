@@ -10,7 +10,7 @@ class Reporting extends Baseline_controller {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
     $this->load->library('myemsl-eus-library/EUS','','eus');
-    $this->load->helper(array('network','file_info','inflector'));
+    $this->load->helper(array('network','file_info','inflector','time'));
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');
   }
@@ -21,7 +21,24 @@ class Reporting extends Baseline_controller {
     redirect('reporting/view');
   }
   
-  public function view($object_type, $default_object_id = false, $start_date = false, $end_date = false){
+  public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    if(!strtotime($time_range)){
+      if($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)){
+        //custom date_range, just leave them. Canonicalize will fix them
+      }else{
+        //looks like the time range is borked, pick the default
+        $time_range = '1 week';
+        $times = time_range_to_date_pair($time_range);
+        extract($times);
+      }
+    }else{
+      $times = time_range_to_date_pair($time_range);
+      extract($times);
+    }
+    $times = $this->rep->canonicalize_date_range($start_date, $end_date);
+    extract($times);
+    
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
     if(!in_array($object_type,$accepted_object_types)){
@@ -53,10 +70,12 @@ class Reporting extends Baseline_controller {
       // $transaction_info[$object_id] = $this->rep->$transaction_retrieval_func($object_id,'2015-10-01','2015-12-01');
       $this->page_data['placeholder_info'][$object_id] = array(
         'object_type' => $object_type,
-        'object_id' => $object_id
+        'object_id' => $object_id,
+        'time_range' => $time_range,
+        'times' => $times
       );
     }
-    
+    $this->page_data['default_time_range'] = $times;
     $this->page_data['content_view'] = "object_types/{$object_type}.html";
     $this->page_data['my_objects'] = $object_info;
     // $this->page_data['transaction_info'] = $transaction_info;
@@ -70,7 +89,22 @@ class Reporting extends Baseline_controller {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
   // Call to retrieve fill-in HTML for reporting block entries
-  public function get_reporting_info($object_type,$object_id,$start_date = false, $end_date = false){
+  public function get_reporting_info($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false){
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    if(!strtotime($time_range)){
+      if($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)){
+        //custom date_range, just leave them. Canonicalize will fix them
+      }else{
+        //looks like the time range is borked, pick the default
+        $time_range = '1 week';
+        $times = time_range_to_date_pair($time_range);
+        extract($times);
+      }
+    }else{
+      $times = time_range_to_date_pair($time_range);
+      extract($times);
+    }
+    
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
     $transaction_info = array();
     $transaction_info = $this->rep->$transaction_retrieval_func($object_id,$start_date,$end_date);
@@ -145,6 +179,14 @@ class Reporting extends Baseline_controller {
     echo "<pre>";
     var_dump($results);
     echo "</pre>";
+  }
+  
+  public function test_get_latest($instrument_id){
+    $results = $this->rep->latest_available_data($instrument_id);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+    
   }
   
 
