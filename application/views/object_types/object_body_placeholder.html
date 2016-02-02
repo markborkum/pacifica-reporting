@@ -8,12 +8,13 @@
   <script>
 $(function(){
   $('#loading_status_<?= $object_id ?>').spin();
-  var url = base_url + 'index.php/reporting/get_reporting_info/<?= $object_type ?>/<?= $object_id ?>/<?= $time_range ?>';
+  var url = base_url + 'index.php/reporting/get_reporting_info/<?= $object_type ?>/<?= $object_id ?>/<?= str_replace(" ","-",$time_range) ?>';
   var getter = $.get(url);
-  // getter.done(function(data,status){
-    // $('#loading_status_<?= $object_id ?>').spin(false);
-    // $('#object_body_container_<?= $object_id ?>').replaceWith(data);
-  // });
+  getter.done(function(data,status){
+    $('#loading_status_<?= $object_id ?>').spin(false);
+    
+    $('#object_body_container_<?= $object_id ?>').replaceWith(data);
+  });
 });
   </script>
 </div>

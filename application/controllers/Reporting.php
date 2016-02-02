@@ -10,7 +10,7 @@ class Reporting extends Baseline_controller {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
     $this->load->library('myemsl-eus-library/EUS','','eus');
-    $this->load->helper(array('network','file_info','inflector','time'));
+    $this->load->helper(array('network','file_info','inflector','time','item'));
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');
   }
@@ -90,20 +90,31 @@ class Reporting extends Baseline_controller {
 
   // Call to retrieve fill-in HTML for reporting block entries
   public function get_reporting_info($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false){
+    $latest_data = $this->rep->latest_available_data($object_type,$object_id);
+    $latest_data_object = new DateTime($latest_data);
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    if(!strtotime($time_range)){
-      if($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)){
+    $this->page_data['results_message'] = "No data for this {$object_type} is available in the most recent {$time_range} period.";
+    $valid_tr = strtotime($time_range);
+    $valid_st = strtotime($start_date);
+    $valid_et = strtotime($end_date);
+    if(!$valid_tr){
+      if($time_range == 'custom' && $valid_st && $valid_et){
         //custom date_range, just leave them. Canonicalize will fix them
       }else{
         //looks like the time range is borked, pick the default
         $time_range = '1 week';
-        $times = time_range_to_date_pair($time_range);
-        extract($times);
+        $times = time_range_to_date_pair($time_range,$latest_data_object);
       }
-    }else{
-      $times = time_range_to_date_pair($time_range);
-      extract($times);
+    }else{ //time_range is apparently valid
+      if(($valid_st || $valid_et) && !($valid_st && $valid_et)){
+        //looks like we want an offset time either start or finish 
+        $times = time_range_to_date_pair($time_range,$latest_data_object,$start_date,$end_date);
+      }else{
+        $times = time_range_to_date_pair($time_range, $latest_data_object);
+      }
     }
+    extract($times);
+    // $this->page_data['results_message'] .= $times['message'];
     
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
     $transaction_info = array();
@@ -111,6 +122,7 @@ class Reporting extends Baseline_controller {
     $this->page_data['transaction_info'] = $transaction_info;
     $this->page_data["{$object_type}_id"] = $object_id;
     $this->page_data['object_type'] = $object_type;
+    $this->page_data['times'] = $times;
     $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
   }
 
@@ -181,8 +193,8 @@ class Reporting extends Baseline_controller {
     echo "</pre>";
   }
   
-  public function test_get_latest($instrument_id){
-    $results = $this->rep->latest_available_data($instrument_id);
+  public function test_get_latest($object_type,$object_id){
+    $results = $this->rep->latest_available_data($object_type,$object_id);
     echo "<pre>";
     var_dump($results);
     echo "</pre>";

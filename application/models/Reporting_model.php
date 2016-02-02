@@ -96,6 +96,7 @@ class Reporting_model extends CI_Model {
     );
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+    // var_dump($results);
     $results = $this->transactions_to_results($results);
 
     return $results;
@@ -114,13 +115,13 @@ class Reporting_model extends CI_Model {
     if($end_time){
       $where_clause['stime <'] = $end_time;
     }
-    $this->db->select(array('t.transaction','gi.group_id','t.stime as submit_time'))->where($where_clause);
+    $this->db->select(array('t.transaction','t.stime as submit_time'))->where($where_clause);
     $this->db->from('transactions as t')->join('files as f','f.transaction = t.transaction');
     $this->db->join('group_items as gi','gi.item_id = f.item_id');
     $this->db->where_in('gi.group_id',$group_list);
-    $this->db->order_by('t.transaction desc');
+    $this->db->order_by('t.transaction desc')->distinct();
     $transaction_query = $this->db->get();
-        
+
     if($transaction_query && $transaction_query->num_rows()>0){
       foreach($transaction_query->result() as $row){
         $stime = date_create($row->submit_time);
@@ -349,12 +350,6 @@ class Reporting_model extends CI_Model {
     ksort($summary_list['by_date']);
     //foreach($summary_times as $key){
     foreach($summary_list['by_hour_list'] as $time_key => $info){
-      //$time_key = date_create()->setTime($key,0,0)->format('H:i');
-      // if(array_key_exists($time_key,$summary_list['by_hour_list'])){
-        // $info = $summary_list['by_hour_list'][$time_key];
-      // }else{
-        // $info = array('sizes' => array(), 'counts' => array());
-      // }
       $trans_count = sizeof($info['sizes']);
       $summary_list['by_hour'][$time_key] = array(
         'upload_count' => $trans_count,
@@ -370,8 +365,14 @@ class Reporting_model extends CI_Model {
     
   }
 
+  public function latest_available_data($object_type, $object_id){
+    $latest_function_name = "latest_available_{$object_type}_data";
+    return $this->$latest_function_name($object_id);
+  }
 
-  public function latest_available_data($instrument_id){
+  
+
+  private function latest_available_instrument_data($instrument_id){
     $group_collection = $this->get_instrument_group_list($instrument_id);
     $group_list = array_keys($group_collection);
     
@@ -391,6 +392,48 @@ class Reporting_model extends CI_Model {
     }
   }
   
+  private function latest_available_proposal_data($proposal_id){
+    $group_collection = $this->get_proposal_group_list($proposal_id);
+    $group_list = array_keys($group_collection);
+    
+    $this->db->select('MAX(t.stime) as most_recent_upload');
+    $this->db->from('group_items gi');
+    $this->db->join('files f','gi.item_id = f.item_id');
+    $this->db->join('transactions t', 'f.transaction = t.transaction');
+    $this->db->where_in('gi.group_id',$group_list)->limit(1);
+    $query = $this->db->get();
+    
+    if($query && $query->num_rows() > 0){
+      if(strtotime($query->row()->most_recent_upload)){      
+        $latest_time = $query->row()->most_recent_upload;
+        $latest_time = new DateTime($latest_time);
+      }
+      return $latest_time->format('Y-m-d H:i');
+    }
+  }
+
+
+  private function latest_available_user_data($person_id){
+    $this->db->select(array("t.stime as most_recent_upload","t.transaction"));
+    $this->db->where('t.stime is not null')->order_by("t.transaction desc");
+    $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
+    if($query && $query->num_rows() > 0){
+      //blank stime in trans table
+      $latest_time = new DateTime($query->row()->most_recent_upload);
+    }else{
+      $this->db->order_by('f.transaction desc');
+      $file_query = $this->db->get_where('files f', array('f.transaction' => $query->row()->transaction),1);
+      if($file_query && $file_query->num_rows()>0){
+        $latest_time = new DateTime($file_query->row()->most_recent_upload);
+      }else{
+        $latest_time = new DateTime('1991-01-01 00:00:00');
+      }
+    }
+    return $latest_time->format('Y-m-d H:i');
+  }
+
+
+
   
   public function canonicalize_date_range($start_date, $end_date){
     //both start and end times are filled in and valid
@@ -398,7 +441,7 @@ class Reporting_model extends CI_Model {
     $end_date = $this->convert_short_date($end_date, 'end');
     
     $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('1983-01-01 00:00:00');
-    $end_time = strtotime($end_date) ? date_create($end_date)->setTime(11,59,59) : false;
+    $end_time = strtotime($end_date) ? date_create($end_date)->setTime(23,59,59) : false;
     
     if($end_time < $start_time && !empty($end_time)){
       //flipped??

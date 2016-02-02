@@ -101,21 +101,84 @@ if(!defined('BASEPATH'))
     
   }
   
-  function time_range_to_date_pair($time_range){
-    $today = new DateTime();
-    $today->setTime(11,59,59);
+  function time_range_to_date_pair($time_range, $latest_available_date = false, $start_date = false, $end_date = false){
+    if(!$latest_available_date){
+      $latest_available_date = new DateTime();
+    }
+    if(is_string($latest_available_date)){
+      $latest_available_date = new DateTime($latest_available_date);
+    }
+    
+    //if start_date is valid, use time_range to go forward from that time
+    //if end date is valid, use time_range to go back from that time
+    $time_modifier = "-";
+    if(strtotime($start_date)){
+      $time_modifier = "+";
+      $today = new DateTime($start_date);
+    }elseif(strtotime($end_date)){
+      $today = $latest_available_date->getTimestamp() < new DateTime($end_date) ? $latest_available_date : new DateTime();
+    }else{
+      $today = $latest_available_date;
+    }
+    $today->setTime(23,59,59);
     $earlier = clone($today);
-    $earlier->modify("-{$time_range}")->setTime(0,0,0);
+    $earlier->modify("{$time_modifier}{$time_range}")->setTime(0,0,0);
     $times = array(
       'start_date' => $earlier->format('Y-m-d H:i:s'),
       'end_date' => $today->format('Y-m-d H:i:s'),
-      'time_range' => $time_range
+      'start_date_object' => $earlier,
+      'end_date_object' => $today,
+      'time_range' => $time_range,
+      'message' => "<p>Using ".$today->format('Y-m-d')." as the new origin time</p>"
     );
     return $times;
     
   }
   
+  function dates_covered($first_date,$last_date){
+    $fd_object = new DateTime($first_date);
+    $ld_object = new DateTime($last_date);
+    $current_object = clone $fd_object;
+    $results = array();
+    
+    while($current_object->getTimestamp() <= $ld_object->getTimestamp){
+      $results[$current_object->format('Y-m-d')] = $current_object->format('D M j');
+      $current_object->modify('+1 day');
+    }
+    
+    return $results;
+  }
   
+  function day_graph_to_series($day_graph_info){
+    $keys = array_keys($day_graph_info['by_date']);
+    $fd = array_shift($keys);
+    $fd_object = new DateTime($fd);
+    $ld = array_pop($keys);
+    $ld_object = new DateTime($ld);
+
+    $current_object = clone $fd_object;
+    
+    $results = array(
+      'available_dates' => array(),
+      'file_count' => array(),
+      'file_volume' => array(),
+      'transaction_count' => array()
+    );
+    while($current_object->getTimestamp() <= $ld_object->getTimestamp()){
+      $date_key = $current_object->format('Y-m-d');
+      $results['available_dates'][$date_key] = $current_object->format('D M j');
+      if(array_key_exists($date_key,$day_graph_info['by_date'])){
+        $results['file_count'][$date_key] = $day_graph_info['by_date'][$date_key]['file_count'];
+        $results['file_volume'][$date_key] = $day_graph_info['by_date'][$date_key]['file_volume'];
+        $results['transaction_count'][$date_key] = $day_graph_info['by_date'][$date_key]['upload_count'];
+      }else{
+        $results['file_count'][$date_key] = 0;
+        $results['file_volume'][$date_key] = 0;
+        $results['transaction_count'][$date_key] = 0;
+      }
+    }
+    return $results;
+  }
   
   
   
