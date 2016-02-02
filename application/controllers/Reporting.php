@@ -114,15 +114,26 @@ class Reporting extends Baseline_controller {
       }
     }
     extract($times);
+    // echo "<pre>";
+    // var_dump($times);
+    // echo "</pre>";
     // $this->page_data['results_message'] .= $times['message'];
     
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
     $transaction_info = array();
     $transaction_info = $this->rep->$transaction_retrieval_func($object_id,$start_date,$end_date);
+    // echo "<pre>";
+    // var_dump($transaction_info);
+    // echo "</pre>";
+    // exit;    
     $this->page_data['transaction_info'] = $transaction_info;
     $this->page_data["{$object_type}_id"] = $object_id;
     $this->page_data['object_type'] = $object_type;
     $this->page_data['times'] = $times;
+    // echo "<pre>";
+    // var_dump($this->page_data);
+    // echo "</pre>";
+    // exit;    
     $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
   }
 

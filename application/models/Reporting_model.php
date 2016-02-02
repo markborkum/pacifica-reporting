@@ -96,7 +96,6 @@ class Reporting_model extends CI_Model {
     );
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
-    // var_dump($results);
     $results = $this->transactions_to_results($results);
 
     return $results;

@@ -30,6 +30,13 @@
     <span id="new_end_time_<?= $instrument_id ?>"><time datetime="<?= $times['end_date'] ?>"><?= $times['end_date_object']->format('n/j/Y') ?></time></span>
   </div>
   <script>
+
+function humanFileSize(size) {
+    if (size == 0) { return "0"; }
+    var i = Math.floor( Math.log(size) / Math.log(1024) );
+    return ( size / Math.pow(1000, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+};
+    
 $(function () {
     // Make monochrome colors and set them as default for all pies
     Highcharts.getOptions().plotOptions.pie.colors = (function () {
@@ -44,6 +51,26 @@ $(function () {
         }
         return colors;
     }());
+    
+    Highcharts.getOptions().plotOptions.spline.colors = (function () {
+        var colors = [],
+            // base = Highcharts.getOptions().colors[2],
+            base = '#81aa00',
+            i;
+        for (i = 0; i < 10; i += 1) {
+            // Start out with a darkened base color (negative brighten), and end
+            // up with a much brighter color
+            colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
+        }
+        return colors;
+    }());
+    
+    Highcharts.setOptions({
+      lang: {
+        thousandsSep: ""
+      }
+    });
+
     
     $('span#start_time_<?= $instrument_id ?> > time').replaceWith($('span#new_start_time_<?= $instrument_id ?> > time'));
     $('span#end_time_<?= $instrument_id ?> > time').replaceWith($('span#new_end_time_<?= $instrument_id ?> > time'));
@@ -159,49 +186,61 @@ $(function () {
         },
         type: 'column'
       },
+      title: {
+        text: ''
+      },      
       legend: {
         enabled: false
       },
-      xAxis: [{
-        categories: <?php json_encode(array_values($day_graph_info['available_dates'])); ?>
-      }],
+      tooltip: {
+        pointFormat: '<strong>{point.name} {point.y}{valueSuffix}</strong>',
+        headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
+      },
+      xAxis: [{ categories: <?= json_encode(array_values($day_graph_info['available_dates'])); ?> }],
       yAxis: [{ //transaction count axis
         title: {
           text: 'Number of Uploads',
           style: {
-            color: Highcharts.getOptions().colors[2]
+            color: Highcharts.getOptions().colors[1]
           }
         },
         labels: {
           style: {
-            color: Highcharts.getOptions().colors[2]
+            color: Highcharts.getOptions().colors[1]
           }
         }
       },{ //volume axis
         title: {
           text: 'File Volume (MB)',
           style: {
-            color: Highcharts.getOptions().colors[1]
+            color: Highcharts.getOptions().colors[0]
           }
         },
         labels: {
-          format: '{value} MB',
+          formatter: function() {
+            return humanFileSize(this.value);
+          },
           style: {
-            color: Highcharts.getOptions().colors[1]
+            color: Highcharts.getOptions().colors[0]
           }
         },
         opposite:true
       }],
       // tooltip: {}
       series: [{
-        name: 'File Volume (MB)',
-        type: 'column',
+        name: 'File Volume',
+        type: 'spline',
         yAxis: 1,
-        data: <?= json_encode(array_values($day_graph_info['file_volume'])) ?>
+        tooltip: {
+          pointFormatter: function() {
+            return humanFileSize(this.y);
+          }
+        },
+        data: <?= json_encode(array_values($day_graph_info['file_volume'])); ?>
       },{
         name: 'Upload Count',
         type: 'column',
-        data: <?= json_encode(array_values($day_graph_info['transaction_count'])) ?>
+        data: <?= json_encode(array_values($day_graph_info['transaction_count'])); ?>
       }]
     });
     

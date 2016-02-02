@@ -150,6 +150,9 @@ if(!defined('BASEPATH'))
   }
   
   function day_graph_to_series($day_graph_info){
+    // echo "<pre>";
+    // var_dump($day_graph_info);
+    // echo "</pre>";
     $keys = array_keys($day_graph_info['by_date']);
     $fd = array_shift($keys);
     $fd_object = new DateTime($fd);
@@ -169,13 +172,14 @@ if(!defined('BASEPATH'))
       $results['available_dates'][$date_key] = $current_object->format('D M j');
       if(array_key_exists($date_key,$day_graph_info['by_date'])){
         $results['file_count'][$date_key] = $day_graph_info['by_date'][$date_key]['file_count'];
-        $results['file_volume'][$date_key] = $day_graph_info['by_date'][$date_key]['file_volume'];
+        $results['file_volume'][$date_key] = floatval($day_graph_info['by_date'][$date_key]['file_size']);
         $results['transaction_count'][$date_key] = $day_graph_info['by_date'][$date_key]['upload_count'];
       }else{
         $results['file_count'][$date_key] = 0;
         $results['file_volume'][$date_key] = 0;
         $results['transaction_count'][$date_key] = 0;
       }
+      $current_object->modify("+1 day");
     }
     return $results;
   }
