@@ -174,10 +174,14 @@ if(!defined('BASEPATH'))
         $results['file_count'][$date_key] = $day_graph_info['by_date'][$date_key]['file_count'];
         $results['file_volume'][$date_key] = floatval($day_graph_info['by_date'][$date_key]['file_size']);
         $results['transaction_count'][$date_key] = $day_graph_info['by_date'][$date_key]['upload_count'];
+        $results['file_volume_array'][$date_key] = array($current_object->getTimestamp() * 1000, floatval($day_graph_info['by_date'][$date_key]['file_size']));
+        $results['transaction_count_array'][$date_key] = array($current_object->getTimestamp() * 1000, $day_graph_info['by_date'][$date_key]['upload_count']);
       }else{
         $results['file_count'][$date_key] = 0;
         $results['file_volume'][$date_key] = 0;
         $results['transaction_count'][$date_key] = 0;
+        $results['file_volume_array'][$date_key] = array($current_object->getTimestamp() * 1000, 0.0);
+        $results['transaction_count_array'][$date_key] = array($current_object->getTimestamp() * 1000, 0.0);
       }
       $current_object->modify("+1 day");
     }

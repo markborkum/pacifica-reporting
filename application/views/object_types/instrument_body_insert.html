@@ -184,7 +184,14 @@ $(function () {
           fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
           fontSize: '12px'
         },
+        zoomType: 'x',
+        events: {
+          redraw: function () {
+
+          }
+        },
         type: 'column'
+
       },
       title: {
         text: ''
@@ -196,7 +203,23 @@ $(function () {
         pointFormat: '<strong>{point.name} {point.y}{valueSuffix}</strong>',
         headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
       },
-      xAxis: [{ categories: <?= json_encode(array_values($day_graph_info['available_dates'])); ?> }],
+      plotOptions: {
+        series: {
+          marker: {
+            enabled: false
+          }
+        }
+      },
+      xAxis: {
+        type: 'datetime',
+        labels: {
+          formatter: function() {
+            return moment(this.value).format("ddd M/D/YYYY");
+          },
+          rotation: -45
+        },
+        tickInterval: 24 * 3600 * 1000
+      },
       yAxis: [{ //transaction count axis
         title: {
           text: 'Number of Uploads',
@@ -230,17 +253,19 @@ $(function () {
       series: [{
         name: 'File Volume',
         type: 'spline',
+        lineWidth: 2,
         yAxis: 1,
         tooltip: {
           pointFormatter: function() {
             return humanFileSize(this.y);
           }
         },
-        data: <?= json_encode(array_values($day_graph_info['file_volume'])); ?>
+        data: <?= json_encode(array_values($day_graph_info['file_volume_array'])); ?>
       },{
         name: 'Upload Count',
         type: 'column',
-        data: <?= json_encode(array_values($day_graph_info['transaction_count'])); ?>
+        color: 'rgba(67,67,67,0.50)',
+        data: <?= json_encode(array_values($day_graph_info['transaction_count_array'])); ?>
       }]
     });
     
