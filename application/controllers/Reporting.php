@@ -88,8 +88,16 @@ class Reporting extends Baseline_controller {
 /* API functionality for Ajax calls from UI                  */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+  public function get_reporting_info($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
+    $this->get_reporting_info_base($object_type, $object_id,$time_range,$start_date,$end_date,true);
+  }
+
+  public function get_reporting_info_no_timeline($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false){
+    $this->get_reporting_info_base($object_type, $object_id,$time_range,$start_date,$end_date,false);
+  }
+
   // Call to retrieve fill-in HTML for reporting block entries
-  public function get_reporting_info($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false){
+  private function get_reporting_info_base($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
     $latest_data = $this->rep->latest_available_data($object_type,$object_id);
     $latest_data_object = new DateTime($latest_data);
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
@@ -100,6 +108,18 @@ class Reporting extends Baseline_controller {
     if(!$valid_tr){
       if($time_range == 'custom' && $valid_st && $valid_et){
         //custom date_range, just leave them. Canonicalize will fix them
+        $start_date_object = new DateTime($start_date);
+        $end_date_object = new DateTime($end_date);
+        $times = array(
+          'start_date' => $start_date_object->format('Y-m-d H:i:s'),
+          'end_date' => $end_date_object->format('Y-m-d H:i:s'),
+          'start_date_object' => $start_date_object,
+          'end_date_object' => $end_date_object,
+          'time_range' => $time_range,
+          'message' => "<p>Using ".$end_date_object->format('Y-m-d')." as the new origin time</p>"
+        );
+                    
+        
       }else{
         //looks like the time range is borked, pick the default
         $time_range = '1 week';
@@ -127,14 +147,21 @@ class Reporting extends Baseline_controller {
     // echo "</pre>";
     // exit;    
     $this->page_data['transaction_info'] = $transaction_info;
+    $this->page_data['object_id'] = $object_id;
     $this->page_data["{$object_type}_id"] = $object_id;
     $this->page_data['object_type'] = $object_type;
     $this->page_data['times'] = $times;
+    $this->page_data['include_timeline'] = $with_timeline;
     // echo "<pre>";
     // var_dump($this->page_data);
     // echo "</pre>";
-    // exit;    
-    $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
+    // exit;
+    
+    if($with_timeline){
+      $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
+    }else{
+      $this->load->view("object_types/object_pie_scripts_insert.html", $this->page_data);
+    }
   }
 
 

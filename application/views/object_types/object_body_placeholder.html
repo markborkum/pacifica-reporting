@@ -5,7 +5,7 @@
   <div class="loading_progress_indicator" id="loading_status_<?= $object_id ?>">
     &nbsp;
   </div>
-  <script>
+<script type="text/javascript">
 $(function(){
   $('#loading_status_<?= $object_id ?>').spin();
   var url = base_url + 'index.php/reporting/get_reporting_info/<?= $object_type ?>/<?= $object_id ?>/<?= str_replace(" ","-",$time_range) ?>';

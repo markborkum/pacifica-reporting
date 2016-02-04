@@ -1,0 +1,146 @@
+<?php extract($transaction_info); ?>
+<script type="text/javascript">
+  $(function () {
+      // Make monochrome colors and set them as default for all pies
+      Highcharts.getOptions().plotOptions.pie.colors = (function () {
+          var colors = [],
+              // base = Highcharts.getOptions().colors[2],
+              base = '#81aa00',
+              i;
+          for (i = 0; i < 10; i += 1) {
+              // Start out with a darkened base color (negative brighten), and end
+              // up with a much brighter color
+              colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
+          }
+          return colors;
+      }());
+      
+      Highcharts.getOptions().plotOptions.spline.colors = (function () {
+          var colors = [],
+              // base = Highcharts.getOptions().colors[2],
+              base = '#81aa00',
+              i;
+          for (i = 0; i < 10; i += 1) {
+              // Start out with a darkened base color (negative brighten), and end
+              // up with a much brighter color
+              colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
+          }
+          return colors;
+      }());
+      
+      Highcharts.setOptions({
+        lang: {
+          thousandsSep: ""
+        },
+        global: {
+          useUTC: false
+        }
+      });
+  
+      
+      $('span#start_time_<?= $object_id ?> > time').replaceWith($('span#new_start_time_<?= $object_id ?> > time'));
+      $('span#end_time_<?= $object_id ?> > time').replaceWith($('span#new_end_time_<?= $object_id ?> > time'));
+      $('#message_container_<?= $object_id ?>').html('<?= $results_message ?>');
+      // Build the chart
+      var proposal_chart_<?= $object_id ?> = $('#proposal_stats_graph_<?= $object_id ?>').highcharts({
+        credits: false,
+        chart: {
+          plotBackgroundColor: null,
+          plotBorderWidth: null,
+          plotShadow: false,
+          spacing: [10,0,0,0],
+          style: {
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            fontSize: '12px'
+          },            
+          type: 'pie'
+        },
+        title: {
+          text: 'Uploads By Proposal',
+          style: {'fontSize':'13px','fontWeight':'bold'}
+        },
+        legend: {
+          layout: 'vertical',
+          align:'right',
+          margin:'2'
+        },
+        tooltip: {
+          pointFormat: 'Proposal {point.name}: <b>{point.percentage:.1f}%</b>',
+          headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
+        },
+        plotOptions: {
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+              enabled: false,
+              floating:true
+            },
+            center: [100, 80],
+            showInLegend: true
+          }
+        },
+        series: [{
+          name: 'Uploads',
+          <?php
+          $proposal_data = array();
+          foreach($summary_totals['transaction_stats']['proposal'] as $proposal_id => $proposal_count){
+            $proposal_Data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['transaction_count'],2));
+          }
+          ?>  
+          data: <?= json_encode($proposal_Data); ?>
+        }]
+      });
+      
+      var user_chart_<?= $object_id ?> = $('#user_stats_graph_<?= $object_id ?>').highcharts({
+        credits: false,
+        chart: {
+          plotBackgroundColor: null,
+          plotBorderWidth: null,
+          plotShadow: false,
+          spacing: [10,0,0,0],
+          style: {
+            fontFamily: 'Helvetica, Arial, sans-serif',
+            fontSize: '12px'
+          },
+          type: 'pie'
+        },
+        title: {
+          text: 'Uploads By User',
+          style: {'fontSize':'13px','fontWeight':'bold'}
+        },
+        legend: {
+          layout: 'vertical',
+          align:'right',
+          margin:'2'
+        },
+        tooltip: {
+          pointFormat: '{point.name}: <b>{point.percentage:.1f}%</b>',
+          headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
+        },
+        plotOptions: {
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+              enabled: false,
+              floating: true
+            },
+            center: [100,80],
+            showInLegend: true
+          }
+        },
+        series: [{
+          name: 'Uploads',
+          <?php
+          $user_data = array();
+          foreach($summary_totals['transaction_stats']['user'] as $person_id => $trans_count){
+            $user_info = $this->eus->get_name_from_eus_id($person_id);
+            $user_data[] = array('name' => $user_info['display_name'], 'y' => round($trans_count / $summary_totals['transaction_count'],2));
+          }
+          ?>  
+          data: <?= json_encode($user_data); ?>
+        }]
+      });
+  });
+</script>

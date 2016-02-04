@@ -1,0 +1,117 @@
+<?php extract($transaction_info); ?>
+
+<script type="text/javascript">
+$(function () {
+  Highcharts.setOptions({
+    lang: {
+      thousandsSep: ""
+    },
+    global: {
+      useUTC: false
+    }
+  });
+
+  var timeline_chart_<?= $object_id ?> = $('#object_timeline_<?= $object_id ?>').highcharts({
+    credits: false,
+    chart: {
+      style: {
+        fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+        fontSize: '12px'
+      },
+      zoomType: 'x',
+      events: {
+        redraw: function () {
+          var new_extremes = this.series[0].xAxis.getExtremes();
+          var userMin = new_extremes.userMin != undefined ? new_extremes.userMin : new_extremes.dataMin;
+          var userMax = new_extremes.userMax != undefined ? new_extremes.userMax : new_extremes.dataMax;
+          var new_start = moment(userMin).format('YYYY-MM-DD');
+          var new_end = moment(userMax).format('YYYY-MM-DD');
+          var url = base_url + 'index.php/reporting/get_reporting_info_no_timeline/<?= $object_type ?>/<?= $object_id ?>/custom/';
+          url += new_start + '/' + new_end;
+          var getter = $.get(url);
+          getter.done(function(data,status){
+            $('#pie_scripts_container_<?= $object_id ?>').html(data);
+          });
+        }
+      },
+      type: 'column'
+
+    },
+    title: {
+      text: ''
+    },      
+    legend: {
+      enabled: false
+    },
+    tooltip: {
+      pointFormat: '<strong>{point.name} {point.y}{valueSuffix}</strong>',
+      headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
+    },
+    plotOptions: {
+      series: {
+        marker: {
+          enabled: false
+        }
+      }
+    },
+    xAxis: {
+      type: 'datetime',
+      labels: {
+        formatter: function() {
+          return moment(this.value).format("ddd M/D/YYYY");
+        },
+        rotation: -45
+      },
+      // tickInterval: 24 * 3600 * 1000,
+      tickPixelInterval: 30
+    },
+    yAxis: [{ //transaction count axis
+      title: {
+        text: 'Number of Uploads',
+        style: {
+          color: Highcharts.getOptions().colors[1]
+        }
+      },
+      labels: {
+        style: {
+          color: Highcharts.getOptions().colors[1]
+        }
+      }
+    },{ //volume axis
+      title: {
+        text: 'File Volume (MB)',
+        style: {
+          color: Highcharts.getOptions().colors[0]
+        }
+      },
+      labels: {
+        formatter: function() {
+          return humanFileSize(this.value);
+        },
+        style: {
+          color: Highcharts.getOptions().colors[0]
+        }
+      },
+      opposite:true
+    }],
+    // tooltip: {}
+    series: [{
+      name: 'File Volume',
+      type: 'spline',
+      lineWidth: 2,
+      yAxis: 1,
+      tooltip: {
+        pointFormatter: function() {
+          return humanFileSize(this.y);
+        }
+      },
+      data: <?= json_encode(array_values($day_graph_info['file_volume_array'])); ?>
+    },{
+      name: 'Upload Count',
+      type: 'column',
+      color: 'rgba(67,67,67,0.50)',
+      data: <?= json_encode(array_values($day_graph_info['transaction_count_array'])); ?>
+    }]
+  });
+});    
+</script>
