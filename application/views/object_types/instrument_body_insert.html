@@ -13,7 +13,7 @@
     <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
     <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Upload Totals</div>
     <ul id='upload_totals_<?= $instrument_id ?>' class='stats_list'>
-      <li><span id='transaction_count_<?= $instrument_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></li>
+      <li><a href='#'><span id='transaction_count_<?= $instrument_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></a></li>
       <li><span id='file_count_<?= $instrument_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $instrument_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
     <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Transaction Statistics</div>

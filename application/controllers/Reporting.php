@@ -141,7 +141,7 @@ class Reporting extends Baseline_controller {
     
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
     $transaction_info = array();
-    $transaction_info = $this->rep->$transaction_retrieval_func($object_id,$start_date,$end_date);
+    $transaction_info = $this->rep->$transaction_retrieval_func($object_id,$start_date,$end_date, $with_timeline);
     // echo "<pre>";
     // var_dump($transaction_info);
     // echo "</pre>";

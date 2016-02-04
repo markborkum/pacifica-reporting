@@ -51,13 +51,14 @@
 
 .object_body_container > .totals_container li {
   list-style:none;
-  text-align:left;
+  text-align:right;
 }
 
 .object_body_container .stats_header{
   font-weight:bold;
   border-bottom:1px #222 solid;
   margin-top:0.5em;
+  text-align:right;
 }
 
 /*.stats_graph_container > .stats_graph {

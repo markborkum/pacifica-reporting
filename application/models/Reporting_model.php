@@ -25,7 +25,7 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
  *    Publicly available API calls 
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  private function transactions_to_results($results){
+  private function transactions_to_results($results, $make_day_graph = true){
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
       $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
@@ -38,7 +38,7 @@ class Reporting_model extends CI_Model {
   }
  
  
-  function summarize_uploads_by_user($eus_person_id, $start_date, $end_date,$unfiltered = false){
+  function summarize_uploads_by_user($eus_person_id, $start_date, $end_date, $make_day_graph){
     //canonicalize start and end times (yields $start_time & $end_time)
     extract($this->canonicalize_date_range($start_date, $end_date));
 
@@ -48,8 +48,8 @@ class Reporting_model extends CI_Model {
       'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
     );
     
-    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_time, $end_time, $unfiltered);
-    $results = $this->transactions_to_results($results);
+    $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_time, $end_time, false);
+    $results = $this->transactions_to_results($results, $make_day_graph);
     
     return $results;
   }
@@ -57,7 +57,7 @@ class Reporting_model extends CI_Model {
   
   
   
-  function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date){
+  function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date, $make_day_graph){
     //canonicalize start and end times (yields $start_time & $end_time)
     extract($this->canonicalize_date_range($start_date, $end_date));
     
@@ -73,7 +73,7 @@ class Reporting_model extends CI_Model {
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
 
-    $results = $this->transactions_to_results($results);
+    $results = $this->transactions_to_results($results, $make_day_graph);
 
     return $results;
   }
@@ -81,7 +81,7 @@ class Reporting_model extends CI_Model {
  
  
   
-  function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date = false){
+  function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date, $make_day_graph){
     extract($this->canonicalize_date_range($start_date, $end_date));
     
     //get instrument group_id list
@@ -96,7 +96,7 @@ class Reporting_model extends CI_Model {
     );
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
-    $results = $this->transactions_to_results($results);
+    $results = $this->transactions_to_results($results, $make_day_graph);
 
     return $results;
   }
