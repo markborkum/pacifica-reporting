@@ -16,17 +16,16 @@
       <li><a href='#'><span id='transaction_count_<?= $instrument_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></a></li>
       <li><span id='file_count_<?= $instrument_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $instrument_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
-    <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Transaction Statistics</div>
+    <!-- <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Transaction Statistics</div>
     <ul id='upload_stats_<?= $instrument_id ?>' class='stats_list'>
       <li>Largest Upload: <?= format_bytes($summary_totals['transaction_records']['largest_upload']['file_size']) ?></li>
       <li>Greatest Number of Files: <?= $summary_totals['transaction_records']['most_files']['file_count'] ?></li> 
-    </ul>
-  </div>
+    </ul> -->  </div>
   <div id='stats_graph_container_<?= $instrument_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
     <div id='proposal_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_left' style="min-width:250px;height:250px;width:50%;"></div>
     <div id='user_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_right' style="min-width:250px;height:250px;width:50%;position:absolute;right:0;top:0;"></div>
   </div>
-  <div id="new_times_<?= $instrument_id ?>" style="display_none;">
+  <div id="new_times_<?= $instrument_id ?>" style="display:none;">
     <span id="new_start_time_<?= $instrument_id ?>"><time datetime="<?= $times['start_date'] ?>"><?= $times['start_date_object']->format('n/j/Y') ?></time></span>
     <span id="new_end_time_<?= $instrument_id ?>"><time datetime="<?= $times['end_date'] ?>"><?= $times['end_date_object']->format('n/j/Y') ?></time></span>
   </div>

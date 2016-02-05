@@ -73,6 +73,11 @@
   float:right;
 }
 
+.loading_new_graphics{
+  opacity:0.5;
+  transition: opacity .25s ease-in-out;
+}
+
 
 .loading_progress_text{
   color: #444;

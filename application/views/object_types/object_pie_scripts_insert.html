@@ -73,6 +73,9 @@
           headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
         },
         plotOptions: {
+          series: {
+            animation: <?= $include_timeline ? "true" : "false" ?>
+          },
           pie: {
             allowPointSelect: true,
             cursor: 'pointer',
@@ -95,7 +98,6 @@
           data: <?= json_encode($proposal_Data); ?>
         }]
       });
-      // <?= $include_timeline ?>
       var user_chart_<?= $object_id ?> = $('#user_stats_graph_<?= $object_id ?>').highcharts({
         credits: false,
         chart: {
@@ -124,6 +126,9 @@
           headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
         },
         plotOptions: {
+          series: {
+            animation: <?= $include_timeline ? "true" : "false" ?>
+          },
           pie: {
             allowPointSelect: true,
             cursor: 'pointer',
