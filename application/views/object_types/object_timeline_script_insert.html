@@ -1,6 +1,6 @@
 <?php extract($transaction_info); ?>
-
 <script type="text/javascript">
+var my_transactions_<?= $object_id ?> = [];
 $(function () {
   Highcharts.setOptions({
     lang: {
@@ -10,7 +10,6 @@ $(function () {
       useUTC: false
     }
   });
-
   var timeline_chart_<?= $object_id ?> = $('#object_timeline_<?= $object_id ?>').highcharts({
     credits: false,
     chart: {
@@ -41,7 +40,7 @@ $(function () {
     },
     title: {
       text: ''
-    },      
+    },
     legend: {
       enabled: false
     },
@@ -115,5 +114,5 @@ $(function () {
       data: <?= json_encode(array_values($day_graph_info['transaction_count_array'])); ?>
     }]
   });
-});    
+});
 </script>

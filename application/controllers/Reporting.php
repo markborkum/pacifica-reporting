@@ -15,7 +15,7 @@ class Reporting extends Baseline_controller {
     $this->accepted_object_types = array('instrument','user','proposal');
   }
 
-  //testing uploade
+
 
   public function index(){
     redirect('reporting/view');
@@ -54,7 +54,8 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
-      base_url()."resources/scripts/highcharts/js/highcharts.js"
+      base_url()."resources/scripts/highcharts/js/highcharts.js",
+      base_url()."resources/scripts/reporting.js"
     );
 
     $this->page_data['my_objects'] = '';

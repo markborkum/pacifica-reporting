@@ -25,7 +25,7 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *    Publicly available API calls
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  private function transactions_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false){
+  private function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date){
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
       $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
@@ -49,7 +49,7 @@ class Reporting_model extends CI_Model {
     );
 
     $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_time, $end_time, false);
-    $results = $this->transactions_to_results($results, $make_day_graph);
+    $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
 
     return $results;
   }
@@ -73,7 +73,7 @@ class Reporting_model extends CI_Model {
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
 
-    $results = $this->transactions_to_results($results, $make_day_graph);
+    $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
 
     return $results;
   }
@@ -83,6 +83,7 @@ class Reporting_model extends CI_Model {
 
   function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date, $make_day_graph){
     extract($this->canonicalize_date_range($start_date, $end_date));
+
     //get instrument group_id list
     $group_collection = $this->get_instrument_group_list($eus_instrument_id);
     $group_list = array_keys($group_collection);
@@ -108,7 +109,6 @@ class Reporting_model extends CI_Model {
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
   private function get_transactions_from_group_list($group_list, $start_time, $end_time){
     // extract($this->canonicalize_date_range($start_date, $end_date));
-    // echo "start => {$start_time}  end => {$end_time}";
     $transactions = array();
     $where_clause = array('stime >=' => $start_time);
     if($end_time){
@@ -308,26 +308,29 @@ class Reporting_model extends CI_Model {
    * */
   private function generate_day_graph_summary($transaction_list,$start_date = false,$end_date = false){
 
-    // echo "start => {$start_date}  end => {$end_date}";
     //parse requested date range (if specified)
-    $start_date = strtotime($start_date) ? date_create($start_date) : false;
-    $end_date = strtotime($end_date) ? date_create($end_date) : false;
-
-    $by_date_list = array();
-    if($start_date && $end_date){
-      $now_date = clone $start_date;
-      while($now_date->getTimestamp() <= $end_date->getTimestamp()){
-        $date_key = $now_date->format('Y-m-d');
-        $by_date_list[$date_key] = array(
-          'file_size' => 0, 'file_count' => 0,
-          'upload_count' => 0, 'transaction_list' => array()
-        );
-        $now_date->modify('+1 day');
-      }
+    if(is_string($start_date)){
+      $start_date = is_string($start_date) ? date_create($start_date) : false;
+    }
+    if(is_string($end_date)){
+      $end_date = strtotime($end_date) ? date_create($end_date) : false;
     }
 
+    if($start_date){
+      $padded_start = clone $start_date;
+      $padded_start->modify('-2 days');
+      $start_date = clone $padded_start;
+    }
+    if($end_date){
+      $padded_end = clone $end_date;
+      $padded_end->modify('+2 days');
+      $end_date = clone $padded_end;
+    }
+
+
+
     $date_list = array();
-    $summary_list = array('by_date' => $by_date_list, 'by_hour_list' => array());
+    $summary_list = array('by_date' => array(), 'by_hour_list' => array());
 
     //partition transaction entries into their appropriate upload days
     foreach($transaction_list as $trans_id => $info){
@@ -360,7 +363,7 @@ class Reporting_model extends CI_Model {
     //$summary_times = range(0, 23, 1);
     ksort($summary_list['by_hour_list']);
     ksort($summary_list['by_date']);
-    var_dump($summary_list['by_date']);
+    $summary_list['by_date'] = day_graph_to_series($summary_list,$start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
     //foreach($summary_times as $key){
     foreach($summary_list['by_hour_list'] as $time_key => $info){
       $trans_count = sizeof($info['sizes']);
@@ -373,6 +376,7 @@ class Reporting_model extends CI_Model {
       );
     }
     unset($summary_list['by_hour_list']);
+
     return $summary_list;
 
   }

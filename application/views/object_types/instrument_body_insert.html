@@ -1,10 +1,10 @@
-<?php 
+<?php
   extract($transaction_info);
   $keys = array_keys($day_graph['by_date']);
   $earliest_date = array_shift($keys);
   $last_date = array_pop($keys);
-  $day_graph_info = day_graph_to_series($day_graph);
-  $this->page_data['day_graph_info'] = $day_graph_info; 
+  //$day_graph_info = day_graph_to_series($day_graph);
+  $this->page_data['day_graph_info'] = $day_graph['by_date'];
 ?>
 <div id='instrument_body_container_<?= $instrument_id ?>' class='object_body_container'>
   <?php if(isset($summary_totals)): ?>
@@ -19,7 +19,7 @@
     <!-- <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Transaction Statistics</div>
     <ul id='upload_stats_<?= $instrument_id ?>' class='stats_list'>
       <li>Largest Upload: <?= format_bytes($summary_totals['transaction_records']['largest_upload']['file_size']) ?></li>
-      <li>Greatest Number of Files: <?= $summary_totals['transaction_records']['most_files']['file_count'] ?></li> 
+      <li>Greatest Number of Files: <?= $summary_totals['transaction_records']['most_files']['file_count'] ?></li>
     </ul> -->  </div>
   <div id='stats_graph_container_<?= $instrument_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
     <div id='proposal_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_left' style="min-width:250px;height:250px;width:50%;"></div>
@@ -35,7 +35,10 @@
   <div id="timeline_script_container_<?= $instrument_id ?>">
     <?php $this->load->view('object_types/object_timeline_script_insert.html', $this->page_data); ?>
   </div>
-    
+  <div id="transaction_details_notifier_<?= $instrument_id ?>" class="transaction_details_notifier">
+    Click for current transaction details
+  </div>
+  <div id="transaction_details_container_<?= $instrument_id ?>" class="transaction_details_container" style="display:none;"></div>
   <?php else: ?>
   <div><?= $results_message ?></div>
   <?php endif; ?>
