@@ -23,7 +23,7 @@
 .reporting_object_container > .object_footer{
   font-size:0.925em;
   color:#4e4e4e;
-  font-weight:bold;  
+  font-weight:bold;
   border: 1px solid #ccc;
   background-color:#eee;
   border-radius: 0px 0px 5px 5px;
@@ -34,6 +34,13 @@
 
 .reporting_object_container .object_body_container {
   position:relative;
+}
+
+.object_body_container > .transaction_details_notifier{
+  text-align:center;
+  font-weight:bold;
+  font-size:1.05em;
+  color: #444444;
 }
 
 .object_body_container > .totals_container {
@@ -85,13 +92,13 @@
   font-weight: bold;
   font-style: italic;
   text-align: center;
-  margin-top: 2em;  
+  margin-top: 2em;
   width:100%;
 }
 
 .loading_progress_indicator{
   height:100px;
-  margin-top: 2em;  
+  margin-top: 2em;
   width:100%;
 }
 
@@ -128,7 +135,7 @@
   }
   .message_container {
     padding-left:0.5em;
-    
+
   }
 }
 
@@ -166,5 +173,3 @@
      text-align: center !important;
   }
 }
-
-

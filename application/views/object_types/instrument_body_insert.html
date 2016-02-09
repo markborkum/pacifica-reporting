@@ -36,10 +36,12 @@
     <?php $this->load->view('object_types/object_timeline_script_insert.html', $this->page_data); ?>
   </div>
   <div id="transaction_details_notifier_<?= $instrument_id ?>" class="transaction_details_notifier">
-    Click for current transaction details
+    <span id="disclosure_arrow_<?= $instrument_id ?>_left" class="disclosure_button dc_up" style="margin-right:8px;">&nbsp;</span>
+    Transaction Details
+    <span id="disclosure_arrow_<?= $instrument_id ?>_right" class="disclosure_button dc_up">&nbsp;</span>
   </div>
   <div id="transaction_details_container_<?= $instrument_id ?>" class="transaction_details_container" style="display:none;"></div>
   <?php else: ?>
   <div><?= $results_message ?></div>
   <?php endif; ?>
-</div>
+</div

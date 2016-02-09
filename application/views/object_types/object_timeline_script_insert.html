@@ -1,6 +1,6 @@
 <?php extract($transaction_info); ?>
+<div class="object_timeline" id="object_timeline_<?= $object_id ?>">&nbsp;</div>
 <script type="text/javascript">
-var my_transactions_<?= $object_id ?> = [];
 $(function () {
   Highcharts.setOptions({
     lang: {
@@ -13,6 +13,10 @@ $(function () {
   var timeline_chart_<?= $object_id ?> = $('#object_timeline_<?= $object_id ?>').highcharts({
     credits: false,
     chart: {
+      animation: {
+        duration: 250
+      },
+      height: 250,
       style: {
         fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
         fontSize: '12px'
@@ -52,6 +56,9 @@ $(function () {
       series: {
         marker: {
           enabled: false
+        },
+        animation: {
+          duration: 250
         }
       }
     },

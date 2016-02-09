@@ -2,8 +2,8 @@
 <?php
   $page_header = isset($page_header) ? $page_header : "Untitled Page";
   $title = isset($title) ? $title : $page_header;
-  $rss_link = isset($rss_link) ? $rss_link : "";  
-?>  
+  $rss_link = isset($rss_link) ? $rss_link : "";
+?>
 <html>
   <head>
     <title>MyEMSL Reporting - <?= $title ?></title>
@@ -55,7 +55,7 @@
             </nav>
           </div>
         </div>
-        <div id="header_container">
+        <div id="header_container" style="position:relative;">
           <h1 class="underline"><?= $page_header ?></h1>
           <div id="login_id_container">
             <em><?= $this->nav_info['current_page_info']['logged_in_user'] ?></em>

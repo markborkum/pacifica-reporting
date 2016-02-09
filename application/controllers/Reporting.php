@@ -21,6 +21,9 @@ class Reporting extends Baseline_controller {
     redirect('reporting/view');
   }
 
+
+
+
   public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     if(!strtotime($time_range)){
@@ -135,10 +138,6 @@ class Reporting extends Baseline_controller {
       }
     }
     extract($times);
-    // echo "<pre>";
-    // var_dump($times);
-    // echo "</pre>";
-    // $this->page_data['results_message'] .= $times['message'];
 
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
     $transaction_info = array();
@@ -165,7 +164,21 @@ class Reporting extends Baseline_controller {
     }
   }
 
+  public function get_transaction_list_details(){
+    if($this->input->post()){
+      $transaction_list = $this->input->post();
+    }elseif($this->input->is_ajax_request() || file_get_contents('php://input')){
+      $HTTP_RAW_POST_DATA = file_get_contents('php://input');
+      $transaction_list = json_decode($HTTP_RAW_POST_DATA,true);
+    }else{
+      $transaction_list = array(1895,1894,1893,1888);
+    }
+    $results = $this->rep->detailed_transaction_list($transaction_list);
+    $this->page_data['transaction_info'] = $results;
 
+    $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
+
+  }
 
 
   public function get_uploads_for_instrument($instrument_id,$start_date = false,$end_date = false){
@@ -238,6 +251,18 @@ class Reporting extends Baseline_controller {
     var_dump($results);
     echo "</pre>";
 
+  }
+
+  public function test_get_transaction_info(){
+    $transaction_list = array(
+      1895,1894,1893,1888//,1887,1886,1885,1884,1880,
+      // 1879,1878,1877,1876,1875,1874,1873,1872,1871,
+      // 1870,1869,1868,1867,1866,1865,1864,1862,1861
+    );
+    $results = $this->rep->detailed_transaction_list($transaction_list);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
   }
 
 

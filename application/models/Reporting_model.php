@@ -25,7 +25,53 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *    Publicly available API calls
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  private function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date){
+  function detailed_transaction_list($transaction_list){
+    //this gets us the basic user/instrument/proposal info
+    $eus_info = $this->get_info_for_transactions(array_combine($transaction_list,$transaction_list));
+
+    // echo "<pre>";
+    // var_dump($eus_info);
+    // echo "</pre>";
+
+
+    //now get the aggregated file info
+    $select_array = array(
+      'f.transaction', 'sum(f.size) as total_file_size',
+      'count(f.size) as total_file_count',
+      'max(t.stime) as submission_time'
+    );
+
+    $this->db->select($select_array);
+    $this->db->from('files f')->join('transactions t', 'f.transaction = t.transaction');
+    $this->db->where_in('f.transaction', $transaction_list);
+    $this->db->group_by('f.transaction')->order_by('f.transaction desc');
+    $query = $this->db->get();
+
+    $file_info = array();
+    if($query && $query->num_rows() > 0){
+      foreach($query->result_array() as $row){
+        $file_info[$row['transaction']] = $row;
+      }
+    }
+
+    // echo "<pre>";
+    // var_dump($file_info);
+    // echo "</pre>";
+
+    //combine the list of file info and eus info
+    foreach($file_info as $transaction_id => $file_entry){
+      $eus_entry = $eus_info[$transaction_id];
+      foreach($eus_entry as $key => $value){
+        $file_entry[$key] = $value;
+      }
+      $results[$transaction_id] = $file_entry;
+    }
+    return $results;
+
+  }
+
+
+  function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date){
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
       $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
@@ -36,6 +82,8 @@ class Reporting_model extends CI_Model {
     }
     return $results;
   }
+
+
 
 
   function summarize_uploads_by_user($eus_person_id, $start_date, $end_date, $make_day_graph){
@@ -133,6 +181,8 @@ class Reporting_model extends CI_Model {
   }
 
 
+
+
   private function get_transactions_for_user($eus_user_id, $start_date, $end_date, $unfiltered = false){
     extract($this->canonicalize_date_range($start_date, $end_date));
     $transactions = array();
@@ -159,7 +209,8 @@ class Reporting_model extends CI_Model {
 
 
 
-  private function get_info_for_transactions($transaction_info){
+
+  public function get_info_for_transactions($transaction_info){
     //get proposals
     $transaction_list = array_keys($transaction_info);
     $this->db->select(array('f.transaction','g.name as proposal_id'));
@@ -204,6 +255,8 @@ class Reporting_model extends CI_Model {
     return $trans_prop_lookup;
 
   }
+
+
 
 
   private function generate_summary_data($results){
@@ -327,8 +380,6 @@ class Reporting_model extends CI_Model {
       $end_date = clone $padded_end;
     }
 
-
-
     $date_list = array();
     $summary_list = array('by_date' => array(), 'by_hour_list' => array());
 
@@ -381,6 +432,9 @@ class Reporting_model extends CI_Model {
 
   }
 
+
+
+
   public function latest_available_data($object_type, $object_id){
     $latest_function_name = "latest_available_{$object_type}_data";
     return $this->$latest_function_name($object_id);
@@ -408,6 +462,10 @@ class Reporting_model extends CI_Model {
     }
   }
 
+
+
+
+
   private function latest_available_proposal_data($proposal_id){
     $group_collection = $this->get_proposal_group_list($proposal_id);
     $group_list = array_keys($group_collection);
@@ -427,6 +485,9 @@ class Reporting_model extends CI_Model {
       return $latest_time->format('Y-m-d H:i');
     }
   }
+
+
+
 
 
   private function latest_available_user_data($person_id){
@@ -472,6 +533,10 @@ class Reporting_model extends CI_Model {
       'end_time' => $end_time->format('Y-m-d H:i:s')
     );
   }
+
+
+
+
 
   private function convert_short_date($date_string, $type = 'start'){
     if(preg_match('/(\d{4})$/',$date_string,$matches)){
