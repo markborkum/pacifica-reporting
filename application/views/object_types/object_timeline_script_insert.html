@@ -27,6 +27,8 @@ $(function () {
           var new_extremes = this.series[0].xAxis.getExtremes();
           var userMin = new_extremes.userMin != undefined ? new_extremes.userMin : new_extremes.dataMin;
           var userMax = new_extremes.userMax != undefined ? new_extremes.userMax : new_extremes.dataMax;
+          var details_notifier = $('#transaction_details_notifier_<?= $object_id ?>');
+          var details_container = $('#transaction_details_container_<?= $object_id ?>');
           var new_start = moment(userMin).format('YYYY-MM-DD');
           var new_end = moment(userMax).format('YYYY-MM-DD');
           var url = base_url + 'index.php/reporting/get_reporting_info_no_timeline/<?= $object_type ?>/<?= $object_id ?>/custom/';
@@ -34,6 +36,11 @@ $(function () {
           $('#stats_graph_container_<?= $object_id ?>').addClass('loading_new_graphics');
           var getter = $.get(url);
           getter.done(function(data,status){
+            if(details_notifier.find('.disclosure_arrows').hasClass('dc_down')){
+              //switch arrow state
+              details_notifier.find('.disclosure_arrows').removeClass('dc_down').addClass('dc_up');
+            }
+            details_container.html('');
             $('#pie_scripts_container_<?= $object_id ?>').html(data);
             $('#stats_graph_container_<?= $object_id ?>').removeClass('loading_new_graphics');
           });

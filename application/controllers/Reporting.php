@@ -105,7 +105,7 @@ class Reporting extends Baseline_controller {
     $latest_data = $this->rep->latest_available_data($object_type,$object_id);
     $latest_data_object = new DateTime($latest_data);
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    $this->page_data['results_message'] = "No data for this {$object_type} is available in the most recent {$time_range} period.";
+    $this->page_data['results_message'] = "&nbsp;";
     $valid_tr = strtotime($time_range);
     $valid_st = strtotime($start_date);
     $valid_et = strtotime($end_date);

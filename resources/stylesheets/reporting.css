@@ -41,6 +41,7 @@
   font-weight:bold;
   font-size:1.05em;
   color: #444444;
+  padding: 0.5em;
 }
 
 .object_body_container > .totals_container {
@@ -68,6 +69,44 @@
   text-align:right;
 }
 
+
+.transaction_details_notifier .disclosure_arrows {
+  padding-right:13px;
+  margin-left:6px;
+  vertical-align:middle;
+  background-image:url(/resources/images/disclosure_symbols.png);
+  background-repeat: no-repeat;
+  background-size: 32px 48px;
+}
+.transaction_details_notifier .dc_up {background-position: 0px 0px;}
+.transaction_details_notifier .dc_down {background-position: -16px 0px;}
+.transaction_details_notifier .dc_up:hover {background-position: -0px -16px;}
+.transaction_details_notifier .dc_down:hover {background-position: -16px -16px;}
+.transaction_details_notifier .dc_up:active {background-position: 0px -32px;}
+.transaction_details_notifier .dc_down:active {background-position: -16px -32px;}
+
+.transaction_details_loader{
+  font-weight: bold;
+  font-size: 1.1em;
+  color: #fefefe;
+  border: 2px solid #666;
+  border-radius: 6px;
+  text-align: center;
+  padding: 3px 0px 3px 15px;
+  width: 15%;
+  margin: 0px auto;
+  background-color: #769f19;
+  margin-right: 0;
+  margin-top: -33px;
+}
+
+.transaction_details_container{
+  margin-top:0.5em;
+}
+
+
+.loading_progress_indicator{
+}
 /*.stats_graph_container > .stats_graph {
   border:thin solid green;
 }*/
@@ -113,6 +152,33 @@
 .message_container {
   padding-left:5px;
 }
+
+#login_id_container {
+  position:absolute;
+  bottom:5px;
+  right:15px;
+  text-align: right;
+  color: #fefefe;
+}
+
+
+
+/* @2x Images (Pixel Ratio of 1.25+) */
+@media only screen and (-o-min-device-pixel-ratio: 5/4),
+       only screen and (-webkit-min-device-pixel-ratio: 1.25),
+       only screen and (min-device-pixel-ratio: 1.25),
+       only screen and (min-resolution: 1.25dppx) {
+    .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@2x.png);}
+}
+
+/* @3x Images (Pixel Ratio of 2.25+) */
+@media only screen and (-o-min-device-pixel-ratio: 9/4),
+       only screen and (-webkit-min-device-pixel-ratio: 2.25),
+       only screen and (min-device-pixel-ratio: 2.25),
+       only screen and (min-resolution: 2.25dppx) {
+    .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@3x.png);}
+}
+
 
 @media (max-width: 960px){
   .reporting_object_container > .object_header{
@@ -169,6 +235,17 @@
     border-bottom: 4px solid #666;
     margin-bottom:2em;
   }
+  #login_id_container{
+    position:relative;
+    bottom:auto;
+    right:auto;
+    padding: 0 0 0.5em 0.5em;
+    background-color:#53682B;
+    font-size:0.85em;
+    text-align:inherit;
+    margin-bottom:1em;
+  }
+
   .stats_list > li {
      text-align: center !important;
   }

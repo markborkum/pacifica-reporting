@@ -13,14 +13,10 @@
     <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
     <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Upload Totals</div>
     <ul id='upload_totals_<?= $instrument_id ?>' class='stats_list'>
-      <li><a href='#'><span id='transaction_count_<?= $instrument_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></a></li>
+      <li><span id='transaction_count_<?= $instrument_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></li>
       <li><span id='file_count_<?= $instrument_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $instrument_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
-    <!-- <div id='upload_totals_header_<?= $instrument_id ?>' class='stats_header'>Transaction Statistics</div>
-    <ul id='upload_stats_<?= $instrument_id ?>' class='stats_list'>
-      <li>Largest Upload: <?= format_bytes($summary_totals['transaction_records']['largest_upload']['file_size']) ?></li>
-      <li>Greatest Number of Files: <?= $summary_totals['transaction_records']['most_files']['file_count'] ?></li>
-    </ul> -->  </div>
+  </div>
   <div id='stats_graph_container_<?= $instrument_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
     <div id='proposal_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_left' style="min-width:250px;height:250px;width:50%;"></div>
     <div id='user_stats_graph_<?= $instrument_id ?>' class='stats_graph stats_graph_right' style="min-width:250px;height:250px;width:50%;position:absolute;right:0;top:0;"></div>
@@ -36,9 +32,11 @@
     <?php $this->load->view('object_types/object_timeline_script_insert.html', $this->page_data); ?>
   </div>
   <div id="transaction_details_notifier_<?= $instrument_id ?>" class="transaction_details_notifier">
-    <span id="disclosure_arrow_<?= $instrument_id ?>_left" class="disclosure_button dc_up" style="margin-right:8px;">&nbsp;</span>
     Transaction Details
-    <span id="disclosure_arrow_<?= $instrument_id ?>_right" class="disclosure_button dc_up">&nbsp;</span>
+    <span id="disclosure_arrow_<?= $instrument_id ?>_right" class="disclosure_arrows dc_up">&nbsp;</span>
+  </div>
+  <div id="transaction_details_loader_<?= $instrument_id ?>" class="transaction_details_loader" style="position:relative;display:none;">
+    <div id="details_loading_progress_indicator_<?= $instrument_id ?>" class="details_loading_indicator">Loading...</div>
   </div>
   <div id="transaction_details_container_<?= $instrument_id ?>" class="transaction_details_container" style="display:none;"></div>
   <?php else: ?>
