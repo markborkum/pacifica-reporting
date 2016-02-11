@@ -1,9 +1,11 @@
 <?php foreach($my_objects as $inst_id => $inst_info): ?>
 <div class='reporting_object_container'>
-  <div class="object_header">
+  <div class="object_header" style="position:relative;">
     <div class="object_name"><?= $inst_info['display_name'] ?></div>
     <div class="object_name_short"><?= $inst_info['abbreviation'] ?></div>
+    <div class="remove_icon" title="Click to remove instrument from this report" id="remove_icon_<?= $inst_id ?>"></div>
   </div>
+
   <div class="object_body" id="object_body_<?= $inst_id ?>">
     <?php $transaction_info[$inst_id]['instrument_id'] = $inst_id; ?>
     <?php $this->load->view('object_types/object_body_placeholder.html',$placeholder_info[$inst_id]); ?>

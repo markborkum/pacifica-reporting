@@ -1,5 +1,99 @@
+#search_bar_container{
+  color: #fefefe;
+  padding: 0.5em;
+  background-color: #53692b;
+  margin-top: 0;
+  font-weight: normal;
+  border-radius: 0px 0px 8px 8px;
+  font-size: 1em;
+  margin-bottom:-5px;
+}
+
+.search_bar_container input[type="text"]{
+  border: 3px solid #719500;
+  border-radius: 12px;
+  width: 85%;
+  padding: 4px 0px 4px 20px;
+  transition: box-shadow 0.3s, border 0.3s;
+}
+
+.search_bar_container input[type="text"]:focus,
+.search_bar_container input[type="text"].focus {
+  border-color: #9cc12a;
+  box-shadow: 0 0 5px 1px #969696;
+  outline:none;
+}
+
+#search_results_display{
+  margin: 0 auto 1em auto;
+  width: 90%;
+  border: 3px solid #53692b;
+  border-radius: 0px 0px 8px 8px;
+  /*box-shadow: 0px 3px 4px 1px #969696;*/
+}
+
+
+/*
+  search results styling
+*/
+#search_results_display ul.search_results_list{
+  list-style-type: none;
+}
+
+#search_results_display li{
+  font-size:0.9em;
+  margin-bottom:2px;
+}
+
+
+#search_results_display input[type="checkbox"]{
+  font-size:12px;
+}
+
+
+
+h1.underline{
+  border-radius:0;
+  margin-bottom:0;
+  padding-left:0.5em;
+}
+
+.themed_button {
+  width: 80px;
+  height: 26px;
+  margin-left:0.5em;
+  border: 3px solid #999;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 1.1em;
+  background-color: #efefef;
+  color: #333;
+  vertical-align: middle;
+}
+.themed_button:hover{
+  background-color:#cfcfcf;
+}
+
+.themed_button:active{
+  background-color:#9f9f9f;
+  border-color:#555;
+}
+
+.magnifying_glass_icon {
+  background-image:url(/resources/images/mag_glass@2x.png);
+  background-size: 12px 12px;
+  background-repeat:no-repeat;
+  position: absolute;
+  height: 12px;
+  width: 12px;
+  left: 9px;
+  top: 10px;
+}
+
+
 .reporting_object_container {
   margin-bottom:2em;
+  margin-top:2em;
 }
 
 .reporting_object_container > .object_header{
@@ -68,6 +162,20 @@
   margin-top:0.5em;
   text-align:right;
 }
+
+.remove_icon {
+  background-image:url(/resources/images/remove_icons.png);
+  background-size: 16px 48px;
+  background-repeat:no-repeat;
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  right: 6px;
+  top: 5px;
+}
+.remove_icon {background-position: 0px 0px;}
+.remove_icon:hover {background-position: -0px -16px;}
+.remove_icon:active {background-position: 0px -32px;}
 
 
 .transaction_details_notifier .disclosure_arrows {
@@ -169,6 +277,8 @@
        only screen and (min-device-pixel-ratio: 1.25),
        only screen and (min-resolution: 1.25dppx) {
     .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@2x.png);}
+    .remove_icon {background-image:url(/resources/images/remove_icons@2x.png);}
+    .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -177,6 +287,8 @@
        only screen and (min-device-pixel-ratio: 2.25),
        only screen and (min-resolution: 2.25dppx) {
     .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@3x.png);}
+    .remove_icon {background-image:url(/resources/images/remove_icons@3x.png);}
+    .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
 }
 
 

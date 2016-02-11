@@ -27,3 +27,12 @@ var get_transaction_info = function(el,transaction_list){
     details_container.hide();
   }
 };
+
+
+var get_search_results = function(el, filter_text){
+  var url = base_url + 'index.php/reporting/get_object_lookup/' + object_type + '/' + filter_text;
+  $.get(url, function(data){
+    $('#search_results_display').html(data);
+    $('#search_results_display').slideDown();
+  });
+};

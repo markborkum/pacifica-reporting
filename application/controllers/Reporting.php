@@ -79,9 +79,11 @@ class Reporting extends Baseline_controller {
         'times' => $times
       );
     }
+    $this->page_data['my_object_type'] = $object_type;
     $this->page_data['default_time_range'] = $times;
     $this->page_data['content_view'] = "object_types/{$object_type}.html";
     $this->page_data['my_objects'] = $object_info;
+    $this->page_data['js'] = "var object_type = '{$object_type}';";
     // $this->page_data['transaction_info'] = $transaction_info;
 
     $this->load->view('reporting_view.html',$this->page_data);
@@ -203,6 +205,17 @@ class Reporting extends Baseline_controller {
     $results = $this->eus->get_proposals_by_name($proposal_name_fragment,$active);
     send_json_array($results);
   }
+
+
+  public function get_object_lookup($object_type,$filter = ""){
+    $results = $this->eus->get_object_list($object_type,$filter);
+    $this->page_data['results'] = $results;
+    $this->page_data['object_type'] = $object_type;
+    $this->page_data['filter_text'] = $filter;
+    $this->load->view("object_types/search_results/{$object_type}_results.html",$this->page_data);
+  }
+
+
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Testing functionality                                     */
