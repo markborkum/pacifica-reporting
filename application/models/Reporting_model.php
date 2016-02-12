@@ -150,8 +150,6 @@ class Reporting_model extends CI_Model {
   }
 
 
-
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *    Private functionality for behind the scenes data retrieval
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -628,6 +626,56 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
+
+
+  function update_object_preferences($object_type,$object_list){
+    //object list should look like array('object_id' => $object_id, 'action' => $action)
+    $table = 'reporting_selection_prefs';
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $additions = array();
+    $removals = array();
+    $existing = array();
+    $where_clause = array('item_type' => $object_type, 'eus_person_id' => $this->user_id);
+    $DB_prefs->select('item_id');
+    $check_query = $DB_prefs->get_where($table, $where_clause);
+    if($check_query && $check_query->num_rows() > 0){
+      foreach($check_query->result() as $row){
+        $existing[] = $row->item_id;
+      }
+    }
+    var_dump($object_list);
+    foreach($object_list as $item){
+      extract($item);
+      if($action == 'add'){
+        $additions[] = $object_id;
+      }elseif($action == 'remove'){
+        $removals[] = $object_id;
+      }else{
+        continue;
+      }
+      $additions = array_diff($additions,$existing);
+      $removals = array_intersect($removals, $existing);
+
+      if(!empty($additions)){
+        foreach($additions as $object_id){
+          $insert_object = array(
+            'eus_person_id' => $this->user_id,
+            'item_type' => $object_type,
+            'item_id' => $object_id
+          );
+          $DB_prefs->insert($table,$insert_object);
+        }
+      }
+      if(!empty($removals)){
+        $my_where = $where_clause;
+        foreach($removals as $object_id){
+          $my_where['item_id'] = $object_id;
+          $DB_prefs->where($my_where)->delete($table);
+        }
+      }
+    }
+    return true;
+  }
 
 
 

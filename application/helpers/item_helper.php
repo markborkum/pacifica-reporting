@@ -17,17 +17,17 @@ function build_folder_structure(&$dirs, $path_array, $item_info) {
     }
 }
 
-  
+
 function format_folder_object_json($folder_obj,$folder_name){
   $output = array();
-  
+
   if(array_key_exists('folders', $folder_obj)){
     foreach($folder_obj['folders'] as $folder_entry => $folder_tree){
       $folder_output = array('title' => $folder_entry, 'folder' => true);
       $children = format_folder_object_json($folder_tree, $folder_entry);
       if(!empty($children)){
         foreach($children as $child){
-          $folder_output['children'][] = $child; 
+          $folder_output['children'][] = $child;
         }
       }
       $output[] = $folder_output;
@@ -62,13 +62,18 @@ function format_file_object_html($file_obj, &$output_structure){
     $output_structure .= "<li>{$file_entry}</li>";
   }
 }
-  
+
 function format_bytes($bytes) {
    if ($bytes < 1024) return $bytes.' B';
    elseif ($bytes < 1048576) return round($bytes / 1024, 0).' KB';
    elseif ($bytes < 1073741824) return round($bytes / 1048576, 1).' MB';
    elseif ($bytes < 1099511627776) return round($bytes / 1073741824, 2).' GB';
    else return round($bytes / 1099511627776, 2).' TB';
+}
+
+function process_search_query($query_filter){
+  $query_terms = explode(' ',$query_filter);
+  return $query_terms;
 }
 
 ?>

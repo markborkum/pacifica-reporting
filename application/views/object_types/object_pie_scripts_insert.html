@@ -93,6 +93,7 @@
         },
         series: [{
           name: 'Uploads',
+          animation: false,
           <?php
           $proposal_data = array();
           foreach($summary_totals['transaction_stats']['proposal'] as $proposal_id => $proposal_count){
@@ -146,6 +147,7 @@
         },
         series: [{
           name: 'Uploads',
+          animation: false,
           <?php
           $user_data = array();
           foreach($summary_totals['transaction_stats']['user'] as $person_id => $trans_count){

@@ -57,6 +57,7 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
+      base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"
     );
@@ -207,12 +208,36 @@ class Reporting extends Baseline_controller {
   }
 
 
+  public function update_object_preferences($object_type){
+    if($this->input->post()){
+      $object_list = $this->input->post();
+    }elseif($this->input->is_ajax_request() || file_get_contents('php://input')){
+      $HTTP_RAW_POST_DATA = file_get_contents('php://input');
+      $object_list = json_decode($HTTP_RAW_POST_DATA,true);
+    }else{
+      //return a 404 error
+    }
+    $new_set = array();
+    if($this->rep->update_object_preferences($object_type,$object_list)){
+      $new_set = $this->rep->get_selected_objects($this->user_id,$object_type);
+    }
+    send_json_array($new_set);
+  }
+
+
   public function get_object_lookup($object_type,$filter = ""){
     $results = $this->eus->get_object_list($object_type,$filter);
     $this->page_data['results'] = $results;
     $this->page_data['object_type'] = $object_type;
     $this->page_data['filter_text'] = $filter;
-    $this->load->view("object_types/search_results/{$object_type}_results.html",$this->page_data);
+    $my_objects = $this->rep->get_selected_objects($this->user_id);
+    $this->page_data['my_objects'] = $my_objects[$object_type];
+    $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
+    if(!empty($results)){
+      $this->load->view("object_types/search_results/{$object_type}_results.html",$this->page_data);
+    }else{
+      print "<div class='no_results_notifier'>No Results Returned for '{$filter}'</div>";
+    }
   }
 
 

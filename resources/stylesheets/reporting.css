@@ -13,7 +13,7 @@
   border: 3px solid #719500;
   border-radius: 12px;
   width: 85%;
-  padding: 4px 0px 4px 20px;
+  padding: 4px 0px 5px 20px;
   transition: box-shadow 0.3s, border 0.3s;
 }
 
@@ -45,9 +45,38 @@
   margin-bottom:2px;
 }
 
+.search_results_header{
+  font-size:1.1em;
+  font-weight: bold;
+}
+
 
 #search_results_display input[type="checkbox"]{
-  font-size:12px;
+  cursor: pointer;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #fff;
+  border-radius: 2px;
+  position: relative;
+  margin-top:1px;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #53692b;
+  vertical-align: middle;
+  transition: opacity .1s linear;
+}
+
+#search_results_display input[type="checkbox"]:checked{
+  /*background-color: #719500;*/
+  background-image:url(/resources/images/checkbox_insert.svg);
+  background-size: 10px 10px;
+  background-repeat:no-repeat;
+}
+
+.no_results_notifier{
+  text-align:center;
+  font-weight:bold;
+  font-size:1.5em;
 }
 
 
@@ -89,6 +118,21 @@ h1.underline{
   left: 9px;
   top: 10px;
 }
+
+.clear_field_icon {
+  background-image:url(/resources/images/clear_boxes@2x.png);
+  background-size: 16px 48px;
+  background-repeat:no-repeat;
+  position: absolute;
+  height: 16px;
+  width: 16px;
+  right: 122px;
+  top: 8px;
+}
+
+.clear_field_icon {background-position: 0px 0px;}
+.clear_field_icon:hover {background-position: -0px -16px;}
+.clear_field_icon:active {background-position: 0px -32px;}
 
 
 .reporting_object_container {
@@ -279,6 +323,7 @@ h1.underline{
     .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@2x.png);}
     .remove_icon {background-image:url(/resources/images/remove_icons@2x.png);}
     .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
+    .clear_field_icon {  background-image:url(/resources/images/clear_boxes@2x.png); }
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -289,6 +334,7 @@ h1.underline{
     .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@3x.png);}
     .remove_icon {background-image:url(/resources/images/remove_icons@3x.png);}
     .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
+    .clear_field_icon {  background-image:url(/resources/images/clear_boxes@3x.png); }
 }
 
 
