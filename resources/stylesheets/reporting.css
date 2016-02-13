@@ -1,3 +1,12 @@
+.info_message {
+  text-align: center;
+  font-size: 1.75em;
+  font-weight: bold;
+  font-style:italic;
+  color: #666;
+  margin-top: 1em;
+}
+
 #search_bar_container{
   color: #fefefe;
   padding: 0.5em;
@@ -154,7 +163,7 @@ h1.underline{
   padding:8px;
   padding-bottom:15px;
   font-size:1.0em;
-  min-height:180px;
+  min-height:60px;
   border: 1px solid #ccc;
 }
 

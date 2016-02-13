@@ -34,9 +34,44 @@ var submit_object_change = function(el, object_type, object_id, action){
   var update_list = JSON.stringify([{ 'object_id' : object_id, 'action' : action }]);
   var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type;
   $.post(url, update_list, function(data){
-    alert(data);
+    //need to update the DOM to add/remove the appropriate object
+    if(action == 'remove'){
+      if(el.is('input[type="checkbox"]')){
+        my_el = $('#remove_icon_' + object_id);
+        remove_empty_uls();
+      }else{
+        my_el = el;
+        el = $('#' + object_type + '_id_' + object_id);
+      }
+      my_el.parents('.reporting_object_container').remove();
+      var my_list_item = el.parents('li').detach();
+      remove_empty_uls();
+    }else if(action == 'add'){
+      var first_container = $('.reporting_object_container')[0];
+      var container_url = base_url + 'index.php/reporting/get_object_container/';
+      container_url += object_type + '/' + object_id + '/' + time_range;
+      $.get(container_url, function(data){
+        //add in the new container
+        $(first_container).before(data);
+        if(el.is('input[type="checkbox"]')){
+          var list_item = el.parents('li').detach();
+          $('#' + object_type + "_my_" + object_type + "s_search_results").append(list_item);
+          remove_empty_uls();
+        }
+
+      });
+    }
   });
 }
+
+var remove_empty_uls = function(){
+  $('#search_results_display').find('ul').each(function(index,item){
+    item = $(item);
+    if(item.find('li').length === 0){
+      item.remove();
+    }
+  });
+};
 
 
 var get_search_results = function(el, filter_text){
@@ -64,6 +99,7 @@ var setup_search_checkboxes = function(){
 
 var options = {
   callback: function (value) {
+    $('#search_done_button').enable();
     get_search_results($(this),value);
   },
   wait: 500,
@@ -94,4 +130,11 @@ $(function(){
     clear_results();
   });
   $('#object_search_box').typeWatch(options);
+  $('#search_done_button').click(function(){
+    var input_field = $('#object_search_box');
+    input_field.val("");
+    input_field.siblings('.clear_field_icon').fadeOut('fast');
+    clear_results();
+    $(this).disable();
+  });
 });

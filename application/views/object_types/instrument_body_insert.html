@@ -1,10 +1,12 @@
 <?php
-  extract($transaction_info);
-  $keys = array_keys($day_graph['by_date']);
-  $earliest_date = array_shift($keys);
-  $last_date = array_pop($keys);
-  //$day_graph_info = day_graph_to_series($day_graph);
-  $this->page_data['day_graph_info'] = $day_graph['by_date'];
+  if(isset($transaction_info)){
+    extract($transaction_info);
+    $keys = array_keys($day_graph['by_date']);
+    $earliest_date = array_shift($keys);
+    $last_date = array_pop($keys);
+    //$day_graph_info = day_graph_to_series($day_graph);
+    $this->page_data['day_graph_info'] = $day_graph['by_date'];
+  }
 ?>
 <div id='instrument_body_container_<?= $instrument_id ?>' class='object_body_container'>
   <?php if(isset($summary_totals)): ?>
@@ -40,6 +42,17 @@
   </div>
   <div id="transaction_details_container_<?= $instrument_id ?>" class="transaction_details_container" style="display:none;"></div>
   <?php else: ?>
-  <div><?= $results_message ?></div>
+  <div class='info_message'><?= $results_message ?></div>
   <?php endif; ?>
-</div
+  <script>
+  //<![CDATA[
+  $(function(){
+    $('#remove_icon_<?= $instrument_id ?>').click(function(){
+      var el = $(this);
+      submit_object_change(el, '<?= $object_type ?>', '<?= $object_id ?>', 'remove');
+      el.parents('.reporting_object_container').remove();
+    });
+  });
+  //]]>
+  </script>
+</div>

@@ -443,7 +443,7 @@ class Reporting_model extends CI_Model {
   private function latest_available_instrument_data($instrument_id){
     $group_collection = $this->get_instrument_group_list($instrument_id);
     $group_list = array_keys($group_collection);
-
+    $latest_time = false;
     $this->db->select('MAX(t.stime) as most_recent_upload');
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
@@ -451,12 +451,16 @@ class Reporting_model extends CI_Model {
     $this->db->where_in('gi.group_id',$group_list)->limit(1);
     $query = $this->db->get();
 
-    if($query && $query->num_rows() > 0){
+    if($query && $query->num_rows() > 0 || !empty($query->row()->most_recent_upload)){
       if(strtotime($query->row()->most_recent_upload)){
         $latest_time = $query->row()->most_recent_upload;
         $latest_time = new DateTime($latest_time);
+        return $latest_time->format('Y-m-d H:i');
       }
-      return $latest_time->format('Y-m-d H:i');
+      return false;
+      // echo $this->db->last_query();
+    }else{ // no records or null response
+      return false;
     }
   }
 
@@ -586,7 +590,8 @@ class Reporting_model extends CI_Model {
         $results_by_inst_id[$inst_id][$row->group_id] = $row->name;
       }
     }
-    if(!empty($inst_id_filter) && is_numeric($inst_id_filter)){
+    if(!empty($inst_id_filter) && is_numeric($inst_id_filter) && array_key_exists($inst_id_filter,$results_by_inst_id)){
+      // $inst_id_filter = strval($inst_id_filter);
       $results = $results_by_inst_id[$inst_id_filter];
     }else{
       $results = $results_by_inst_id;
@@ -643,7 +648,7 @@ class Reporting_model extends CI_Model {
         $existing[] = $row->item_id;
       }
     }
-    var_dump($object_list);
+    // var_dump($object_list);
     foreach($object_list as $item){
       extract($item);
       if($action == 'add'){
@@ -661,7 +666,7 @@ class Reporting_model extends CI_Model {
           $insert_object = array(
             'eus_person_id' => $this->user_id,
             'item_type' => $object_type,
-            'item_id' => $object_id
+            'item_id' => strval($object_id)
           );
           $DB_prefs->insert($table,$insert_object);
         }
@@ -669,7 +674,7 @@ class Reporting_model extends CI_Model {
       if(!empty($removals)){
         $my_where = $where_clause;
         foreach($removals as $object_id){
-          $my_where['item_id'] = $object_id;
+          $my_where['item_id'] = strval($object_id);
           $DB_prefs->where($my_where)->delete($table);
         }
       }

@@ -22,9 +22,30 @@ class Reporting extends Baseline_controller {
   }
 
 
+  public function get_object_container($object_type, $object_id, $time_range, $start_date = false, $end_date = false){
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    $times = $this->fix_time_range($time_range, $start_date, $end_date);
+    extract($times);
+    $object_type = singular($object_type);
+    $accepted_object_types = array('instrument','proposal','user');
+    $this->page_data['placeholder_info'][$object_id] = array(
+      'object_type' => $object_type,
+      'object_id' => $object_id,
+      'time_range' => $time_range,
+      'times' => $times
+    );
+    $object_list = array();
+    $object_list[] = $object_id;
+    $object_info = $this->eus->get_object_info($object_list,$object_type);
+    $this->page_data['my_object_type'] = $object_type;
+    $this->page_data['default_time_range'] = $times;
+    $this->page_data['my_objects'] = $object_info;
+
+    $this->load->view("object_types/{$object_type}.html", $this->page_data);
+  }
 
 
-  public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+  private function fix_time_range($time_range, $start_date, $end_date){
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     if(!strtotime($time_range)){
       if($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)){
@@ -40,6 +61,13 @@ class Reporting extends Baseline_controller {
       extract($times);
     }
     $times = $this->rep->canonicalize_date_range($start_date, $end_date);
+    return $times;
+  }
+
+
+  public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    $times = $this->fix_time_range($time_range, $start_date, $end_date);
     extract($times);
 
     $object_type = singular($object_type);
@@ -84,7 +112,7 @@ class Reporting extends Baseline_controller {
     $this->page_data['default_time_range'] = $times;
     $this->page_data['content_view'] = "object_types/{$object_type}.html";
     $this->page_data['my_objects'] = $object_info;
-    $this->page_data['js'] = "var object_type = '{$object_type}';";
+    $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     // $this->page_data['transaction_info'] = $transaction_info;
 
     $this->load->view('reporting_view.html',$this->page_data);
@@ -104,8 +132,17 @@ class Reporting extends Baseline_controller {
   }
 
   // Call to retrieve fill-in HTML for reporting block entries
-  private function get_reporting_info_base($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
+  private function get_reporting_info_base($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false){
+    $this->page_data['object_id'] = $object_id;
+    $this->page_data["{$object_type}_id"] = $object_id;
+    $this->page_data['object_type'] = $object_type;
     $latest_data = $this->rep->latest_available_data($object_type,$object_id);
+    if(!$latest_data){
+      //no data available for this object
+      $this->page_data['results_message'] = "No Data Available for this ".ucwords($object_type);
+      $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
+      return;
+    }
     $latest_data_object = new DateTime($latest_data);
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     $this->page_data['results_message'] = "&nbsp;";
@@ -150,9 +187,6 @@ class Reporting extends Baseline_controller {
     // echo "</pre>";
     // exit;
     $this->page_data['transaction_info'] = $transaction_info;
-    $this->page_data['object_id'] = $object_id;
-    $this->page_data["{$object_type}_id"] = $object_id;
-    $this->page_data['object_type'] = $object_type;
     $this->page_data['times'] = $times;
     $this->page_data['include_timeline'] = $with_timeline;
     // echo "<pre>";
@@ -207,6 +241,25 @@ class Reporting extends Baseline_controller {
     send_json_array($results);
   }
 
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* Functions for adding/removing objects from the report page  */
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  public function get_object_lookup($object_type,$filter = ""){
+    $my_objects = $this->rep->get_selected_objects($this->user_id);
+    $results = $this->eus->get_object_list($object_type,$filter, $my_objects[$object_type]);
+    $this->page_data['results'] = $results;
+    $this->page_data['object_type'] = $object_type;
+    $this->page_data['filter_text'] = $filter;
+    $this->page_data['my_objects'] = $my_objects[$object_type];
+    $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
+    if(!empty($results)){
+      $this->load->view("object_types/search_results/{$object_type}_results.html",$this->page_data);
+    }else{
+      print "<div class='no_results_notifier'>No Results Returned for '{$filter}'</div>";
+    }
+  }
+
+
 
   public function update_object_preferences($object_type){
     if($this->input->post()){
@@ -222,22 +275,6 @@ class Reporting extends Baseline_controller {
       $new_set = $this->rep->get_selected_objects($this->user_id,$object_type);
     }
     send_json_array($new_set);
-  }
-
-
-  public function get_object_lookup($object_type,$filter = ""){
-    $results = $this->eus->get_object_list($object_type,$filter);
-    $this->page_data['results'] = $results;
-    $this->page_data['object_type'] = $object_type;
-    $this->page_data['filter_text'] = $filter;
-    $my_objects = $this->rep->get_selected_objects($this->user_id);
-    $this->page_data['my_objects'] = $my_objects[$object_type];
-    $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
-    if(!empty($results)){
-      $this->load->view("object_types/search_results/{$object_type}_results.html",$this->page_data);
-    }else{
-      print "<div class='no_results_notifier'>No Results Returned for '{$filter}'</div>";
-    }
   }
 
 
