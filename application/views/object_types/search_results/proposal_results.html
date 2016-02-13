@@ -1,0 +1,26 @@
+<?php
+  $categorized_results = array();
+  foreach($results as $object_id => $object_info){
+    $year = strtotime($object_info['end_date']) ? new DateTime($object_info['end_date']) : "Unknown";
+    if(!is_string($year)){
+      $year = $year->format('Y');
+    }
+    $categorized_results[$year][$object_id] = $object_info;
+  }
+  krsort($categorized_results);
+?>
+<?php foreach($categorized_results as $category => $type_items): ?>
+<ul id='<?= $object_type ?>_<?= $category ?>_search_results' class="search_results_list">
+  <div>
+    Ending Year <?= $category ?>
+  </div>
+  <?php foreach($type_items as $object_id => $object_info): ?>
+  <li>
+    <input type="checkbox" id="proposal_id_<?= $object_id ?>" name="proposal_id_<?= $object_id ?>" />
+    <span id="proposal_<?= $object_id ?>" name="proposal_name_<?= $object_id ?>">
+      <?= $object_info['display_name'] ?>
+    </span>
+  </li>
+  <?php endforeach; ?>
+</ul>
+<?php endforeach; ?>

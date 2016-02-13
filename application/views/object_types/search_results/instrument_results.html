@@ -1,0 +1,36 @@
+<?php
+  $categorized_results = array();
+  $my_category_name = " My Instruments";
+  $my_stuff = array();
+  foreach($results as $object_id => $object_info){
+    if(array_key_exists($object_id, $my_objects)){
+      $categorized_results[$my_category_name][$object_id] = $object_info;
+    }else{
+      $categorized_results[$object_info['instrument_type']][$object_id] = $object_info;
+    }
+  }
+  ksort($categorized_results);
+  //array_unshift($categorized_results,$my_stuff);
+  //var_dump($categorized_results);
+?>
+<?php foreach($categorized_results as $category => $type_items): ?>
+<ul id='<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results' class="search_results_list">
+  <div class="search_results_header">
+    <?= trim($category) ?>
+  </div>
+  <?php foreach($type_items as $object_id => $object_info): ?>
+    <?php $checked = array_key_exists($object_id,$my_objects) ? "checked='checked' " : ""; ?>
+  <li>
+    <input type="checkbox" class='object_selection_checkbox' id="instrument_id_<?= $object_id ?>" <?= $checked ?>name="instrument_id_<?= $object_id ?>" />
+    <label for='instrument_id_<?= $object_id ?>'><?= $object_info['display_name'] ?></label>
+  </li>
+  <?php endforeach; ?>
+</ul>
+<?php endforeach; ?>
+<?php if(!empty($js)): ?>
+<script type='text/javascript'>
+//<![CDATA[
+  <?= $js ?>
+//]]>
+</script>
+<?php endif; ?>

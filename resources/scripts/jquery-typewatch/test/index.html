@@ -1,0 +1,87 @@
+<html>
+	<head>
+		<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+		<script src="../jquery.typewatch.js"></script>
+	</head>
+	<body>
+		<div>
+			TEXT<br />
+			<input type="TEXT" placeholder="Enter text" />
+		</div>
+		<div>
+			TEXTAREA<br />
+			<TEXTAREA rows="3" columns="5" placeholder="Enter text"></TEXTAREA>
+		</div>
+		<div>
+			PASSWORD<br />
+			<input type="PASSWORD" placeholder="Enter text" />
+		</div>
+		<div>
+			TEL<br />
+			<input type="TEL" placeholder="Enter text" />
+		</div>
+		<div>
+			SEARCH<br />
+			<input type="SEARCH" placeholder="Enter text" />
+		</div>
+		<div>
+			URL<br />
+			<input type="URL" placeholder="Enter text" />
+		</div>
+		<div>
+			EMAIL<br />
+			<input name="email" type="EMAIL" placeholder="Enter text" autocomplete="on" />
+		</div>
+		<div>
+			DATETIME<br />
+			<input type="DATETIME" placeholder="Enter text" />
+		</div>
+		<div>
+			DATE<br />
+			<input type="DATE" placeholder="Enter text" />
+		</div>
+		<div>
+			MONTH<br />
+			<input type="MONTH" placeholder="Enter text" />
+		</div>
+		<div>
+			WEEK<br />
+			<input type="WEEK" placeholder="Enter text" />
+		</div>
+		<div>
+			TIME<br />
+			<input type="TIME" placeholder="Enter text" />
+		</div>
+		<div>
+			DATETIME-LOCAL<br />
+			<input type="DATETIME-LOCAL" placeholder="Enter text" />
+		</div>
+		<div>
+			NUMBER<br />
+			<input type="NUMBER" placeholder="Enter text" />
+		</div>
+	</body>
+
+	<script type="text/javascript">
+		$(document).ready(function() {
+			$('input,textarea').typeWatch({
+				captureLength: 2,
+				callback: function(value) {
+					alert('TypeWatch callback: (' + this.type + ') ' + value);
+				}
+			});
+		});
+	</script>
+
+	<form action="https://www.paypal.com/cgi-bin/webscr" method="get" target="_top">
+<input type="hidden" name="cmd" value="_donations">
+<input type="hidden" name="business" value="95YL35K45G4VA">
+<input type="hidden" name="lc" value="US">
+<input type="hidden" name="item_name" value="Denny Ferrassoli">
+<input type="hidden" name="currency_code" value="USD">
+<input type="hidden" name="bn" value="PP-DonationsBF:btn_donate_SM.gif:NonHosted">
+<input type="image" src="https://www.paypalobjects.com/en_US/i/btn/btn_donate_SM.gif" border="0" name="submit" alt="PayPal - The safer, easier way to pay online!">
+<img alt="" border="0" src="https://www.paypalobjects.com/en_US/i/scr/pixel.gif" width="1" height="1">
+</form>
+
+</html>
