@@ -6,7 +6,7 @@
       <th>Upload Time</th>
       <th>Proposal ID</th>
       <th>Uploaded By</th>
-      <th>Total File Size</th>
+      <th>Bundle Size</th>
       <th>File Count</th>
     </tr>
     </thead>
@@ -21,7 +21,7 @@
       $friendly_file_size = format_bytes($item['total_file_size']);
       ?>
       <tr>
-        <td><?= $id ?></td>
+        <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>"><?= $id ?></a></td>
         <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
         <td><?= $item['eus_proposal_id'] ?></td>
         <td><?= $ul_user ?></td>

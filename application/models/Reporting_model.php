@@ -611,6 +611,8 @@ class Reporting_model extends CI_Model {
     $DB_prefs->order_by('item_type');
     $query = $DB_prefs->get_where('reporting_selection_prefs',array('eus_person_id' => $eus_person_id));
     $results = array();
+    // echo $DB_prefs->last_query();
+    // var_dump($query->result_array());
     if($query && $query->num_rows()>0){
       foreach($query->result() as $row){
         switch($row->item_type){
