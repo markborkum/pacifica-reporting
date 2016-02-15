@@ -626,7 +626,7 @@ class Reporting_model extends CI_Model {
             $group_list = $row->item_id;
 
         }
-        $item_id = "{$row->item_id}";
+        $item_id = strval($row->item_id);
         $results[$row->item_type][$item_id] = $group_list;
       }
     }

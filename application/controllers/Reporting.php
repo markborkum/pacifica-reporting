@@ -10,7 +10,7 @@ class Reporting extends Baseline_controller {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
     $this->load->library('myemsl-eus-library/EUS','','eus');
-    $this->load->helper(array('network','file_info','inflector','time','item'));
+    $this->load->helper(array('network','file_info','inflector','time','item','search_term'));
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');
   }
@@ -66,16 +66,8 @@ class Reporting extends Baseline_controller {
 
 
   public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
-    $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    $times = $this->fix_time_range($time_range, $start_date, $end_date);
-    extract($times);
-
-    $object_type = singular($object_type);
-    $accepted_object_types = array('instrument','proposal','user');
-    if(!in_array($object_type,$accepted_object_types)){
-      redirect('reporting/view/instrument');
-    }
     $this->page_data['page_header'] = "MyEMSL Uploads per ".ucwords($object_type);
+    $this->page_data['my_object_type'] = $object_type;
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
@@ -90,8 +82,33 @@ class Reporting extends Baseline_controller {
       base_url()."resources/scripts/reporting.js"
     );
 
-    $this->page_data['my_objects'] = '';
     $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
+    if(empty($my_object_list)){
+      $object_examples = array('instrument' => array(
+        "'nmr' returns a list of all instruments with 'nmr' somewhere in the name or description",
+        "'34075' returns the instrument having an ID of '34075' in the EUS database"
+      ));
+      $this->page_data['js'] = "
+$(function(){
+  $('#object_search_box').focus();
+});
+var object_type = '{$object_type}';
+";
+      $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
+      $this->load->view('reporting_view.html',$this->page_data);
+      return;
+    }
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    $times = $this->fix_time_range($time_range, $start_date, $end_date);
+    extract($times);
+
+    $object_type = singular($object_type);
+    $accepted_object_types = array('instrument','proposal','user');
+    if(!in_array($object_type,$accepted_object_types)){
+      redirect('reporting/view/instrument');
+    }
+
+    $this->page_data['my_objects'] = '';
     $object_list = array_map('strval', array_keys($my_object_list[$object_type]));
     if(!empty($default_object_id) && in_array($default_object_id,$object_list)){
       $object_list = array(strval($default_object_id));
@@ -108,7 +125,6 @@ class Reporting extends Baseline_controller {
         'times' => $times
       );
     }
-    $this->page_data['my_object_type'] = $object_type;
     $this->page_data['default_time_range'] = $times;
     $this->page_data['content_view'] = "object_types/{$object_type}.html";
     $this->page_data['my_objects'] = $object_info;
@@ -246,7 +262,11 @@ class Reporting extends Baseline_controller {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
   public function get_object_lookup($object_type,$filter = ""){
     $my_objects = $this->rep->get_selected_objects($this->user_id);
-    $results = $this->eus->get_object_list($object_type,$filter, $my_objects[$object_type]);
+    if(!array_key_exists($object_type, $my_objects)){
+      $my_objects[$object_type] = array();
+    }
+    $filter = parse_search_term($filter);
+    $results = $this->eus->get_object_list($object_type, $filter, $my_objects[$object_type]);
     $this->page_data['results'] = $results;
     $this->page_data['object_type'] = $object_type;
     $this->page_data['filter_text'] = $filter;

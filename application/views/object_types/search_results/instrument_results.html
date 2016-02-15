@@ -1,7 +1,6 @@
 <?php
   $categorized_results = array();
   $my_category_name = " My Instruments";
-  $my_stuff = array();
   foreach($results as $object_id => $object_info){
     if(array_key_exists($object_id, $my_objects)){
       $categorized_results[$my_category_name][$object_id] = $object_info;
@@ -10,8 +9,6 @@
     }
   }
   ksort($categorized_results);
-  //array_unshift($categorized_results,$my_stuff);
-  //var_dump($categorized_results);
 ?>
 <?php foreach($categorized_results as $category => $type_items): ?>
 <ul id='<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results' class="search_results_list">
