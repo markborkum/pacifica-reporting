@@ -41,7 +41,7 @@ class Reporting extends Baseline_controller {
     $this->page_data['default_time_range'] = $times;
     $this->page_data['my_objects'] = $object_info;
 
-    $this->load->view("object_types/{$object_type}.html", $this->page_data);
+    $this->load->view("object_types/object.html", $this->page_data);
   }
 
 

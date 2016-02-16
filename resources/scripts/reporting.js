@@ -1,3 +1,48 @@
+var hc_pie_options = {
+  credits: false,
+  chart: {
+    animation: false,
+    plotBackgroundColor: null,
+    plotBorderWidth: null,
+    plotShadow: false,
+    spacing: [10,0,0,0],
+    style: {
+      fontFamily: 'Helvetica, Arial, sans-serif',
+      fontSize: '12px'
+    },
+    type: 'pie'
+  },
+  title: {
+    style: {'fontSize':'13px', 'fontWeight':'bold'}
+  },
+  legend: {
+    layout: 'vertical',
+    align:'right',
+    margin:'2'
+  },
+  tooltip: {
+    headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
+  },
+  plotOptions: {
+    pie: {
+      allowPointSelect: true,
+      cursor: 'pointer',
+      dataLabels: {
+        enabled: false,
+        floating:true
+      },
+      center: [100, 80],
+      showInLegend: true
+    }
+  },
+  series: [{
+    name: 'Uploads',
+    animation: false,
+  }]
+};
+
+
+
 var get_transaction_info = function(el,transaction_list){
   var el = $(el);
   var parent_container = el.parents('.object_body');
@@ -63,7 +108,7 @@ var submit_object_change = function(el, object_type, object_id, action){
             var new_element = $('<ul id="' + object_type + '_my_' + object_type + 's_search_results" class="search_results_list"></ul>');
             $('#search_results_display > ul').before(new_element);
             new_element = $('#' + object_type + '_my_' + object_type + 's_search_results');
-            new_element.append('<div class="search_results_header">My ' + object_type + 's</div>');
+            new_element.append('<div class="search_results_header">my ' + object_type + 's</div>');
           }
           // debugger;
           $('#' + object_type + "_my_" + object_type + "s_search_results").append(list_item);

@@ -1,6 +1,6 @@
 <?php
   $categorized_results = array();
-  $my_category_name = " My Instruments";
+  $my_category_name = " my instruments";
   foreach($results as $object_id => $object_info){
     if(array_key_exists($object_id, $my_objects)){
       $categorized_results[$my_category_name][$object_id] = $object_info;

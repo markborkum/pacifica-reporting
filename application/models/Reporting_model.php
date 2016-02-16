@@ -183,7 +183,7 @@ class Reporting_model extends CI_Model {
 
   private function get_transactions_for_user($eus_user_id, $start_date, $end_date, $unfiltered = false){
     extract($this->canonicalize_date_range($start_date, $end_date));
-    echo $start_time;
+    // echo $start_time;
     $transactions = array();
     $where_clause = array('stime >=' => $start_time_object->format('Y-m-d H:i:s'));
     if($end_time){

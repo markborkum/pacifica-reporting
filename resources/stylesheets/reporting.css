@@ -14,6 +14,11 @@
   color: #666;
 }
 
+.legend_description {
+  margin-top:5px;
+  margin-left:2.5em;
+}
+
 #search_bar_container{
   color: #fefefe;
   padding: 0.5em;
@@ -64,6 +69,7 @@
 .search_results_header{
   font-size:1.1em;
   font-weight: bold;
+  text-transform: capitalize;
 }
 
 

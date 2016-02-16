@@ -1,6 +1,6 @@
 <?php
   $categorized_results = array();
-  $my_category_name = " My Users";
+  $my_category_name = " my users";
   foreach($results as $object_id => $object_info){
     $alpha_group = strtolower(substr($object_info['order_field'],0,1));
     if(array_key_exists($object_id, $my_objects)){
@@ -12,13 +12,15 @@
   ksort($categorized_results);
 ?>
 <?php foreach($categorized_results as $category => $type_items): ?>
-<ul id='<?= $object_type ?>_<?= $category ?>_search_results' class="search_results_list">
-  <div>
+<?php $category = trim($category); ?>
+<ul id='<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results' class="search_results_list">
+  <div class="search_results_header">
     <?= ucwords($category) ?>
   </div>
   <?php foreach($type_items as $object_id => $object_info): ?>
+    <?php $checked = array_key_exists($object_id,$my_objects) ? "checked='checked' " : ""; ?>
   <li>
-    <input type="checkbox" id="proposal_id_<?= $object_id ?>" name="proposal_id_<?= $object_id ?>" />
+    <input type="checkbox" class='object_selection_checkbox' id="proposal_id_<?= $object_id ?>" <?= $checked ?>name="proposal_id_<?= $object_id ?>" />
     <span id="proposal_<?= $object_id ?>" name="proposal_name_<?= $object_id ?>">
       <?= $object_info['display_name'] ?>
     </span>
@@ -26,3 +28,10 @@
   <?php endforeach; ?>
 </ul>
 <?php endforeach; ?>
+<?php if(!empty($js)): ?>
+<script type='text/javascript'>
+//<![CDATA[
+  <?= $js ?>
+//]]>
+</script>
+<?php endif; ?>
