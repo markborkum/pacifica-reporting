@@ -183,10 +183,11 @@ class Reporting_model extends CI_Model {
 
   private function get_transactions_for_user($eus_user_id, $start_date, $end_date, $unfiltered = false){
     extract($this->canonicalize_date_range($start_date, $end_date));
+    echo $start_time;
     $transactions = array();
-    $where_clause = array('stime >=' => $start_time->format('Y-m-d H:i:s'));
+    $where_clause = array('stime >=' => $start_time_object->format('Y-m-d H:i:s'));
     if($end_time){
-      $where_clause['stime <'] = $end_time->format('Y-m-d H:i:s');
+      $where_clause['stime <'] = $end_time_object->format('Y-m-d H:i:s');
     }
     $this->db->select(array('t.transaction','t.stime as submit_time','ing.person_id'))->where($where_clause);
     $this->db->from('transactions as t')->join('ingest_state as ing', 't.transaction = ing.trans_id');
@@ -319,17 +320,20 @@ class Reporting_model extends CI_Model {
           }else{
             $transaction_stats['user'][$tx_i['eus_person_id']] += 1;
           }
-          if(!array_key_exists($tx_i['eus_instrument_id'], $transaction_stats['instrument'])){
-            $transaction_stats['instrument'][$tx_i['eus_instrument_id']] = 1;
-          }else{
-            $transaction_stats['instrument'][$tx_i['eus_instrument_id']] += 1;
+          if(array_key_exists('eus_instrument_id', $tx_i)){
+            if(!array_key_exists($tx_i['eus_instrument_id'], $transaction_stats['instrument'])){
+              $transaction_stats['instrument'][$tx_i['eus_instrument_id']] = 1;
+            }else{
+              $transaction_stats['instrument'][$tx_i['eus_instrument_id']] += 1;
+            }
           }
-          if(!array_key_exists($tx_i['eus_proposal_id'], $transaction_stats['proposal'])){
-            $transaction_stats['proposal'][$tx_i['eus_proposal_id']] = 1;
-          }else{
-            $transaction_stats['proposal'][$tx_i['eus_proposal_id']] += 1;
+          if(array_key_exists('eus_proposal_id', $tx_i)){
+            if(!array_key_exists($tx_i['eus_proposal_id'], $transaction_stats['proposal'])){
+              $transaction_stats['proposal'][$tx_i['eus_proposal_id']] = 1;
+            }else{
+              $transaction_stats['proposal'][$tx_i['eus_proposal_id']] += 1;
+            }
           }
-
         }
       }
     }

@@ -7,6 +7,13 @@
   margin-top: 1em;
 }
 
+.info_instructions {
+  margin-left:8em;
+  margin-right:8em;
+  font-size: 1.2em;
+  color: #666;
+}
+
 #search_bar_container{
   color: #fefefe;
   padding: 0.5em;
@@ -271,6 +278,22 @@ h1.underline{
 /*.stats_graph_container > .stats_graph {
   border:thin solid green;
 }*/
+
+.stats_graph {
+  min-width:250px;
+  height:250px;
+  width:50%;
+}
+
+.stats_graph_left {
+
+}
+
+.stats_graph_right {
+  position:absolute;
+  right:0;
+  top:0;
+}
 
 .reporting_object_container .object_name_short {
   display:none;

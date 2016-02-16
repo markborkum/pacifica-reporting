@@ -47,18 +47,32 @@ var submit_object_change = function(el, object_type, object_id, action){
       var my_list_item = el.parents('li').detach();
       remove_empty_uls();
     }else if(action == 'add'){
+      if($('.reporting_object_container').length == 0){
+        $('#search_results_display').after('<div class="reporting_object_container"></div>');
+      }
+      $('.info_container').fadeOut();
       var first_container = $('.reporting_object_container')[0];
       var container_url = base_url + 'index.php/reporting/get_object_container/';
       container_url += object_type + '/' + object_id + '/' + time_range;
-      $.get(container_url, function(data){
+      var posting = $.get(container_url, function(data){
         //add in the new container
         $(first_container).before(data);
         if(el.is('input[type="checkbox"]')){
           var list_item = el.parents('li').detach();
+          if($('#' + object_type + "_my_" + object_type + "s_search_results").length == 0){
+            var new_element = $('<ul id="' + object_type + '_my_' + object_type + 's_search_results" class="search_results_list"></ul>');
+            $('#search_results_display > ul').before(new_element);
+            new_element = $('#' + object_type + '_my_' + object_type + 's_search_results');
+            new_element.append('<div class="search_results_header">My ' + object_type + 's</div>');
+          }
+          // debugger;
           $('#' + object_type + "_my_" + object_type + "s_search_results").append(list_item);
           remove_empty_uls();
         }
 
+      })
+      .fail(function(){
+        location.reload();
       });
     }
   });
@@ -70,6 +84,17 @@ var remove_empty_uls = function(){
     if(item.find('li').length === 0){
       item.remove();
     }
+  });
+};
+
+var load_results = function(object_type, object_id){
+  $('#loading_status_' + object_id).spin();
+  var url = base_url + 'index.php/reporting/get_reporting_info/' + object_type + '/' + object_id + '/' + time_range;
+  var getter = $.get(url);
+  getter.done(function(data,status){
+    $('#loading_status_' + object_id).spin(false);
+
+    $('#object_body_container_' + object_id).replaceWith(data);
   });
 };
 

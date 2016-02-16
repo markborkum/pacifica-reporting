@@ -66,6 +66,11 @@ class Reporting extends Baseline_controller {
 
 
   public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+    $object_type = singular($object_type);
+    $accepted_object_types = array('instrument','proposal','user');
+    if(!in_array($object_type,$accepted_object_types)){
+      redirect('reporting/view/instrument');
+    }
     $this->page_data['page_header'] = "MyEMSL Uploads per ".ucwords($object_type);
     $this->page_data['my_object_type'] = $object_type;
     $this->page_data['css_uris'] = array(
@@ -81,54 +86,44 @@ class Reporting extends Baseline_controller {
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"
     );
-
-    $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
-    if(empty($my_object_list)){
-      $object_examples = array('instrument' => array(
-        "'nmr' returns a list of all instruments with 'nmr' somewhere in the name or description",
-        "'34075' returns the instrument having an ID of '34075' in the EUS database"
-      ));
-      $this->page_data['js'] = "
-$(function(){
-  $('#object_search_box').focus();
-});
-var object_type = '{$object_type}';
-";
-      $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
-      $this->load->view('reporting_view.html',$this->page_data);
-      return;
-    }
+    $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     $times = $this->fix_time_range($time_range, $start_date, $end_date);
     extract($times);
 
-    $object_type = singular($object_type);
-    $accepted_object_types = array('instrument','proposal','user');
-    if(!in_array($object_type,$accepted_object_types)){
-      redirect('reporting/view/instrument');
-    }
-
-    $this->page_data['my_objects'] = '';
-    $object_list = array_map('strval', array_keys($my_object_list[$object_type]));
-    if(!empty($default_object_id) && in_array($default_object_id,$object_list)){
-      $object_list = array(strval($default_object_id));
-    }
-    // $transaction_info = array();
-    $object_info = $this->eus->get_object_info($object_list,$object_type);
-    // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
-    foreach($object_list as $object_id){
-      // $transaction_info[$object_id] = $this->rep->$transaction_retrieval_func($object_id,'2015-10-01','2015-12-01');
-      $this->page_data['placeholder_info'][$object_id] = array(
-        'object_type' => $object_type,
-        'object_id' => $object_id,
-        'time_range' => $time_range,
-        'times' => $times
-      );
+    $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
+    if(empty($my_object_list)){
+      $examples = $this->add_objects_instructions($object_type);
+      $this->page_data['examples'] = $examples;
+      $this->page_data['js'] .= "
+$(function(){
+  $('#object_search_box').focus();
+});
+";
+      $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
+    }else{
+      $this->page_data['my_objects'] = '';
+      $object_list = array_map('strval', array_keys($my_object_list[$object_type]));
+      if(!empty($default_object_id) && in_array($default_object_id,$object_list)){
+        $object_list = array(strval($default_object_id));
+      }
+      // $transaction_info = array();
+      $object_info = $this->eus->get_object_info($object_list,$object_type);
+      // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
+      foreach($object_list as $object_id){
+        // $transaction_info[$object_id] = $this->rep->$transaction_retrieval_func($object_id,'2015-10-01','2015-12-01');
+        $this->page_data['placeholder_info'][$object_id] = array(
+          'object_type' => $object_type,
+          'object_id' => $object_id,
+          'time_range' => $time_range,
+          'times' => $times
+        );
+      }
+      // var_dump($object_info);
+      $this->page_data['my_objects'] = $object_info;
+      $this->page_data['content_view'] = "object_types/object.html";
     }
     $this->page_data['default_time_range'] = $times;
-    $this->page_data['content_view'] = "object_types/{$object_type}.html";
-    $this->page_data['my_objects'] = $object_info;
-    $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     // $this->page_data['transaction_info'] = $transaction_info;
 
     $this->load->view('reporting_view.html',$this->page_data);
@@ -156,7 +151,7 @@ var object_type = '{$object_type}';
     if(!$latest_data){
       //no data available for this object
       $this->page_data['results_message'] = "No Data Available for this ".ucwords($object_type);
-      $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
+      $this->load->view("object_types/object_body_insert.html", $this->page_data);
       return;
     }
     $latest_data_object = new DateTime($latest_data);
@@ -211,7 +206,7 @@ var object_type = '{$object_type}';
     // exit;
 
     if($with_timeline){
-      $this->load->view("object_types/{$object_type}_body_insert.html", $this->page_data);
+      $this->load->view("object_types/object_body_insert.html", $this->page_data);
     }else{
       $this->load->view("object_types/object_pie_scripts_insert.html", $this->page_data);
     }
@@ -275,7 +270,8 @@ var object_type = '{$object_type}';
     if(!empty($results)){
       $this->load->view("object_types/search_results/{$object_type}_results.html",$this->page_data);
     }else{
-      print "<div class='no_results_notifier'>No Results Returned for '{$filter}'</div>";
+      $filter_string = implode("' '", $filter);
+      print "<div class='info_message' style='margin-bottom:1.5em;'>No Results Returned for '{$filter_string}'</div>";
     }
   }
 
@@ -293,8 +289,33 @@ var object_type = '{$object_type}';
     $new_set = array();
     if($this->rep->update_object_preferences($object_type,$object_list)){
       $new_set = $this->rep->get_selected_objects($this->user_id,$object_type);
+      if(empty($new_set)){
+
+      }
     }
     send_json_array($new_set);
+  }
+
+  public function add_objects_instructions($object_type){
+    $object_examples = array(
+      'instrument' => array(),
+      'proposal' => array(),
+      'user' => array()
+    );
+    $object_examples['instrument'] = array(
+      "'nmr' returns a list of all instruments with 'nmr' somewhere in the name or description",
+      "'34075' returns the instrument having an ID of '34075' in the EUS database",
+      "'nmr nittany' returns anything with 'nmr' and 'nittany' somewhere in the name or description"
+    );
+    $object_examples['proposal'] = array(
+      "'phos' returns a list of all proposals having the term 'phos' somewhere in the title or description",
+      "'49164' returns a proposal having an ID of '49164' in the EUS database"
+    );
+    $object_examples['user'] = array(
+      "'jones' returns a list of EUS users having 'jones' somewhere in their first name, last name or email",
+      "'36846' returns a user having the ID of '36846' in the EUS database"
+    );
+    return $object_examples[$object_type];
   }
 
 

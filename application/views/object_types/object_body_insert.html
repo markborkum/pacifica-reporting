@@ -1,0 +1,69 @@
+<?php
+  if(isset($transaction_info)){
+    extract($transaction_info);
+    $keys = array_keys($day_graph['by_date']);
+    $earliest_date = array_shift($keys);
+    $last_date = array_pop($keys);
+    //$day_graph_info = day_graph_to_series($day_graph);
+    $this->page_data['day_graph_info'] = $day_graph['by_date'];
+  }
+?>
+<div id="object_body_container_<?= $object_id ?>" class="object_body_container">
+  <?php if(isset($summary_totals)): ?>
+  <div id="totals_container_<?= $object_id ?>" class="totals_container" style='vertical-align: middle;'>
+    <?php $transaction_plural = $summary_totals['transaction_count'] != 1 ? "s" : ""; ?>
+    <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
+    <div id='upload_totals_header_<?= $object_id ?>' class='stats_header'>Upload Totals</div>
+    <ul id='upload_totals_<?= $object_id ?>' class='stats_list'>
+      <li><span id='transaction_count_<?= $object_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></li>
+      <li><span id='file_count_<?= $object_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $object_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
+    </ul>
+  </div>
+  <div id='stats_graph_container_<?= $object_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
+    <?php $graph_sides = array('left','right'); ?>
+    <?php if($object_type != 'instrument'): ?>
+      <?php $side = array_shift($graph_sides); ?>
+      <div id='instrument_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_<?= $side ?>'></div>
+    <?php endif; ?>
+    <?php if($object_type != 'proposal'): ?>
+      <?php $side = array_shift($graph_sides); ?>
+      <div id='proposal_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_<?= $side ?>'></div>
+    <?php endif; ?>
+    <?php if($object_type != 'user'): ?>
+      <?php $side = array_shift($graph_sides); ?>
+      <div id='user_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_<?= $side ?>'></div>
+    <?php endif; ?>
+  </div>
+  <div id="new_times_<?= $object_id ?>" style="display:none;">
+    <span id="new_start_time_<?= $object_id ?>"><time datetime="<?= $times['start_date'] ?>"><?= $times['start_date_object']->format('n/j/Y') ?></time></span>
+    <span id="new_end_time_<?= $object_id ?>"><time datetime="<?= $times['end_date'] ?>"><?= $times['end_date_object']->format('n/j/Y') ?></time></span>
+  </div>
+  <div id="pie_scripts_container_<?= $object_id ?>">
+    <?php $this->load->view('object_types/object_pie_scripts_insert.html', $this->page_data); ?>
+  </div>
+  <div id="timeline_script_container_<?= $object_id ?>">
+    <?php $this->load->view('object_types/object_timeline_script_insert.html', $this->page_data); ?>
+  </div>
+  <div id="transaction_details_notifier_<?= $object_id ?>" class="transaction_details_notifier">
+    Transaction Details
+    <span id="disclosure_arrow_<?= $object_id ?>_right" class="disclosure_arrows dc_up">&nbsp;</span>
+  </div>
+  <div id="transaction_details_loader_<?= $object_id ?>" class="transaction_details_loader" style="position:relative;display:none;">
+    <div id="details_loading_progress_indicator_<?= $object_id ?>" class="details_loading_indicator">Loading...</div>
+  </div>
+  <div id="transaction_details_container_<?= $object_id ?>" class="transaction_details_container" style="display:none;"></div>
+  <?php else: ?>
+  <div class='info_message'><?= $results_message ?></div>
+  <?php endif; ?>
+  <script>
+  //<![CDATA[
+  $(function(){
+    $('#remove_icon_<?= $object_id ?>').click(function(){
+      var el = $(this);
+      submit_object_change(el, '<?= $object_type ?>', '<?= $object_id ?>', 'remove');
+      el.parents('.reporting_object_container').remove();
+    });
+  });
+  //]]>
+  </script>
+</div>
