@@ -3,7 +3,11 @@
   <div class="object_header" style="position:relative;">
     <div class="object_name"><?= $item_info['display_name'] ?></div>
     <div class="object_name_short"><?= $item_info['abbreviation'] ?></div>
+    <div class="remove_message" style="display:none;">Remove this <?= $my_object_type ?> from my list</div>
     <div class="remove_icon" title="Click to remove <?= $my_object_type ?> from this report" id="remove_icon_<?= $id ?>"></div>
+    <div class="remove_confirmation_dialog" id="remove_confirmation_dialog_<?= $id ?>"></div>
+    <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
+    <span class="remove_dialog_message" style="display:none;">Really remove this <?= $my_object_type ?>?</span>
   </div>
 
   <div class="object_body" id="object_body_<?= $id ?>">
@@ -12,8 +16,8 @@
   </div>
   <div class="object_footer">
     <div id="message_container_<?= $id ?>" class="message_container">&nbsp;</div>
-    <div id="time_range_container_<?= $id ?>" class="time_range_container">Data Uploaded Between <span id="start_time_<?= $id ?>"><time datetime="<?= $placeholder_info[$id]['times']['start_time'] ?>"><?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y') ?></time></span>&nbsp;&ndash;&nbsp;
-      <span id="end_time_<?= $id ?>"><time datetime="<?= $placeholder_info[$id]['times']['end_time'] ?>"><?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y') ?></time></span>
+    <div id="time_range_container_<?= $id ?>" class="time_range_container">Data Uploaded Between <span id="start_time_<?= $id ?>" class="time_range_indicator start_time"><time datetime="<?= $placeholder_info[$id]['times']['start_time'] ?>"><?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y') ?></time></span>&nbsp;&ndash;&nbsp;
+      <span id="end_time_<?= $id ?>" class="time_range_indicator end_time"><time datetime="<?= $placeholder_info[$id]['times']['end_time'] ?>"><?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y') ?></time></span>
     </div>
   </div>
 </div>

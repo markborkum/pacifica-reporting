@@ -73,21 +73,13 @@ var get_transaction_info = function(el,transaction_list){
   }
 };
 
-
-var submit_object_change = function(el, object_type, object_id, action){
-  //action is add or remove
+var submit_object_change_worker = function(el, object_type, object_id, action){
   var update_list = JSON.stringify([{ 'object_id' : object_id, 'action' : action }]);
   var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type;
+
   $.post(url, update_list, function(data){
     //need to update the DOM to add/remove the appropriate object
     if(action == 'remove'){
-      if(el.is('input[type="checkbox"]')){
-        my_el = $('#remove_icon_' + object_id);
-        remove_empty_uls();
-      }else{
-        my_el = el;
-        el = $('#' + object_type + '_id_' + object_id);
-      }
       my_el.parents('.reporting_object_container').remove();
       var my_list_item = el.parents('li').detach();
       remove_empty_uls();
@@ -121,6 +113,46 @@ var submit_object_change = function(el, object_type, object_id, action){
       });
     }
   });
+}
+
+var submit_object_change = function(el, object_type, object_id, action){
+  //action is add or remove
+  if(el.is('input[type="checkbox"]')){
+    my_el = $('#remove_icon_' + object_id);
+    remove_empty_uls();
+  }else{
+    my_el = el;
+    el = $('#' + object_type + '_id_' + object_id);
+  }
+  if(action == 'remove'){
+    var d_box = $(my_el).siblings('.remove_confirmation_dialog');
+    var message = $(my_el).siblings('.remove_dialog_message').text();
+    var object_id = $(my_el).siblings('.container_id').text();
+    d_box.html(message);
+    d_box.dialog({
+      resizable:false,
+      modal:true,
+      title: 'Remove ' + object_type + ' ID ' + object_id,
+      width:250,
+      buttons: {
+        "Yes" : function(){
+          submit_object_change_worker(el, object_type,object_id,action);
+          $(this).dialog('close');
+        },
+        "No" : function(){
+          $(this).dialog('close');
+        }
+      }
+    });
+  }else{
+    submit_object_change_worker(el, object_type,object_id,action);
+  }
+
+
+
+
+
+
 }
 
 var remove_empty_uls = function(){
@@ -182,6 +214,9 @@ var clear_results = function(){
   $('#search_results_display').html('');
 };
 
+var setup_confirmation_dialog_boxes = function(e){
+};
+
 
 $(function(){
   $('#object_search_box').keyup(function(){
@@ -207,4 +242,19 @@ $(function(){
     clear_results();
     $(this).disable();
   });
+  $('.remove_icon').mouseover(function(event){
+    $(event.target).siblings('.remove_message').fadeIn('fast');
+
+  });
+  $('.remove_icon').mouseout(function(event) {
+    $(event.target).siblings('.remove_message').fadeOut('fast');
+  });
+  // $('.time_range_indicator').datepicker({
+  //   showOn:"button",
+  //   buttonImage: "/resources/images/calendar_month.png",
+  //   buttonImageOnly: true,
+  //   changeMonth: true,
+  //   changeYear: true,
+  // });
+
 });

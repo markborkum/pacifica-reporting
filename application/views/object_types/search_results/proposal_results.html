@@ -18,13 +18,14 @@
 ?>
 <?php foreach($categorized_results as $category => $type_items): ?>
   <?php $category = $category == $my_category_name ? trim($my_category_name) : "Ending Year {$category}"; ?>
-<ul id='<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results' class="search_results_list">  
+<ul id='<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results' class="search_results_list">
   <div class="search_results_header">
     <?= $category ?>
   </div>
   <?php foreach($type_items as $object_id => $object_info): ?>
   <li>
     <input type="checkbox" class='object_selection_checkbox' id="proposal_id_<?= $object_id ?>" name="proposal_id_<?= $object_id ?>" />
+    <input type="hidden" class="item_category" value="<?= $category ?>" />
     <span id="proposal_<?= $object_id ?>" name="proposal_name_<?= $object_id ?>">
       <?= $object_info['display_name'] ?>
     </span>

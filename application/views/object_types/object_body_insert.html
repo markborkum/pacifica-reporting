@@ -53,6 +53,7 @@
     <div id="details_loading_progress_indicator_<?= $object_id ?>" class="details_loading_indicator">Loading...</div>
   </div>
   <div id="transaction_details_container_<?= $object_id ?>" class="transaction_details_container" style="display:none;"></div>
+  <div id="dialog-confirm"></div>
   <?php else: ?>
   <div class='info_message'><?= $results_message ?></div>
   <?php endif; ?>
@@ -62,7 +63,6 @@
     $('#remove_icon_<?= $object_id ?>').click(function(){
       var el = $(this);
       submit_object_change(el, '<?= $object_type ?>', '<?= $object_id ?>', 'remove');
-      el.parents('.reporting_object_container').remove();
     });
   });
   //]]>

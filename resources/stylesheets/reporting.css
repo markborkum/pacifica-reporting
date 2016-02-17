@@ -19,6 +19,13 @@
   margin-left:2.5em;
 }
 
+.remove_message{
+  right: 30px;
+  top:4px;
+  position: absolute;
+  color: white;
+}
+
 #search_bar_container{
   color: #fefefe;
   padding: 0.5em;
@@ -397,7 +404,9 @@ h1.underline{
   }
   .message_container {
     padding-left:0.5em;
-
+  }
+  .search_bar_container input[type="text"]{
+    width: 80%;
   }
 }
 
@@ -441,7 +450,12 @@ h1.underline{
     text-align:inherit;
     margin-bottom:1em;
   }
-
+  .search_bar_container input[type="text"]{
+    width: 75%;
+  }
+  .themed_button {
+    font-size:0.95em;
+  }
   .stats_list > li {
      text-align: center !important;
   }
