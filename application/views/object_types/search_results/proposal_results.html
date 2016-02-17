@@ -2,7 +2,7 @@
   $categorized_results = array();
   $my_category_name = " my proposals";
   foreach($results as $object_id => $object_info){
-    $year = $object_info['end_date'];
+    $year = $object_info['category'];
     if(array_key_exists($object_id, $my_objects)){
       $categorized_results[$my_category_name][$object_id] = $object_info;
     }else{
@@ -23,8 +23,9 @@
     <?= $category ?>
   </div>
   <?php foreach($type_items as $object_id => $object_info): ?>
+    <?php $checked = array_key_exists($object_id,$my_objects) ? "checked='checked' " : ""; ?>
   <li>
-    <input type="checkbox" class='object_selection_checkbox' id="proposal_id_<?= $object_id ?>" name="proposal_id_<?= $object_id ?>" />
+    <input type="checkbox" class='object_selection_checkbox' id="proposal_id_<?= $object_id ?>" <?= $checked ?>name="proposal_id_<?= $object_id ?>" />
     <input type="hidden" class="item_category" value="<?= $category ?>" />
     <span id="proposal_<?= $object_id ?>" name="proposal_name_<?= $object_id ?>">
       <?= $object_info['display_name'] ?>
