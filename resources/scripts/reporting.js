@@ -41,7 +41,7 @@ var hc_pie_options = {
   }]
 };
 
-
+var datepicker = $.fn.datepicker.noConflict();
 
 var get_transaction_info = function(el,transaction_list){
   var el = $(el);
@@ -219,6 +219,9 @@ var setup_confirmation_dialog_boxes = function(e){
 
 
 $(function(){
+  $.fn.bootstrapDP = datepicker
+  // $('.time_range_container').bootstrapDP({ format: 'mm/dd/yyyy' })
+  $('.input-daterange').bootstrapDP();
   $('#object_search_box').keyup(function(){
     var el = $(this);
     var cfi = el.siblings('.clear_field_icon');

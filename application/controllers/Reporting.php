@@ -76,12 +76,16 @@ class Reporting extends Baseline_controller {
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
+      base_url()."resources/scripts/bootstrap/css/bootstrap.min.css",
+      base_url()."resources/scripts/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css",
       base_url()."resources/stylesheets/reporting.css"
     );
     $this->page_data['script_uris'] = array(
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
+      base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
+      base_url()."resources/scripts/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js",
       base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"

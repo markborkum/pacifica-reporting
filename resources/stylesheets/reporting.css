@@ -26,6 +26,18 @@
   color: white;
 }
 
+/*.form-control {
+  height: auto !important;
+  padding: 2px !important;
+}*/
+.input-sm {
+  font-size: 1em;
+}
+
+.input-daterange .input-group-addon{
+  line-height: 1;
+}
+
 #search_bar_container{
   color: #fefefe;
   padding: 0.5em;
@@ -197,6 +209,7 @@ h1.underline{
   padding:3px 5px 3px 5px;
   margin-top:-1px;
   position:relative;
+  height: 3.5em;
 }
 
 .reporting_object_container .object_body_container {
@@ -251,7 +264,7 @@ h1.underline{
 .remove_icon:active {background-position: 0px -32px;}
 
 
-.transaction_details_notifier .disclosure_arrows {
+.disclosure_arrows {
   padding-right:13px;
   margin-left:6px;
   vertical-align:middle;
@@ -259,12 +272,12 @@ h1.underline{
   background-repeat: no-repeat;
   background-size: 32px 48px;
 }
-.transaction_details_notifier .dc_up {background-position: 0px 0px;}
-.transaction_details_notifier .dc_down {background-position: -16px 0px;}
-.transaction_details_notifier .dc_up:hover {background-position: -0px -16px;}
-.transaction_details_notifier .dc_down:hover {background-position: -16px -16px;}
-.transaction_details_notifier .dc_up:active {background-position: 0px -32px;}
-.transaction_details_notifier .dc_down:active {background-position: -16px -32px;}
+.dc_up {background-position: 0px 0px;}
+.dc_down {background-position: -16px 0px;}
+.dc_up:hover {background-position: -0px -16px;}
+.dc_down:hover {background-position: -16px -16px;}
+.dc_up:active {background-position: 0px -32px;}
+.dc_down:active {background-position: -16px -32px;}
 
 .transaction_details_loader{
   font-weight: bold;
@@ -365,7 +378,7 @@ h1.underline{
        only screen and (-webkit-min-device-pixel-ratio: 1.25),
        only screen and (min-device-pixel-ratio: 1.25),
        only screen and (min-resolution: 1.25dppx) {
-    .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@2x.png);}
+    .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@2x.png);}
     .remove_icon {background-image:url(/resources/images/remove_icons@2x.png);}
     .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
     .clear_field_icon {  background-image:url(/resources/images/clear_boxes@2x.png); }
@@ -376,7 +389,7 @@ h1.underline{
        only screen and (-webkit-min-device-pixel-ratio: 2.25),
        only screen and (min-device-pixel-ratio: 2.25),
        only screen and (min-resolution: 2.25dppx) {
-    .transaction_details_notifier .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@3x.png);}
+    .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@3x.png);}
     .remove_icon {background-image:url(/resources/images/remove_icons@3x.png);}
     .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
     .clear_field_icon {  background-image:url(/resources/images/clear_boxes@3x.png); }

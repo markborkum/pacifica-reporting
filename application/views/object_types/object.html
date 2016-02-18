@@ -15,10 +15,25 @@
     <?php $this->load->view('object_types/object_body_placeholder.html',$placeholder_info[$id]); ?>
   </div>
   <div class="object_footer">
-    <div id="message_container_<?= $id ?>" class="message_container">&nbsp;</div>
-    <div id="time_range_container_<?= $id ?>" class="time_range_container">Data Uploaded Between <span id="start_time_<?= $id ?>" class="time_range_indicator start_time"><time datetime="<?= $placeholder_info[$id]['times']['start_time'] ?>"><?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y') ?></time></span>&nbsp;&ndash;&nbsp;
-      <span id="end_time_<?= $id ?>" class="time_range_indicator end_time"><time datetime="<?= $placeholder_info[$id]['times']['end_time'] ?>"><?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y') ?></time></span>
+    <div id="time_range_container_<?= $id ?>" class="time_range_container">
+      <div class="input-daterange input-group" id="datepicker_<?= $id ?>">
+        <input type="text" class="input-sm form-control" name="start" value="<?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y'); ?>"/>
+        <span class="input-group-addon">to</span>
+        <input type="text" class="input-sm form-control" name="end" value="<?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y'); ?>"/>
+      </div>
     </div>
   </div>
 </div>
 <?php endforeach; ?>
+<script type='text/javascript'>
+//<![CDATA[
+$('#time_range_container_<?= $id ?> .input-daterange').bootstrapDP({
+  startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>',
+  endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>',
+  orientation: "auto right",
+  toggleActive: true,
+  clearBtn: true,
+  todayBrn: "linked"
+})
+//]]>
+</script>
