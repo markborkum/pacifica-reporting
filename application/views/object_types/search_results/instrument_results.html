@@ -5,7 +5,7 @@
     if(array_key_exists($object_id, $my_objects)){
       $categorized_results[$my_category_name][$object_id] = $object_info;
     }else{
-      $categorized_results[$object_info['instrument_type']][$object_id] = $object_info;
+      $categorized_results[$object_info['category']][$object_id] = $object_info;
     }
   }
   ksort($categorized_results);
