@@ -76,7 +76,7 @@ class Reporting extends Baseline_controller {
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
-      base_url()."resources/scripts/bootstrap/css/bootstrap.min.css",
+      // base_url()."resources/scripts/bootstrap/css/bootstrap.min.css",
       base_url()."resources/scripts/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css",
       base_url()."resources/stylesheets/reporting.css"
     );

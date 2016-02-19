@@ -42,6 +42,7 @@ var hc_pie_options = {
 };
 
 var datepicker = $.fn.datepicker.noConflict();
+$.fn.bootstrapDP = datepicker;
 
 var get_transaction_info = function(el,transaction_list){
   var el = $(el);
@@ -219,7 +220,6 @@ var setup_confirmation_dialog_boxes = function(e){
 
 
 $(function(){
-  $.fn.bootstrapDP = datepicker
   // $('.time_range_container').bootstrapDP({ format: 'mm/dd/yyyy' })
   $('.input-daterange').bootstrapDP();
   $('#object_search_box').keyup(function(){
@@ -252,12 +252,4 @@ $(function(){
   $('.remove_icon').mouseout(function(event) {
     $(event.target).siblings('.remove_message').fadeOut('fast');
   });
-  // $('.time_range_indicator').datepicker({
-  //   showOn:"button",
-  //   buttonImage: "/resources/images/calendar_month.png",
-  //   buttonImageOnly: true,
-  //   changeMonth: true,
-  //   changeYear: true,
-  // });
-
 });

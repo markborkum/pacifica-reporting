@@ -17,9 +17,9 @@
   <div class="object_footer">
     <div id="time_range_container_<?= $id ?>" class="time_range_container">
       <div class="input-daterange input-group" id="datepicker_<?= $id ?>">
-        <input type="text" class="input-sm form-control" name="start" value="<?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y'); ?>"/>
+        <input type="text" class="input-sm form-control" name="start" id="start_time_<?= $id ?>" value="<?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y'); ?>"/>
         <span class="input-group-addon">to</span>
-        <input type="text" class="input-sm form-control" name="end" value="<?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y'); ?>"/>
+        <input type="text" class="input-sm form-control" name="end" id="end_time_<?= $id ?>" value="<?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y'); ?>"/>
       </div>
     </div>
   </div>
@@ -28,12 +28,29 @@
 <script type='text/javascript'>
 //<![CDATA[
 $('#time_range_container_<?= $id ?> .input-daterange').bootstrapDP({
-  startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>',
-  endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>',
+  // startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
+  // endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
   orientation: "auto right",
   toggleActive: true,
   clearBtn: true,
-  todayBrn: "linked"
+  todayBtn: "linked"
 })
+$('#start_time_<?= $id ?>').bootstrapDP().on('changeDate',function(e){
+  console.log(e);
+  var new_d = $(this).bootstrapDP('getDate').getTime();
+  var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
+  var old_extremes = tl_obj.xAxis[0].getExtremes();
+  var old_end = new Date(old_extremes.dataMax);
+  tl_obj.xAxis[0].setExtremes(new_d, old_end);
+});
+$('#end_time_<?= $id ?>').bootstrapDP().on('changeDate',function(e){
+  console.log(e);
+  var new_d = $(this).bootstrapDP('getDate').getTime();
+  var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
+  var old_extremes = tl_obj.xAxis[0].getExtremes();
+  var old_start = new Date(old_extremes.dataMin);
+  tl_obj.xAxis[0].setExtremes(old_start,new_d);
+});
+
 //]]>
 </script>
