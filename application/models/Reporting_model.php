@@ -88,6 +88,8 @@ class Reporting_model extends CI_Model {
 
   function summarize_uploads_by_user($eus_person_id, $start_date, $end_date, $make_day_graph){
     //canonicalize start and end times (yields $start_time & $end_time)
+    // echo "start_date => {$start_date}   end_date => {$end_date}";
+
     extract($this->canonicalize_date_range($start_date, $end_date));
 
     //get user transactions
@@ -439,7 +441,15 @@ class Reporting_model extends CI_Model {
 
   public function latest_available_data($object_type, $object_id){
     $latest_function_name = "latest_available_{$object_type}_data";
-    return $this->$latest_function_name($object_id);
+    $spread =  $this->$latest_function_name($object_id);
+    $latest_time = is_array($spread) && array_key_exists('latest',$spread) ? $spread['latest'] : false;
+    return $latest_time;
+  }
+
+  public function earliest_latest_data($object_type, $object_id){
+    $latest_function_name = "latest_available_{$object_type}_data";
+    $spread =  $this->$latest_function_name($object_id);
+    return $spread;
   }
 
 
@@ -448,18 +458,23 @@ class Reporting_model extends CI_Model {
     $group_collection = $this->get_instrument_group_list($instrument_id);
     $group_list = array_keys($group_collection);
     $latest_time = false;
-    $this->db->select('MAX(t.stime) as most_recent_upload');
+    $this->db->select(array(
+      'MAX(t.stime) as most_recent_upload',
+      'MIN(t.stime) as earliest_upload')
+    );
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('transactions t', 'f.transaction = t.transaction');
     $this->db->where_in('gi.group_id',$group_list)->limit(1);
     $query = $this->db->get();
-
     if($query && $query->num_rows() > 0 || !empty($query->row()->most_recent_upload)){
       if(strtotime($query->row()->most_recent_upload)){
-        $latest_time = $query->row()->most_recent_upload;
-        $latest_time = new DateTime($latest_time);
-        return $latest_time->format('Y-m-d H:i');
+        $latest_time = new DateTime($query->row()->most_recent_upload);
+        $earliest_time = new DateTime($query->row()->earliest_upload);
+        return array(
+          'earliest' => $earliest_time->format('Y-m-d H:i'),
+          'latest' => $latest_time->format('Y-m-d H:i')
+        );
       }
       return false;
       // echo $this->db->last_query();
@@ -476,7 +491,10 @@ class Reporting_model extends CI_Model {
     $group_collection = $this->get_proposal_group_list($proposal_id);
     $group_list = array_keys($group_collection);
 
-    $this->db->select('MAX(t.stime) as most_recent_upload');
+    $this->db->select(array(
+      'MAX(t.stime) as most_recent_upload',
+      'MIN(t.stime) as earliest_upload')
+    );
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('transactions t', 'f.transaction = t.transaction');
@@ -485,21 +503,26 @@ class Reporting_model extends CI_Model {
 
     if($query && $query->num_rows() > 0){
       if(strtotime($query->row()->most_recent_upload)){
-        $latest_time = $query->row()->most_recent_upload;
-        $latest_time = new DateTime($latest_time);
+        $latest_time = new DateTime($query->row()->most_recent_upload);
+        $earliest_time = new DateTime($query->row()->earliest_upload);
+        return array(
+          'earliest' => $earliest_time->format('Y-m-d H:i'),
+          'latest' => $latest_time->format('Y-m-d H:i')
+        );
       }
-      return $latest_time->format('Y-m-d H:i');
+      return false;
+    }else{
+      return false;
     }
   }
 
 
-
-
-
-  private function latest_available_user_data($person_id){
+  private function old_latest_available_user_data($person_id){
     $this->db->select(array("t.stime as most_recent_upload","t.transaction"));
     $this->db->where('t.stime is not null')->order_by("t.transaction desc");
     $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
+    echo $this->db->last_query();
+
     if($query && $query->num_rows() > 0){
       //blank stime in trans table
       $latest_time = new DateTime($query->row()->most_recent_upload);
@@ -516,13 +539,38 @@ class Reporting_model extends CI_Model {
   }
 
 
+  private function latest_available_user_data($person_id){
+    $this->db->select(array(
+      'MAX(t.stime) as most_recent_upload',
+      'MIN(t.stime) as earliest_upload')
+    );
+    $this->db->where('t.stime is not null');
+    $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
+
+    if($query && $query->num_rows() > 0){
+      //blank stime in trans table
+      if(strtotime($query->row()->most_recent_upload)){
+        $latest_time = new DateTime($query->row()->most_recent_upload);
+        $earliest_time = new DateTime($query->row()->earliest_upload);
+        return array(
+          'earliest' => $earliest_time->format('Y-m-d H:i'),
+          'latest' => $latest_time->format('Y-m-d H:i')
+        );
+      }
+      return false;
+    }else{
+      return false;
+    }
+  }
+
+
 
 
   public function canonicalize_date_range($start_date, $end_date){
     //both start and end times are filled in and valid
+    // echo "start_date => {$start_date}   end_date => {$end_date}";
     $start_date = $this->convert_short_date($start_date);
     $end_date = $this->convert_short_date($end_date, 'end');
-
     $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('1983-01-01 00:00:00');
     $end_time = strtotime($end_date) ? date_create($end_date)->setTime(23,59,59) : false;
 

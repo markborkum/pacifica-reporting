@@ -24,33 +24,38 @@
     </div>
   </div>
 </div>
-<?php endforeach; ?>
 <script type='text/javascript'>
 //<![CDATA[
 $('#time_range_container_<?= $id ?> .input-daterange').bootstrapDP({
-  // startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
-  // endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
   orientation: "auto right",
   toggleActive: true,
   clearBtn: true,
   todayBtn: "linked"
 })
-$('#start_time_<?= $id ?>').bootstrapDP().on('changeDate',function(e){
-  console.log(e);
+$('#start_time_<?= $id ?>').bootstrapDP()
+.on('changeDate',function(e){
   var new_d = $(this).bootstrapDP('getDate').getTime();
   var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
-  var old_extremes = tl_obj.xAxis[0].getExtremes();
-  var old_end = new Date(old_extremes.dataMax);
-  tl_obj.xAxis[0].setExtremes(new_d, old_end);
+  tl_obj.xAxis[0].update({ min : new_d });
 });
-$('#end_time_<?= $id ?>').bootstrapDP().on('changeDate',function(e){
-  console.log(e);
+$('#start_time_<?= $id ?>').bootstrapDP('setStartDate', moment('<?= $placeholder_info[$id]['times']['earliest_available_object']->format('c'); ?>').toDate());
+$('#start_time_<?= $id ?>').bootstrapDP('setEndDate', moment('<?= $placeholder_info[$id]['times']['latest_available_object']->format('c'); ?>').toDate());
+// $('#start_time_<?= $id ?>').bootstrapDP('update',moment('<?= $placeholder_info[$id]['times']['start_time_object']->format('c'); ?>').toDate());
+
+$('#end_time_<?= $id ?>').bootstrapDP()
+.on('changeDate',function(e){
   var new_d = $(this).bootstrapDP('getDate').getTime();
   var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
-  var old_extremes = tl_obj.xAxis[0].getExtremes();
-  var old_start = new Date(old_extremes.dataMin);
-  tl_obj.xAxis[0].setExtremes(old_start,new_d);
+  if(timeline_load_new_data_check(tl_obj)){
+    //
+  }else{
+    tl_obj.xAxis[0].update({ max : new_d });
+  }
 });
+$('#end_time_<?= $id ?>').bootstrapDP('setStartDate', moment('<?= $placeholder_info[$id]['times']['earliest_available_object']->format('c'); ?>').toDate());
+$('#end_time_<?= $id ?>').bootstrapDP('setEndDate', moment('<?= $placeholder_info[$id]['times']['latest_available_object']->format('c'); ?>').toDate());
+// $('#end_time_<?= $id ?>').bootstrapDP('update',moment('<?= $placeholder_info[$id]['times']['end_time_object']->format('c'); ?>').toDate());
 
 //]]>
 </script>
+<?php endforeach; ?>

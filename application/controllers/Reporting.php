@@ -25,6 +25,17 @@ class Reporting extends Baseline_controller {
   public function get_object_container($object_type, $object_id, $time_range, $start_date = false, $end_date = false){
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     $times = $this->fix_time_range($time_range, $start_date, $end_date);
+    $valid_date_range = $this->rep->earliest_latest_data($object_type,$object_id);
+    $latest_available_date = new DateTime($valid_date_range['latest']);
+    $earliest_available_date = new DateTime($valid_date_range['earliest']);
+
+    $valid_range = array(
+      'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
+      'latest' => $latest_available_date->format('Y-m-d H:i:s'),
+      'earliest_available_object' => $earliest_available_date,
+      'latest_available_object' => $latest_available_date
+    );
+    $times = array_merge($times, $valid_range);
     extract($times);
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
@@ -38,14 +49,15 @@ class Reporting extends Baseline_controller {
     $object_list[] = $object_id;
     $object_info = $this->eus->get_object_info($object_list,$object_type);
     $this->page_data['my_object_type'] = $object_type;
-    $this->page_data['default_time_range'] = $times;
+    // $this->page_data['default_time_range'] = $times;
     $this->page_data['my_objects'] = $object_info;
 
     $this->load->view("object_types/object.html", $this->page_data);
   }
 
 
-  private function fix_time_range($time_range, $start_date, $end_date){
+  private function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false){
+    // echo "start_date => {$start_date}   end_date => {$end_date}";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     if(!strtotime($time_range)){
       if($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)){
@@ -53,13 +65,14 @@ class Reporting extends Baseline_controller {
       }else{
         //looks like the time range is borked, pick the default
         $time_range = '1 week';
-        $times = time_range_to_date_pair($time_range);
+        $times = time_range_to_date_pair($time_range, $valid_date_range);
         extract($times);
       }
     }else{
-      $times = time_range_to_date_pair($time_range);
+      $times = time_range_to_date_pair($time_range, $valid_date_range);
       extract($times);
     }
+
     $times = $this->rep->canonicalize_date_range($start_date, $end_date);
     return $times;
   }
@@ -92,8 +105,9 @@ class Reporting extends Baseline_controller {
     );
     $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    $times = $this->fix_time_range($time_range, $start_date, $end_date);
-    extract($times);
+    // $times = $this->fix_time_range($time_range, $start_date, $end_date);
+
+    // extract($times);
 
     $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
     if(empty($my_object_list)){
@@ -115,19 +129,40 @@ $(function(){
       $object_info = $this->eus->get_object_info($object_list,$object_type);
       // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
       foreach($object_list as $object_id){
+        $valid_date_range = $this->rep->earliest_latest_data($object_type,$object_id);
+        $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
+        $latest_available_date = new DateTime($valid_date_range['latest']);
+        $earliest_available_date = new DateTime($valid_date_range['earliest']);
+
+        $valid_range = array(
+          'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
+          'latest' => $latest_available_date->format('Y-m-d H:i:s'),
+          'earliest_available_object' => $earliest_available_date,
+          'latest_available_object' => $latest_available_date
+        );
+        if($my_times['start_time_object']->getTimestamp() < $valid_range['earliest_available_object']->getTimestamp()){
+          $my_times['start_time_object'] = clone($valid_range['earliest_available_object']);
+        }
+        if($my_times['end_time_object']->getTimestamp() > $valid_range['latest_available_object']->getTimestamp()){
+          $my_times['end_time_object'] = clone($valid_range['latest_available_object']);
+        }
+        $my_times = array_merge($my_times, $valid_range);
+        // var_dump(array_merge($times,$valid_range));
+
         // $transaction_info[$object_id] = $this->rep->$transaction_retrieval_func($object_id,'2015-10-01','2015-12-01');
         $this->page_data['placeholder_info'][$object_id] = array(
           'object_type' => $object_type,
           'object_id' => $object_id,
           'time_range' => $time_range,
-          'times' => $times
+          'times' => $my_times
         );
+        // var_dump($my_times);
       }
       // var_dump($object_info);
       $this->page_data['my_objects'] = $object_info;
       $this->page_data['content_view'] = "object_types/object.html";
     }
-    $this->page_data['default_time_range'] = $times;
+    // $this->page_data['default_time_range'] = $times;
     // $this->page_data['transaction_info'] = $transaction_info;
 
     $this->load->view('reporting_view.html',$this->page_data);
@@ -151,7 +186,8 @@ $(function(){
     $this->page_data['object_id'] = $object_id;
     $this->page_data["{$object_type}_id"] = $object_id;
     $this->page_data['object_type'] = $object_type;
-    $latest_data = $this->rep->latest_available_data($object_type,$object_id);
+    $available_time_range = $this->rep->earliest_latest_data($object_type,$object_id);
+    $latest_data = is_array($available_time_range) && array_key_exists('latest',$available_time_range) ? $available_time_range['latest'] : false;
     if(!$latest_data){
       //no data available for this object
       $this->page_data['results_message'] = "No Data Available for this ".ucwords($object_type);
@@ -167,29 +203,42 @@ $(function(){
     if(!$valid_tr){
       if($time_range == 'custom' && $valid_st && $valid_et){
         //custom date_range, just leave them. Canonicalize will fix them
+        $earliest_available_object = new DateTime($available_time_range['earliest']);
+        $latest_available_object = new DateTime($available_time_range['latest']);
         $start_date_object = new DateTime($start_date);
         $end_date_object = new DateTime($end_date);
+        if($start_date_object->getTimestamp() < $earliest_available_object->getTimestamp()){
+          $start_date_object = clone $earliest_available_object;
+          $start_date = $start_date_object->format('Y-m-d');
+        }
+        if($end_date_object->getTimestamp() > $latest_available_object->getTimestamp()){
+          $end_date_object = clone $latest_available_object;
+          $end_date = $end_date_object->format('Y-m-d');
+        }
         $times = array(
           'start_date' => $start_date_object->format('Y-m-d H:i:s'),
           'end_date' => $end_date_object->format('Y-m-d H:i:s'),
+          'earliest' => $earliest_available_object->format('Y-m-d H:i:s'),
+          'latest' => $latest_available_object->format('Y-m-d H:i:s'),
           'start_date_object' => $start_date_object,
           'end_date_object' => $end_date_object,
           'time_range' => $time_range,
+          'earliest_available_object' => $earliest_available_object,
+          'latest_available_object' => $latest_available_object,
           'message' => "<p>Using ".$end_date_object->format('Y-m-d')." as the new origin time</p>"
         );
-
 
       }else{
         //looks like the time range is borked, pick the default
         $time_range = '1 week';
-        $times = time_range_to_date_pair($time_range,$latest_data_object);
+        $times = time_range_to_date_pair($time_range,$available_time_range);
       }
     }else{ //time_range is apparently valid
       if(($valid_st || $valid_et) && !($valid_st && $valid_et)){
         //looks like we want an offset time either start or finish
-        $times = time_range_to_date_pair($time_range,$latest_data_object,$start_date,$end_date);
+        $times = time_range_to_date_pair($time_range,$available_time_range,$start_date,$end_date);
       }else{
-        $times = time_range_to_date_pair($time_range, $latest_data_object);
+        $times = time_range_to_date_pair($time_range, $available_time_range);
       }
     }
     extract($times);

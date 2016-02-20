@@ -101,9 +101,19 @@ if(!defined('BASEPATH'))
 
   }
 
-  function time_range_to_date_pair($time_range, $latest_available_date = false, $start_date = false, $end_date = false){
+  function time_range_to_date_pair($time_range, $valid_date_range = false, $start_date = false, $end_date = false){
+    // var_dump($valid_date_range);
+    $latest_available_date = is_array($valid_date_range) && array_key_exists('latest',$valid_date_range) ? $valid_date_range['latest'] : false;
     if(!$latest_available_date){
       $latest_available_date = new DateTime();
+      $earliest_available_date = new DateTime('1991-01-01');
+      $valid_date_range = array(
+        'earliest' => $earliest_available_date->format('Y-m-d H:i'),
+        'latest' => $latest_available_date->format('Y-m-d H:i'),
+      );
+    }else{
+      $latest_available_date = new DateTime($valid_date_range['latest']);
+      $earliest_available_date = new DateTime($valid_date_range['earliest']);
     }
     if(is_string($latest_available_date)){
       $latest_available_date = new DateTime($latest_available_date);
@@ -120,15 +130,29 @@ if(!defined('BASEPATH'))
     }else{
       $today = $latest_available_date;
     }
+
+
     $today->setTime(23,59,59);
     $earlier = clone($today);
     $earlier->modify("{$time_modifier}{$time_range}")->setTime(0,0,0);
+    if($earlier->getTimestamp() < $earliest_available_date->getTimestamp()){
+      $earlier = clone $earliest_available_date;
+      $start_date = $earlier->format('Y-m-d');
+    }
+    if($today->getTimestamp() > $latest_available_date->getTimestamp()){
+      $today = clone $latest_available_date;
+      $end_date = $today->format('Y-m-d');
+    }
     $times = array(
       'start_date' => $earlier->format('Y-m-d H:i:s'),
       'end_date' => $today->format('Y-m-d H:i:s'),
+      'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
+      'latest' => $latest_available_date->format('Y-m-d H:i:s'),
       'start_date_object' => $earlier,
       'end_date_object' => $today,
       'time_range' => $time_range,
+      'earliest_available_object' => $earliest_available_date,
+      'latest_available_object' => $latest_available_date,
       'message' => "<p>Using ".$today->format('Y-m-d')." as the new origin time</p>"
     );
     return $times;

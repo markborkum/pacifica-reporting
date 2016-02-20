@@ -116,6 +116,18 @@ var submit_object_change_worker = function(el, object_type, object_id, action){
   });
 }
 
+var timeline_load_new_data_check = function(timeline_obj, new_timestamp){
+  var chart = timeline_obj;
+  var x_extremes = chart.xAxis[0].getExtremes();
+  if(new_timestamp > x_extremes.dataMax || new_timestamp < x_extremes.dataMin){
+    //we're outside of our loaded data, need to request more
+    return true;
+  }else{
+    //still inside our current bounds, just zoom
+    return false;
+  }
+}
+
 var submit_object_change = function(el, object_type, object_id, action){
   //action is add or remove
   if(el.is('input[type="checkbox"]')){
