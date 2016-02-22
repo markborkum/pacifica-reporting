@@ -59,6 +59,8 @@
   <?php endif; ?>
   <script>
   //<![CDATA[
+  var earliest_loaded = '<?= $time_range['start_time'] ?>';
+  var latest_loaded = '<?= $time_range['end_time'] ?>';
   $(function(){
     $('#remove_icon_<?= $object_id ?>').click(function(){
       var el = $(this);
