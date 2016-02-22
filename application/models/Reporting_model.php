@@ -576,7 +576,7 @@ class Reporting_model extends CI_Model {
 
     if($end_time < $start_time && !empty($end_time)){
       //flipped??
-      $temp_start = strtotime($end_time) ? clone($end_time) : false;
+      $temp_start = $end_time ? clone($end_time) : false;
       $end_time = clone($start_time);
       $start_time = $temp_start;
     }

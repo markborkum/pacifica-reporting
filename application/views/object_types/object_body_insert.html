@@ -54,13 +54,18 @@
   </div>
   <div id="transaction_details_container_<?= $object_id ?>" class="transaction_details_container" style="display:none;"></div>
   <div id="dialog-confirm"></div>
+  <script>
+  //<![CDATA[
+  var earliest_loaded = '<?= $time_range['start_time'] ?>';
+  var latest_loaded = '<?= $time_range['end_time'] ?>';
+  //]]>
+  </script>
+
   <?php else: ?>
   <div class='info_message'><?= $results_message ?></div>
   <?php endif; ?>
   <script>
   //<![CDATA[
-  var earliest_loaded = '<?= $time_range['start_time'] ?>';
-  var latest_loaded = '<?= $time_range['end_time'] ?>';
   $(function(){
     $('#remove_icon_<?= $object_id ?>').click(function(){
       var el = $(this);

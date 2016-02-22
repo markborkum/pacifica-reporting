@@ -89,8 +89,9 @@ class Reporting extends Baseline_controller {
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
-      // base_url()."resources/scripts/bootstrap/css/bootstrap.min.css",
-      base_url()."resources/scripts/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css",
+      base_url()."resources/scripts/bootstrap/css/bootstrap.min.css",
+      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
+      // base_url()."resources/scripts/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css",
       base_url()."resources/stylesheets/reporting.css"
     );
     $this->page_data['script_uris'] = array(
@@ -98,7 +99,8 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
       base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
-      base_url()."resources/scripts/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js",
+      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
+      // base_url()."resources/scripts/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js",
       base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"
@@ -421,6 +423,15 @@ $(function(){
     echo "</pre>";
 
   }
+
+  public function test_get_earliest_latest($object_type,$object_id){
+    $results = $this->rep->earliest_latest_data($object_type,$object_id);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+
+  }
+
 
   public function test_get_transaction_info(){
     $transaction_list = array(

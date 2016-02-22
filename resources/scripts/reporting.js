@@ -41,8 +41,8 @@ var hc_pie_options = {
   }]
 };
 
-var datepicker = $.fn.datepicker.noConflict();
-$.fn.bootstrapDP = datepicker;
+// var datepicker = $.fn.datepicker.noConflict();
+// $.fn.bootstrapDP = datepicker;
 
 var get_transaction_info = function(el,transaction_list){
   var el = $(el);
@@ -116,10 +116,11 @@ var submit_object_change_worker = function(el, object_type, object_id, action){
   });
 }
 
-var timeline_load_new_data_check = function(timeline_obj, new_timestamp){
+var timeline_load_new_data_check = function(timeline_obj, new_start, new_end){
+  debugger;
   var chart = timeline_obj;
   var x_extremes = chart.xAxis[0].getExtremes();
-  if(new_timestamp > x_extremes.dataMax || new_timestamp < x_extremes.dataMin){
+  if(new_end > x_extremes.dataMax || new_start < x_extremes.dataMin){
     //we're outside of our loaded data, need to request more
     return true;
   }else{
@@ -233,7 +234,7 @@ var setup_confirmation_dialog_boxes = function(e){
 
 $(function(){
   // $('.time_range_container').bootstrapDP({ format: 'mm/dd/yyyy' })
-  $('.input-daterange').bootstrapDP();
+  // $('.input-daterange').bootstrapDP();
   $('#object_search_box').keyup(function(){
     var el = $(this);
     var cfi = el.siblings('.clear_field_icon');
