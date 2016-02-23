@@ -24,17 +24,9 @@ $(function () {
       zoomType: 'x',
       events: {
         redraw: function () {
-          // var datepicker_min = $('#start_time_<?= $object_id ?>').bootstrapDP('getStartDate');
-          // var datepicker_max = $('#end_time_<?= $object_id ?>').bootstrapDP('getEndDate');
           var new_extremes = this.series[0].xAxis.getExtremes();
           var userMin = new_extremes.userMin != undefined ? new_extremes.userMin : new_extremes.min;
           var userMax = new_extremes.userMax != undefined ? new_extremes.userMax : new_extremes.max;
-          // if(userMin < new_extremes.dataMin || userMin < datepicker_min.getTime()){
-          //   userMin = new_extremes.dataMin > datepicker_min.getTime() ? new_extremes.dataMin : datepicker_min.getTime();
-          // }
-          // if(userMax > new_extremes.dataMax || userMax > datepicker_max.getTime()){
-          //   userMax = new_extremes.dataMax < datepicker_max.getTime() ? new_extremes.dataMax : datepicker_max.getTime();
-          // }
           var details_notifier = $('#transaction_details_notifier_<?= $object_id ?>');
           var details_container = $('#transaction_details_container_<?= $object_id ?>');
           var new_start = moment(new Date(userMin).setHours(0,0,0)).format('YYYY-MM-DD');
@@ -50,23 +42,9 @@ $(function () {
             }
             details_container.html('');
             //update the date pickers
-            // debugger;
-            // $('#start_time_<?= $object_id ?>').bootstrapDP('update', new Date(new_start));
-            // $('#end_time_<?= $object_id ?>').bootstrapDP('update', new Date(new_end));
             $('#pie_scripts_container_<?= $object_id ?>').html(data);
             $('#stats_graph_container_<?= $object_id ?>').removeClass('loading_new_graphics');
           });
-        },
-        load: function(){
-          console.log('<?= $object_id ?> chart loaded');
-          var chart = this;
-          // debugger;
-          // d_range = chart.xAxis[0].getExtremes();
-          // d_min = moment(d_range.min).toDate();
-          // d_max = moment(d_range.max).toDate();
-
-          // $('#start_time_<?= $object_id ?>').bootstrapDP('update',d_min);
-          // $('#end_time_<?= $object_id ?>').bootstrapDP('update',d_max);
         }
       },
       type: 'column'

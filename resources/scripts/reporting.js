@@ -117,7 +117,7 @@ var submit_object_change_worker = function(el, object_type, object_id, action){
 }
 
 var timeline_load_new_data_check = function(timeline_obj, new_start, new_end){
-  debugger;
+  // debugger;
   var chart = timeline_obj;
   var x_extremes = chart.xAxis[0].getExtremes();
   if(new_end > x_extremes.dataMax || new_start < x_extremes.dataMin){
@@ -127,7 +127,20 @@ var timeline_load_new_data_check = function(timeline_obj, new_start, new_end){
     //still inside our current bounds, just zoom
     return false;
   }
-}
+};
+
+var load_new_timeline_data = function(timeline_obj, object_type, object_id, start_date, end_date){
+  var url = base_url + "index.php/reporting/get_timeline_data/" + object_type + "/" + object_id + "/";
+  url += start_date + "/" + end_date;
+  var fv_data = timeline_obj.series[0];
+  var tx_data = timeline_obj.series[1];
+
+  var getter = $.get(url, function(data){
+    fv_data.setData(data.file_volumes,false);
+    tx_data.setData(data.transaction_counts,false);
+    timeline_obj.redraw();
+  });
+};
 
 var submit_object_change = function(el, object_type, object_id, action){
   //action is add or remove

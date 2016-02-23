@@ -17,11 +17,6 @@
   <div class="object_footer" id="object_body_<?= $id ?>">
     <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
       <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
-      <!-- <div class="input-daterange input-group" id="datepicker_<?= $id ?>">
-        <input type="text" class="input-sm form-control" name="start" id="start_time_<?= $id ?>" value="<?= $placeholder_info[$id]['times']['start_time_object']->format('n/j/Y'); ?>"/>
-        <span class="input-group-addon">to</span>
-        <input type="text" class="input-sm form-control" name="end" id="end_time_<?= $id ?>" value="<?= $placeholder_info[$id]['times']['end_time_object']->format('n/j/Y'); ?>"/>
-      </div> -->
     </div>
   </div>
 </div>
@@ -31,14 +26,13 @@ $(function() {
 
     function cb(start, end) {
         $('#time_range_container_<?= $id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
-        console.log("new range => " + start.format('YYYY-MM-DD') + " - " + end.format('YYYY-MM-DD'));
         var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
         var start_timestamp = start.toDate().getTime();
         var end_timestamp = end.toDate().getTime();
-        debugger;
+
         if(tl_obj){
           if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
-
+            load_new_timeline_data(tl_obj, object_type,'<?= $id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));
           }else{
             tl_obj.xAxis[0].update({
               min: start_timestamp,
@@ -47,13 +41,16 @@ $(function() {
           }
         }
     }
-    cb(moment(new Date('<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>')), moment(new Date('<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>')));
+    cb(moment(correctTZ(new Date('<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>'))), moment(correctTZ(new Date('<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>'))));
 
     $('#time_range_container_<?= $id ?>').daterangepicker({
         parentEl: '#object_footer_<?= $id ?>',
-        // minDate: '<?= $placeholder_info[$id]['times']['earliest_available_object']->format('Y-m-d'); ?>',
-        // maxDate: '<?= $placeholder_info[$id]['times']['latest_available_object']->format('Y-m-d'); ?>',
+        minDate: '<?= $placeholder_info[$id]['times']['earliest_available_object']->format('m/d/Y'); ?>',
+        maxDate: '<?= $placeholder_info[$id]['times']['latest_available_object']->format('m/d/Y'); ?>',
+        startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
+        endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
         autoUpdateInput: true,
+        linkedCalendars:false,
         ranges: {
            'Last 7 Days': [moment().subtract(6, 'days'), moment()],
            'Last 30 Days': [moment().subtract(29, 'days'), moment()],
@@ -64,38 +61,6 @@ $(function() {
     }, cb);
 
 });
-// $('#time_range_container_<?= $id ?> .input-daterange').bootstrapDP({
-//   orientation: "auto right",
-//   toggleActive: true,
-//   autoclose: true,
-//   todayBtn: "linked"
-// })
-// $('#start_time_<?= $id ?>').bootstrapDP()
-// .on('changeDate',function(e){
-//   var new_d = $(this).bootstrapDP('getDate').getTime();
-//   var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
-//   tl_obj.xAxis[0].update({ min : new_d });
-//   debugger;
-// });
-// $('#start_time_<?= $id ?>').bootstrapDP('setStartDate', moment('<?= $placeholder_info[$id]['times']['earliest_available_object']->format('c'); ?>').toDate());
-// $('#start_time_<?= $id ?>').bootstrapDP('setEndDate', moment('<?= $placeholder_info[$id]['times']['latest_available_object']->format('c'); ?>').toDate());
-// // $('#start_time_<?= $id ?>').bootstrapDP('update',moment('<?= $placeholder_info[$id]['times']['start_time_object']->format('c'); ?>').toDate());
-//
-// $('#end_time_<?= $id ?>').bootstrapDP()
-// .on('changeDate',function(e){
-//   var new_d = $(this).bootstrapDP('getDate').getTime();
-//   var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
-//   // if(timeline_load_new_data_check(tl_obj)){
-//   //   //
-//   // }else{
-//   debugger;
-//     tl_obj.xAxis[0].update({ max : new_d });
-//   // }
-// });
-// $('#end_time_<?= $id ?>').bootstrapDP('setStartDate', moment('<?= $placeholder_info[$id]['times']['earliest_available_object']->format('c'); ?>').toDate());
-// $('#end_time_<?= $id ?>').bootstrapDP('setEndDate', moment('<?= $placeholder_info[$id]['times']['latest_available_object']->format('c'); ?>').toDate());
-// // $('#end_time_<?= $id ?>').bootstrapDP('update',moment('<?= $placeholder_info[$id]['times']['end_time_object']->format('c'); ?>').toDate());
-
 //]]>
 </script>
 <?php endforeach; ?>

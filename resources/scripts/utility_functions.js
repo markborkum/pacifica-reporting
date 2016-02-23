@@ -4,7 +4,7 @@
 
 
 if(window.jQuery){
-  
+
   $.fn.disable = function(){
     this.attr("disabled","disabled");
     this.addClass('disabled_button');
@@ -13,7 +13,7 @@ if(window.jQuery){
     this.removeAttr("disabled");
     this.removeClass('disabled_button');
   };
-  
+
   $.fn.objectIsEqual = function(secondObject){
     var match = false;
     $.each(this,function(index,collectionObject){
@@ -28,19 +28,19 @@ if(window.jQuery){
     });
     return match;
   };
-  
-    
+
+
   $.fn.up = function(type_desired){
     var parents = this.parents(type_desired);
     return parents[0];
   };
-  
+
   $.fn.bodysnatch = function() {
     var collection = this;
     return collection.each(function(a,b) {
       var element = $(this);
       var clone = element.clone();
-      
+
       w = element.width();
       h = element.height();
       if ( w && h)
@@ -62,7 +62,7 @@ if(window.jQuery){
           left: element.offset().left,
           margin:0
           //padding: 0
-        });  
+        });
       }
       $('body').append(clone);
       if(element[0].id) {
@@ -79,9 +79,9 @@ if(window.jQuery){
       collection[a]=clone[0];
     });
   };
-  
+
   $.fn.serializeFormJSON = function() {
-  
+
     var o = {};
     var a = this.serializeArray();
     $.each(a, function() {
@@ -97,36 +97,36 @@ if(window.jQuery){
       }
     );
       return o;
-    };  
-  
+    };
+
   $.fn.labelOver = function(overClass) {
       return this.each(function() {
           var label = $(this);
           var f = label.attr('for');
           if (f) {
               var input = $('#' + f);
-  
+
               this.hide = function() {
                   label.css({
-                      textIndent: -10000 
+                      textIndent: -10000
                   });
               };
-  
+
               this.show = function() {
-                  if (input.val() == '') 
+                  if (input.val() == '')
                       label.css({
-                          textIndent: 0 
+                          textIndent: 0
                       });
               };
-  
+
               // handlers
               input.focus(this.hide);
               input.blur(this.show);
               label.addClass(overClass).click(function() {
                   input.focus();
               });
-  
-              if (input.val() != '') 
+
+              if (input.val() != '')
                   this.hide();
           }
       });
@@ -141,6 +141,13 @@ function isBlank(str) {
     return (!str || /^\s*$/.test(str));
 }
 
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+}
+
+function correctTZ(date){
+  return addMinutes(date, date.getTimezoneOffset());
+}
 
 
 /*  PNNL Javascript
@@ -151,4 +158,3 @@ function isBlank(str) {
 // $(function() {
   // $('label[for=q]').labelOver('over-apply');
 // });
-

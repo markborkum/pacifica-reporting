@@ -104,6 +104,24 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
+  function summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, $make_day_graph){
+    //canonicalize start and end times (yields $start_time & $end_time)
+    // echo "start_date => {$start_date}   end_date => {$end_date}";
+
+    extract($this->canonicalize_date_range($start_date, $end_date));
+
+    //get user transactions
+    $results = array(
+      'transactions' => array(),
+      'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
+    );
+
+    $results['transactions'] = $this->get_transactions_for_user_list($eus_person_id_list, $start_time, $end_time, false);
+    $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
+
+    return $results;
+  }
+
 
 
 
@@ -129,6 +147,58 @@ class Reporting_model extends CI_Model {
   }
 
 
+  function summarize_uploads_by_proposal_list($eus_proposal_id_list, $start_date, $end_date, $make_day_graph){
+    //canonicalize start and end times (yields $start_time & $end_time)
+    extract($this->canonicalize_date_range($start_date, $end_date));
+
+    $results = array(
+      'transactions' => array(),
+      'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
+    );
+
+    //get proposal_group_list
+    $group_collection = array();
+    foreach($eus_instrument_id_list as $eus_instrument_id){
+      $new_collection = $this->get_proposal_group_list($eus_proposal_id);
+      var_dump($new_collection);
+      $group_collection = $group_collection + $new_collection;
+    }
+
+    $group_list = array_keys($group_collection);
+
+    //get transactions for time period & group_list
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+
+    $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
+
+    return $results;
+  }
+
+
+  function summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, $make_day_graph){
+    extract($this->canonicalize_date_range($start_date, $end_date));
+    $group_collection = array();
+    //get instrument group_id list
+    foreach($eus_instrument_id_list as $eus_instrument_id){
+      $new_collection = $this->get_instrument_group_list($eus_instrument_id);
+      $group_collection = $group_collection + $new_collection;
+    }
+    var_dump($group_collection);
+    $group_list = array_keys($group_collection);
+    if(empty($group_list)){
+      //no results returned for group list => bail out
+    }
+    $results = array(
+      'transactions' => array(),
+      'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
+    );
+    //get transactions for time period & group_list
+    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+    $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
+
+    return $results;
+  }
+
 
 
   function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date, $make_day_graph){
@@ -146,6 +216,7 @@ class Reporting_model extends CI_Model {
     );
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+
     $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
 
     return $results;
@@ -208,6 +279,30 @@ class Reporting_model extends CI_Model {
     return $transactions;
   }
 
+  private function get_transactions_for_user_list($eus_user_id_list, $start_date, $end_date, $unfiltered = false){
+    extract($this->canonicalize_date_range($start_date, $end_date));
+    // echo $start_time;
+    $transactions = array();
+    $where_clause = array('stime >=' => $start_time_object->format('Y-m-d H:i:s'));
+    if($end_time){
+      $where_clause['stime <'] = $end_time_object->format('Y-m-d H:i:s');
+    }
+    $this->db->select(array('t.transaction','t.stime as submit_time','ing.person_id'))->where($where_clause);
+    $this->db->from('transactions as t')->join('ingest_state as ing', 't.transaction = ing.trans_id');
+    $this->db->where('ing.message','completed')->where_in('ing.person_id',$eus_user_id_list);
+    $this->db->order_by('t.transaction desc');
+    $transaction_query = $this->db->get();
+
+    if($transaction_query && $transaction_query->num_rows() > 0){
+      foreach($transaction_query->result() as $row){
+        $stime = date_create($row->submit_time);
+        $transactions[$row->transaction] = array(
+          'submit_time' => $stime->format('Y-m-d H:i:s')
+        );
+      }
+    }
+    return $transactions;
+  }
 
 
 

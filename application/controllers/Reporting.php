@@ -89,7 +89,7 @@ class Reporting extends Baseline_controller {
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
-      base_url()."resources/scripts/bootstrap/css/bootstrap.min.css",
+      base_url()."resources/scripts/bootstrap/css/bootstrap.css",
       base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
       // base_url()."resources/scripts/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css",
       base_url()."resources/stylesheets/reporting.css"
@@ -267,6 +267,86 @@ $(function(){
     }
   }
 
+  private function get_reporting_info_list($object_type,$object_id_list,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false){
+    $object_id_list = explode('-',$object_id_list);
+    $this->page_data['object_id_list'] = $object_id_list;
+    // $this->page_data['object_id'] = $object_id;
+    $this->page_data["{$object_type}_id_list"] = $object_id_list;
+    $this->page_data['object_type'] = $object_type;
+    $available_time_range = $this->rep->earliest_latest_data_for_list($object_type,$object_id_list);
+    $latest_data = is_array($available_time_range) && array_key_exists('latest',$available_time_range) ? $available_time_range['latest'] : false;
+    if(!$latest_data){
+      //no data available for this object
+      $this->page_data['results_message'] = "No Data Available for this group of ".ucwords($object_type);
+      $this->load->view("object_types/object_body_insert.html", $this->page_data);
+      return;
+    }
+    $latest_data_object = new DateTime($latest_data);
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    $this->page_data['results_message'] = "&nbsp;";
+    $valid_tr = strtotime($time_range);
+    $valid_st = strtotime($start_date);
+    $valid_et = strtotime($end_date);
+    if(!$valid_tr){
+      if($time_range == 'custom' && $valid_st && $valid_et){
+        //custom date_range, just leave them. Canonicalize will fix them
+        $earliest_available_object = new DateTime($available_time_range['earliest']);
+        $latest_available_object = new DateTime($available_time_range['latest']);
+        $start_date_object = new DateTime($start_date);
+        $end_date_object = new DateTime($end_date);
+        if($start_date_object->getTimestamp() < $earliest_available_object->getTimestamp()){
+          $start_date_object = clone $earliest_available_object;
+          $start_date = $start_date_object->format('Y-m-d');
+        }
+        if($end_date_object->getTimestamp() > $latest_available_object->getTimestamp()){
+          $end_date_object = clone $latest_available_object;
+          $end_date = $end_date_object->format('Y-m-d');
+        }
+        $times = array(
+          'start_date' => $start_date_object->format('Y-m-d H:i:s'),
+          'end_date' => $end_date_object->format('Y-m-d H:i:s'),
+          'earliest' => $earliest_available_object->format('Y-m-d H:i:s'),
+          'latest' => $latest_available_object->format('Y-m-d H:i:s'),
+          'start_date_object' => $start_date_object,
+          'end_date_object' => $end_date_object,
+          'time_range' => $time_range,
+          'earliest_available_object' => $earliest_available_object,
+          'latest_available_object' => $latest_available_object,
+          'message' => "<p>Using ".$end_date_object->format('Y-m-d')." as the new origin time</p>"
+        );
+
+      }else{
+        //looks like the time range is borked, pick the default
+        $time_range = '1 week';
+        $times = time_range_to_date_pair($time_range,$available_time_range);
+      }
+    }else{ //time_range is apparently valid
+      if(($valid_st || $valid_et) && !($valid_st && $valid_et)){
+        //looks like we want an offset time either start or finish
+        $times = time_range_to_date_pair($time_range,$available_time_range,$start_date,$end_date);
+      }else{
+        $times = time_range_to_date_pair($time_range, $available_time_range);
+      }
+    }
+    extract($times);
+
+    $transaction_retrieval_func = "summarize_uploads_by_{$object_type}_list";
+    $transaction_info = array();
+    $transaction_info = $this->rep->$transaction_retrieval_func($object_id_list,$start_date,$end_date, $with_timeline);
+    $this->page_data['transaction_info'] = $transaction_info;
+    $this->page_data['times'] = $times;
+    $this->page_data['include_timeline'] = $with_timeline;
+
+    if($with_timeline){
+      $this->load->view("object_types/object_body_insert.html", $this->page_data);
+    }else{
+      $this->load->view("object_types/object_pie_scripts_insert.html", $this->page_data);
+    }
+  }
+
+
+
+
   public function get_transaction_list_details(){
     if($this->input->post()){
       $transaction_list = $this->input->post();
@@ -283,13 +363,30 @@ $(function(){
 
   }
 
+  public function get_timeline_data($object_type,$object_id,$start_date,$end_date){
+    if(!in_array($object_type,$this->accepted_object_types)){
+      //return an error
+      return false;
+    }
+
+    $retrieval_func = "summarize_uploads_by_{$object_type}";
+    $results = $this->rep->$retrieval_func($object_id,$start_date,$end_date,true);
+    $downselect = $results['day_graph']['by_date'];
+    $return_array = array(
+      'file_volumes' => array_values($downselect['file_volume_array']),
+      'transaction_counts' => array_values($downselect['transaction_count_array'])
+    );
+    send_json_array($return_array);
+  }
+
+
 
   public function get_uploads_for_instrument($instrument_id,$start_date = false,$end_date = false){
-    $results = $this->rep->summarize_uploads_by_instrument($instrument_id,$start_date,$end_date);
+    $results = $this->rep->summarize_uploads_by_instrument($instrument_id,$start_date,$end_date, true);
     $results_size = sizeof($results);
     $pluralizer = $results_size != 1 ? "s" : "";
     $status_message = '{$results_size} transaction{$pluralizer} returned';
-    send_json_array($results);
+    send_json_array($results['day_graph']['by_date']['transaction_count_array']);
   }
 
   public function get_uploads_for_proposal($proposal_id,$start_date = false,$end_date = false){
@@ -393,8 +490,19 @@ $(function(){
 
   }
 
-  public function test_get_uploads_for_instrument($eus_instrument_id,$start_date = false,$end_date = false){
-    $results = $this->rep->summarize_uploads_by_instrument($eus_instrument_id,$start_date,$end_date);
+  public function test_get_uploads_for_user_list($eus_person_id_list,$start_date = false,$end_date = false){
+    $eus_person_id_list = explode('-',$eus_person_id_list);
+    $results = $this->rep->summarize_uploads_by_user_list($eus_person_id_list,$start_date,$end_date,true);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+
+  }
+
+
+  public function test_get_uploads_for_instrument($eus_instrument_id_list,$start_date = false,$end_date = false){
+    $eus_instrument_id_list = explode('-',$eus_instrument_id_list);
+    $results = $this->rep->summarize_uploads_by_instrument_list($eus_instrument_id_list,$start_date,$end_date,true);
     echo "<pre>";
     var_dump($results);
     echo "</pre>";
