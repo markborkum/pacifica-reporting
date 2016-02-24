@@ -5,6 +5,7 @@
       <th>Upload ID</th>
       <th>Upload Time</th>
       <th>Proposal ID</th>
+      <th>Instrument ID</th>
       <th>Uploaded By</th>
       <th>Bundle Size</th>
       <th>File Count</th>
@@ -24,6 +25,7 @@
         <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>"><?= $id ?></a></td>
         <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
         <td><?= $item['eus_proposal_id'] ?></td>
+        <td><?= $item['eus_instrument_id'] ?></td>
         <td><?= $ul_user ?></td>
         <td><?= $friendly_file_size ?></td>
         <td><?= $item['total_file_count'] ?></td>

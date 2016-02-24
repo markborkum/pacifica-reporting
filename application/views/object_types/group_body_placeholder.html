@@ -1,0 +1,15 @@
+<div id='object_body_container_<?= $group_id ?>' class='object_body_container'>
+  <div class="loading_progress_text" id="loading_text_<?= $group_id ?>">
+    Loading Info for <?= ucwords($object_type) ?> Group "<?= $group_name ?>"
+  </div>
+  <div class="loading_progress_indicator" id="loading_status_<?= $group_id ?>">
+    &nbsp;
+  </div>
+<script type="text/javascript">
+//<![CDATA[
+$(function(){
+  load_group_results(object_type, '<?= $group_id ?>', <?= json_encode($item_list); ?>);
+});;
+//]]>
+</script>
+</div>

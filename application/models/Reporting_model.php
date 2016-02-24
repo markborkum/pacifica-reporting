@@ -158,9 +158,8 @@ class Reporting_model extends CI_Model {
 
     //get proposal_group_list
     $group_collection = array();
-    foreach($eus_instrument_id_list as $eus_instrument_id){
+    foreach($eus_proposal_id_list as $eus_proposal_id){
       $new_collection = $this->get_proposal_group_list($eus_proposal_id);
-      var_dump($new_collection);
       $group_collection = $group_collection + $new_collection;
     }
 
@@ -183,7 +182,7 @@ class Reporting_model extends CI_Model {
       $new_collection = $this->get_instrument_group_list($eus_instrument_id);
       $group_collection = $group_collection + $new_collection;
     }
-    var_dump($group_collection);
+    // var_dump($group_collection);
     $group_list = array_keys($group_collection);
     if(empty($group_list)){
       //no results returned for group list => bail out
@@ -542,15 +541,26 @@ class Reporting_model extends CI_Model {
   }
 
   public function earliest_latest_data($object_type, $object_id){
-    $latest_function_name = "latest_available_{$object_type}_data";
-    $spread =  $this->$latest_function_name($object_id);
+    $spread_function_name = "available_{$object_type}_data_spread";
+    $object_id_list = array($object_id);
+    $spread =  $this->$spread_function_name($object_id_list);
+    return $spread;
+  }
+
+
+  public function earliest_latest_data_for_list($object_type,$object_id_list){
+    $spread_function_name = "available_{$object_type}_data_spread";
+    $spread = $this->$spread_function_name($object_id_list);
     return $spread;
   }
 
 
 
-  private function latest_available_instrument_data($instrument_id){
-    $group_collection = $this->get_instrument_group_list($instrument_id);
+  private function available_instrument_data_spread($object_id_list){
+    $group_collection = array();
+    foreach($object_id_list as $object_id){
+      $group_collection += $this->get_instrument_group_list($object_id);
+    }
     $group_list = array_keys($group_collection);
     $latest_time = false;
     $this->db->select(array(
@@ -582,8 +592,11 @@ class Reporting_model extends CI_Model {
 
 
 
-  private function latest_available_proposal_data($proposal_id){
-    $group_collection = $this->get_proposal_group_list($proposal_id);
+  private function available_proposal_data_spread($object_id_list){
+    $group_collection = array();
+    foreach($object_id_list as $object_id){
+      $group_collection += $this->get_proposal_group_list($object_id);
+    }
     $group_list = array_keys($group_collection);
 
     $this->db->select(array(
@@ -612,35 +625,36 @@ class Reporting_model extends CI_Model {
   }
 
 
-  private function old_latest_available_user_data($person_id){
-    $this->db->select(array("t.stime as most_recent_upload","t.transaction"));
-    $this->db->where('t.stime is not null')->order_by("t.transaction desc");
-    $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
-    echo $this->db->last_query();
+  // private function old_latest_available_user_data($person_id){
+  //   $this->db->select(array("t.stime as most_recent_upload","t.transaction"));
+  //   $this->db->where('t.stime is not null')->order_by("t.transaction desc");
+  //   $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
+  //   echo $this->db->last_query();
+  //
+  //   if($query && $query->num_rows() > 0){
+  //     //blank stime in trans table
+  //     $latest_time = new DateTime($query->row()->most_recent_upload);
+  //   }else{
+  //     $this->db->order_by('f.transaction desc');
+  //     $file_query = $this->db->get_where('files f', array('f.transaction' => $query->row()->transaction),1);
+  //     if($file_query && $file_query->num_rows()>0){
+  //       $latest_time = new DateTime($file_query->row()->most_recent_upload);
+  //     }else{
+  //       $latest_time = new DateTime('1991-01-01 00:00:00');
+  //     }
+  //   }
+  //   return $latest_time->format('Y-m-d H:i');
+  // }
 
-    if($query && $query->num_rows() > 0){
-      //blank stime in trans table
-      $latest_time = new DateTime($query->row()->most_recent_upload);
-    }else{
-      $this->db->order_by('f.transaction desc');
-      $file_query = $this->db->get_where('files f', array('f.transaction' => $query->row()->transaction),1);
-      if($file_query && $file_query->num_rows()>0){
-        $latest_time = new DateTime($file_query->row()->most_recent_upload);
-      }else{
-        $latest_time = new DateTime('1991-01-01 00:00:00');
-      }
-    }
-    return $latest_time->format('Y-m-d H:i');
-  }
 
-
-  private function latest_available_user_data($person_id){
+  private function available_user_data_spread($object_id_list){
     $this->db->select(array(
       'MAX(t.stime) as most_recent_upload',
       'MIN(t.stime) as earliest_upload')
     );
     $this->db->where('t.stime is not null');
-    $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
+    $this->db->where_in('submitter',$object_id_list);
+    $query = $this->db->get("transactions t",1);
 
     if($query && $query->num_rows() > 0){
       //blank stime in trans table
@@ -700,7 +714,11 @@ class Reporting_model extends CI_Model {
   private function get_proposal_group_list($proposal_id_filter = ""){
     $this->db->select(array('group_id','name as proposal_id'))->where('type','proposal');
     if(!empty($proposal_id_filter)){
-      $this->db->where('name',$proposal_id_filter);
+      if(is_array($proposal_id_filter)){
+        $this->db->where_in('name',$proposal_id_filter);
+      }else{
+        $this->db->where('name',$proposal_id_filter);
+      }
     }
     $query = $this->db->get('groups');
 
@@ -750,7 +768,7 @@ class Reporting_model extends CI_Model {
 
   public function get_selected_objects($eus_person_id,$restrict_type = false){
     $DB_prefs = $this->load->database('website_prefs',TRUE);
-    $DB_prefs->select(array('eus_person_id','item_type','item_id'));
+    $DB_prefs->select(array('eus_person_id','item_type','item_id','group_id'));
     $DB_prefs->where('deleted is null');
     if(!empty($restrict_type)){
       $DB_prefs->where('item_type',$restrict_type);
@@ -775,6 +793,40 @@ class Reporting_model extends CI_Model {
         }
         $item_id = strval($row->item_id);
         $results[$row->item_type][$item_id] = $group_list;
+        // $results[{$row->item_type}_group][$row->group_id][$item_id] =
+      }
+    }
+    return $results;
+  }
+
+
+  public function get_selected_groups($eus_person_id,$restrict_type = false){
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $select_array = array(
+      'g.group_id','g.group_name','g.group_type','g.person_id as user','p.item_id'
+    );
+    $DB_prefs->select($select_array);
+    $person_array = array($eus_person_id);
+    $DB_prefs->where_in('g.person_id',$person_array);
+    $DB_prefs->where('g.deleted is NULL');
+    if($restrict_type){
+      $DB_prefs->where('g.group_type',$restrict_type);
+    }
+    $DB_prefs->from('reporting_object_groups g')->join('reporting_selection_prefs p', 'g.group_id = p.group_id');
+    $query = $DB_prefs->get();
+    $results = array();
+    if($query && $query->num_rows()>0){
+      foreach($query->result() as $row){
+        if(!array_key_exists($row->group_id, $results)){
+          $results[$row->group_id] = array(
+            'group_name' => $row->group_name,
+            'group_type' => $row->group_type,
+            'user' => $row->user,
+            'item_list' => array($row->item_id)
+          );
+        }else{
+          $results[$row->group_id]['item_list'][] = $row->item_id;
+        }
       }
     }
     return $results;
@@ -831,6 +883,18 @@ class Reporting_model extends CI_Model {
     return true;
   }
 
+  public function get_items_for_group($group_id){
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $DB_prefs->select(array('item_type','item_id'));
+    $query = $DB_prefs->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+    $results = array();
+    if($query && $query->num_rows() > 0){
+      foreach($query->result() as $row){
+        $results[$row->item_type][] = $row->item_id;
+      }
+    }
+    return $results;
+  }
 
 
 }

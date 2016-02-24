@@ -1,0 +1,67 @@
+<?php foreach($my_groups as $id => $group_info): ?>
+  <?php $display_group_name = ucwords($group_info['group_type']); ?>
+  <div class='reporting_object_container' id="reporting_object_container_<?= $id ?>">
+    <div class="object_header" style="position:relative;">
+      <div class="object_name"><?= $display_group_name ?> Grouping - <?= $group_info['group_name'] ?></div>
+      <div class="object_name_short"><?= $group_info['group_name'] ?></div>
+      <div class="remove_message" style="display:none;">Remove this <?= $group_info['group_type'] ?> grouping from my list</div>
+      <div class="remove_icon" title="Click to remove this <?= $group_info['group_type'] ?> grouping from this report" id="remove_icon_<?= $id ?>"></div>
+      <div class="remove_confirmation_dialog" id="remove_confirmation_dialog_<?= $id ?>"></div>
+      <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
+      <span class="remove_dialog_message" style="display:none;">Really remove this <?= $group_info['group_type'] ?> grouping?</span>
+    </div>
+
+    <div class="object_body" id="object_body_<?= $id ?>">
+      <?php $this->load->view('object_types/group_body_placeholder.html',$placeholder_info[$id]); ?>
+    </div>
+
+    <div class="object_footer" id="object_body_<?= $id ?>">
+      <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
+        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
+      </div>
+    </div>
+  </div>
+  <script type='text/javascript'>
+  //<![CDATA[
+  $(function() {
+
+      function cb(start, end) {
+          $('#time_range_container_<?= $id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
+          var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
+          var start_timestamp = start.toDate().getTime();
+          var end_timestamp = end.toDate().getTime();
+
+          if(tl_obj){
+            if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
+              load_new_group_timeline_data(tl_obj, object_type,'<?= $id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));
+            }else{
+              tl_obj.xAxis[0].update({
+                min: start_timestamp,
+                max: end_timestamp
+              });
+            }
+          }
+      }
+      cb(moment(correctTZ(new Date('<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>'))), moment(correctTZ(new Date('<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>'))));
+
+      $('#time_range_container_<?= $id ?>').daterangepicker({
+          parentEl: '#object_footer_<?= $id ?>',
+          minDate: '<?= $placeholder_info[$id]['times']['earliest_available_object']->format('m/d/Y'); ?>',
+          maxDate: '<?= $placeholder_info[$id]['times']['latest_available_object']->format('m/d/Y'); ?>',
+          startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
+          endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
+          autoUpdateInput: true,
+          linkedCalendars:false,
+          ranges: {
+             'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+             'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+             'Last 3 Months': [moment().subtract(3, 'months'), moment()],
+             'Last 6 Months': [moment().subtract(6, 'months'), moment()],
+             'Last Year': [moment().subtract(12, 'months'), moment()],
+          }
+      }, cb);
+
+  });
+  //]]>
+  </script>
+<?php endforeach; ?>

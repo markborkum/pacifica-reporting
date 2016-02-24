@@ -1,0 +1,67 @@
+<?php
+  if(isset($transaction_info)){
+    extract($transaction_info);
+    $keys = array_keys($day_graph['by_date']);
+    $earliest_date = array_shift($keys);
+    $last_date = array_pop($keys);
+    //$day_graph_info = day_graph_to_series($day_graph);
+    $this->page_data['day_graph_info'] = $day_graph['by_date'];
+  }
+?>
+<div id="object_body_container_<?= $group_id ?>" class="object_body_container">
+  <?php if(isset($summary_totals)): ?>
+  <div id="totals_container_<?= $group_id ?>" class="totals_container" style='vertical-align: middle;'>
+    <?php $transaction_plural = $summary_totals['transaction_count'] != 1 ? "s" : ""; ?>
+    <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
+    <div id='upload_totals_header_<?= $group_id ?>' class='stats_header'>Upload Totals</div>
+    <ul id='upload_totals_<?= $group_id ?>' class='stats_list'>
+      <li><span id='transaction_count_<?= $group_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></li>
+      <li><span id='file_count_<?= $group_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $group_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
+    </ul>
+  </div>
+  <div id='stats_graph_container_<?= $group_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
+      <div id='proposal_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_left'></div>
+      <div id='instrument_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_center'></div>
+      <div id='user_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_right'></div>
+  </div>
+  <div id="new_times_<?= $group_id ?>" style="display:none;">
+    <span id="new_start_time_<?= $group_id ?>"><time datetime="<?= $times['start_date'] ?>"><?= $times['start_date_object']->format('n/j/Y') ?></time></span>
+    <span id="new_end_time_<?= $group_id ?>"><time datetime="<?= $times['end_date'] ?>"><?= $times['end_date_object']->format('n/j/Y') ?></time></span>
+  </div>
+  <div id="pie_scripts_container_<?= $group_id ?>">
+    <?php $this->load->view('object_types/group_pie_scripts_insert.html', $this->page_data); ?>
+  </div>
+  <div id="legend_description_<?= $group_id ?>" class="legend_description" style="min-height:20px;"></div>
+  <div id="timeline_script_container_<?= $group_id ?>">
+    <?php $this->load->view('object_types/group_timeline_script_insert.html', $this->page_data); ?>
+  </div>
+  <div id="transaction_details_notifier_<?= $group_id ?>" class="transaction_details_notifier">
+    Transaction Details
+    <span id="disclosure_arrow_<?= $group_id ?>_right" class="disclosure_arrows dc_up">&nbsp;</span>
+  </div>
+  <div id="transaction_details_loader_<?= $group_id ?>" class="transaction_details_loader" style="position:relative;display:none;">
+    <div id="details_loading_progress_indicator_<?= $group_id ?>" class="details_loading_indicator">Loading...</div>
+  </div>
+  <div id="transaction_details_container_<?= $group_id ?>" class="transaction_details_container" style="display:none;"></div>
+  <div id="dialog-confirm"></div>
+  <script>
+  //<![CDATA[
+  var earliest_loaded = '<?= $time_range['start_time'] ?>';
+  var latest_loaded = '<?= $time_range['end_time'] ?>';
+  //]]>
+  </script>
+
+  <?php else: ?>
+  <div class='info_message'><?= $results_message ?></div>
+  <?php endif; ?>
+  <script>
+  //<![CDATA[
+  $(function(){
+    $('#remove_icon_<?= $group_id ?>').click(function(){
+      var el = $(this);
+      submit_object_change(el, '<?= $object_type ?>', '<?= $group_id ?>', 'remove');
+    });
+  });
+  //]]>
+  </script>
+</div>

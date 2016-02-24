@@ -1,45 +1,6 @@
 <?php extract($transaction_info); ?>
 <script type="text/javascript">
   $(function () {
-      // Make monochrome colors and set them as default for all pies
-      Highcharts.getOptions().plotOptions.pie.colors = (function () {
-          var colors = [],
-              // base = Highcharts.getOptions().colors[2],
-              base = '#81aa00',
-              i;
-          for (i = 0; i < 10; i += 1) {
-              // Start out with a darkened base color (negative brighten), and end
-              // up with a much brighter color
-              colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
-          }
-          return colors;
-      }());
-
-      Highcharts.getOptions().plotOptions.spline.colors = (function () {
-          var colors = [],
-              // base = Highcharts.getOptions().colors[2],
-              base = '#81aa00',
-              i;
-          for (i = 0; i < 10; i += 1) {
-              // Start out with a darkened base color (negative brighten), and end
-              // up with a much brighter color
-              colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
-          }
-          return colors;
-      }());
-
-      Highcharts.setOptions({
-        lang: {
-          thousandsSep: ""
-        },
-        global: {
-          useUTC: false
-        }
-      });
-
-
-      // $('span#start_time_<?= $object_id ?> > time').html('<?= $times['start_date_object']->format('n/j/Y') ?>');
-      // $('span#end_time_<?= $object_id ?> > time').html('<?= $times['end_date_object']->format('n/j/Y') ?>');
       $('#message_container_<?= $object_id ?>').html('<?= $results_message ?>');
       $('#transaction_count_<?= $object_id ?>').html('<?= $summary_totals["transaction_count"] ?>');
       $('#file_count_<?= $object_id ?>').html('<?= $summary_totals["total_file_count"] ?>');
@@ -57,7 +18,6 @@
           $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['transaction_count'],2));
           $proposal_name = $this->eus->get_proposal_name($proposal_id);
           $proposal_lookup[$proposal_id] = $proposal_name;
-
         }
         ?>
 

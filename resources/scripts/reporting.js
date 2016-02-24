@@ -31,13 +31,88 @@ var hc_pie_options = {
         enabled: false,
         floating:true
       },
-      center: [100, 80],
       showInLegend: true
     }
   },
   series: [{
     name: 'Uploads',
     animation: false,
+  }]
+};
+
+var hc_timeline_options = {
+  credits: false,
+  chart: {
+    animation: {
+      duration: 250
+    },
+    height: 250,
+    style: {
+      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+      fontSize: '12px'
+    },
+    zoomType: 'x',
+    type: 'column'
+  },
+  title: {
+    text: ''
+  },
+  legend: {
+    enabled: false
+  },
+  tooltip: {
+    pointFormat: '<strong>{point.name} {point.y}{valueSuffix}</strong>',
+    headerFormat: '<span style="font-size: 10px">{series.name}</span><br/>'
+  },
+  plotOptions: {
+    series: {
+      marker: {
+        enabled: false
+      },
+      animation: {
+        duration: 250
+      }
+    }
+  },
+  xAxis: {
+    type: 'datetime',
+    labels: {
+      formatter: function() {
+        return moment(this.value).format("ddd M/D/YYYY");
+      },
+      rotation: -45
+    },
+    // tickInterval: 24 * 3600 * 1000,
+    tickPixelInterval: 30
+  },
+  yAxis: [{ //transaction count axis
+    title: {
+      text: 'Number of Uploads',
+      style: {
+        color: Highcharts.getOptions().colors[1]
+      }
+    },
+    labels: {
+      style: {
+        color: Highcharts.getOptions().colors[1]
+      }
+    }
+  },{ //volume axis
+    title: {
+      text: 'File Volume (MB)',
+      style: {
+        color: Highcharts.getOptions().colors[0]
+      }
+    },
+    labels: {
+      formatter: function() {
+        return humanFileSize(this.value);
+      },
+      style: {
+        color: Highcharts.getOptions().colors[0]
+      }
+    },
+    opposite:true
   }]
 };
 
@@ -116,6 +191,13 @@ var submit_object_change_worker = function(el, object_type, object_id, action){
   });
 }
 
+var humanFileSize = function(size) {
+    if (size == 0) { return "0"; }
+    var i = Math.floor( Math.log(size) / Math.log(1024) );
+    return ( size / Math.pow(1000, i) ).toFixed(2) * 1 + ' ' + ['B', 'kB', 'MB', 'GB', 'TB'][i];
+};
+
+
 var timeline_load_new_data_check = function(timeline_obj, new_start, new_end){
   // debugger;
   var chart = timeline_obj;
@@ -131,6 +213,19 @@ var timeline_load_new_data_check = function(timeline_obj, new_start, new_end){
 
 var load_new_timeline_data = function(timeline_obj, object_type, object_id, start_date, end_date){
   var url = base_url + "index.php/reporting/get_timeline_data/" + object_type + "/" + object_id + "/";
+  url += start_date + "/" + end_date;
+  var fv_data = timeline_obj.series[0];
+  var tx_data = timeline_obj.series[1];
+
+  var getter = $.get(url, function(data){
+    fv_data.setData(data.file_volumes,false);
+    tx_data.setData(data.transaction_counts,false);
+    timeline_obj.redraw();
+  });
+};
+
+var load_new_group_timeline_data = function(timeline_obj, object_type, group_id, start_date, end_date){
+  var url = base_url + "index.php/reporting/get_group_timeline_data/" + object_type + "/" + group_id + "/";
   url += start_date + "/" + end_date;
   var fv_data = timeline_obj.series[0];
   var tx_data = timeline_obj.series[1];
@@ -203,6 +298,17 @@ var load_results = function(object_type, object_id){
 };
 
 
+var load_group_results = function(object_type, group_id, item_list){
+  $('#loading_status_' + group_id).spin();
+  var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
+  var getter = $.get(url);
+  getter.done(function(data,status){
+    $('#loading_status_' + group_id).spin(false);
+    $('#object_body_container_' + group_id).replaceWith(data);
+  });
+};
+
+
 var get_search_results = function(el, filter_text){
   if(filter_text.length > 0){
     var url = base_url + 'index.php/reporting/get_object_lookup/' + object_type + '/' + filter_text;
@@ -246,6 +352,42 @@ var setup_confirmation_dialog_boxes = function(e){
 
 
 $(function(){
+  // Make monochrome colors and set them as default for all pies
+  Highcharts.getOptions().plotOptions.pie.colors = (function () {
+      var colors = [],
+          // base = Highcharts.getOptions().colors[2],
+          base = '#81aa00',
+          i;
+      for (i = 0; i < 10; i += 1) {
+          // Start out with a darkened base color (negative brighten), and end
+          // up with a much brighter color
+          colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
+      }
+      return colors;
+  }());
+
+  Highcharts.getOptions().plotOptions.spline.colors = (function () {
+      var colors = [],
+          // base = Highcharts.getOptions().colors[2],
+          base = '#81aa00',
+          i;
+      for (i = 0; i < 10; i += 1) {
+          // Start out with a darkened base color (negative brighten), and end
+          // up with a much brighter color
+          colors.push(Highcharts.Color(base).brighten((i - 3) / 7).get());
+      }
+      return colors;
+  }());
+
+  Highcharts.setOptions({
+    lang: {
+      thousandsSep: ""
+    },
+    global: {
+      useUTC: false
+    }
+  });
+
   // $('.time_range_container').bootstrapDP({ format: 'mm/dd/yyyy' })
   // $('.input-daterange').bootstrapDP();
   $('#object_search_box').keyup(function(){

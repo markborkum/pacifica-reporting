@@ -116,7 +116,7 @@ header.secondary .page_header{
   border-radius: 12px;
   height:30px;
   width: 85%;
-  padding: 4px 0px 5px 20px;
+  padding: 8px 0px 5px 20px;
   transition: box-shadow 0.3s, border 0.3s;
   color: #222;
 }
@@ -195,6 +195,7 @@ h1.underline{
 .themed_button {
   width: 10%;
   height: 29px;
+  margin-bottom:4px;
   margin-left:0.5em;
   border: 3px solid #999;
   border-radius: 12px;
@@ -370,13 +371,18 @@ h1.underline{
 }*/
 
 .stats_graph {
-  min-width:250px;
-  height:250px;
-  width:50%;
+  height:150px;
+  width:33%;
 }
 
 .stats_graph_left {
 
+}
+
+.stats_graph_center {
+  position:absolute;
+  right:33%;
+  top:0;
 }
 
 .stats_graph_right {
@@ -435,6 +441,10 @@ h1.underline{
   color: #fefefe;
 }
 
+.form_container th {
+  text-align: center;
+  padding: 10px auto;
+}
 
 
 /* @2x Images (Pixel Ratio of 1.25+) */

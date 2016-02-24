@@ -78,11 +78,11 @@ class Reporting extends Baseline_controller {
   }
 
 
-  public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+  public function group_view($object_type,$time_range = '1-month', $start_date = false, $end_date = false){
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
     if(!in_array($object_type,$accepted_object_types)){
-      redirect('reporting/view/instrument');
+      redirect('reporting/group_view/instrument/{$time_range}');
     }
     $this->page_data['page_header'] = "MyEMSL Uploads per ".ucwords($object_type);
     $this->page_data['my_object_type'] = $object_type;
@@ -91,7 +91,6 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/select2/select2.css",
       base_url()."resources/scripts/bootstrap/css/bootstrap.css",
       base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
-      // base_url()."resources/scripts/bootstrap-datepicker/dist/css/bootstrap-datepicker3.standalone.css",
       base_url()."resources/stylesheets/reporting.css"
     );
     $this->page_data['script_uris'] = array(
@@ -100,16 +99,109 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/moment.min.js",
       base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
       base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
-      // base_url()."resources/scripts/bootstrap-datepicker/dist/js/bootstrap-datepicker.min.js",
       base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"
     );
     $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    // $times = $this->fix_time_range($time_range, $start_date, $end_date);
 
-    // extract($times);
+    // $my_object_list = $this->rep->get_selected_objects($this->user_id, $object_type);
+    $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
+
+    if(empty($my_groups)){
+      $examples = $this->add_groups_instructions($object_type);
+      $this->page_data['examples'] = $examples;
+//       $this->page_data['js'] .= "
+// $(function(){
+//   $('#object_search_box').focus();
+// });
+// ";
+      $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
+    }else{
+      $this->page_data['my_groups'] = '';
+      // $object_list = array_map('strval', array_keys($my_groups[$object_type]));
+      // if(!empty($default_object_id) && in_array($default_object_id,$object_list)){
+      //   $object_list = array(strval($default_object_id));
+      // }
+      // $transaction_info = array();
+      $object_list = array();
+      //get just the raw object_ids for lookup purposes
+      // foreach($my_groups as $group_id => $group_info){
+      //   $object_list = array_merge($object_list, $group_info['item_list']);
+      // }
+
+      // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
+      foreach($my_groups as $group_id => $group_info){
+        $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
+        $object_list = array_merge($object_list,$group_info['item_list']);
+
+        $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
+        $latest_available_date = new DateTime($valid_date_range['latest']);
+        $earliest_available_date = new DateTime($valid_date_range['earliest']);
+
+        $valid_range = array(
+          'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
+          'latest' => $latest_available_date->format('Y-m-d H:i:s'),
+          'earliest_available_object' => $earliest_available_date,
+          'latest_available_object' => $latest_available_date
+        );
+        if($my_times['start_time_object']->getTimestamp() < $valid_range['earliest_available_object']->getTimestamp()){
+          $my_times['start_time_object'] = clone($valid_range['earliest_available_object']);
+        }
+        if($my_times['end_time_object']->getTimestamp() > $valid_range['latest_available_object']->getTimestamp()){
+          $my_times['end_time_object'] = clone($valid_range['latest_available_object']);
+        }
+        $my_times = array_merge($my_times, $valid_range);
+
+        $this->page_data['placeholder_info'][$group_id] = array(
+          'group_id' => $group_id,
+          'object_type' => $object_type,
+          'group_name' => $group_info['group_name'],
+          'item_list' => $group_info['item_list'],
+          'time_range' => $time_range,
+          'times' => $my_times
+        );
+      }
+      $object_info = $this->eus->get_object_info($object_list,$object_type);
+
+      // var_dump($object_info);
+      $this->page_data['my_objects'] = $object_info;
+      $this->page_data['my_groups'] = $my_groups;
+      $this->page_data['content_view'] = "object_types/group.html";
+    }
+    // var_dump($this->page_data['placeholder_info']);
+    $this->load->view('reporting_view.html',$this->page_data);
+  }
+
+
+  public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+    $object_type = singular($object_type);
+    $accepted_object_types = array('instrument','proposal','user');
+    if(!in_array($object_type,$accepted_object_types)){
+      redirect('reporting/view/instrument/{$time_range}');
+    }
+    $this->page_data['page_header'] = "MyEMSL Uploads per ".ucwords($object_type);
+    $this->page_data['my_object_type'] = $object_type;
+    $this->page_data['css_uris'] = array(
+      "/resources/stylesheets/status_style.css",
+      "/resources/scripts/select2/select2.css",
+      base_url()."resources/scripts/bootstrap/css/bootstrap.css",
+      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
+      base_url()."resources/stylesheets/reporting.css"
+    );
+    $this->page_data['script_uris'] = array(
+      "/resources/scripts/spinner/spin.min.js",
+      "/resources/scripts/spinner/jquery.spin.js",
+      "/resources/scripts/moment.min.js",
+      base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
+      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
+      base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
+      base_url()."resources/scripts/highcharts/js/highcharts.js",
+      base_url()."resources/scripts/reporting.js"
+    );
+    $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
 
     $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
     if(empty($my_object_list)){
@@ -123,10 +215,12 @@ $(function(){
       $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
     }else{
       $this->page_data['my_objects'] = '';
+
       $object_list = array_map('strval', array_keys($my_object_list[$object_type]));
       if(!empty($default_object_id) && in_array($default_object_id,$object_list)){
         $object_list = array(strval($default_object_id));
       }
+
       // $transaction_info = array();
       $object_info = $this->eus->get_object_info($object_list,$object_type);
       // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
@@ -267,13 +361,24 @@ $(function(){
     }
   }
 
-  private function get_reporting_info_list($object_type,$object_id_list,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false){
-    $object_id_list = explode('-',$object_id_list);
+  public function get_reporting_info_list($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
+    $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,true);
+  }
+
+  public function get_reporting_info_list_no_timeline($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false){
+    $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,false);
+  }
+
+
+  private function get_reporting_info_list_base($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false){
+    $group_info = $this->rep->get_items_for_group($group_id);
+    $object_id_list = array_values($group_info[$object_type]);
     $this->page_data['object_id_list'] = $object_id_list;
     // $this->page_data['object_id'] = $object_id;
     $this->page_data["{$object_type}_id_list"] = $object_id_list;
     $this->page_data['object_type'] = $object_type;
     $available_time_range = $this->rep->earliest_latest_data_for_list($object_type,$object_id_list);
+
     $latest_data = is_array($available_time_range) && array_key_exists('latest',$available_time_range) ? $available_time_range['latest'] : false;
     if(!$latest_data){
       //no data available for this object
@@ -334,13 +439,14 @@ $(function(){
     $transaction_info = array();
     $transaction_info = $this->rep->$transaction_retrieval_func($object_id_list,$start_date,$end_date, $with_timeline);
     $this->page_data['transaction_info'] = $transaction_info;
+    $this->page_data['group_id'] = $group_id;
     $this->page_data['times'] = $times;
     $this->page_data['include_timeline'] = $with_timeline;
 
     if($with_timeline){
-      $this->load->view("object_types/object_body_insert.html", $this->page_data);
+      $this->load->view("object_types/group_body_insert.html", $this->page_data);
     }else{
-      $this->load->view("object_types/object_pie_scripts_insert.html", $this->page_data);
+      $this->load->view("object_types/group_pie_scripts_insert.html", $this->page_data);
     }
   }
 
@@ -371,6 +477,22 @@ $(function(){
 
     $retrieval_func = "summarize_uploads_by_{$object_type}";
     $results = $this->rep->$retrieval_func($object_id,$start_date,$end_date,true);
+    $downselect = $results['day_graph']['by_date'];
+    $return_array = array(
+      'file_volumes' => array_values($downselect['file_volume_array']),
+      'transaction_counts' => array_values($downselect['transaction_count_array'])
+    );
+    send_json_array($return_array);
+  }
+
+  public function get_group_timeline_data($object_type,$group_id,$start_date,$end_date){
+    if(!in_array($object_type,$this->accepted_object_types)){
+      //return an error
+      return false;
+    }
+    $object_list = $this->rep->get_items_for_group($group_id);
+    $retrieval_func = "summarize_uploads_by_{$object_type}_list";
+    $results = $this->rep->$retrieval_func($object_list,$start_date,$end_date,true);
     $downselect = $results['day_graph']['by_date'];
     $return_array = array(
       'file_volumes' => array_values($downselect['file_volume_array']),
@@ -533,7 +655,8 @@ $(function(){
   }
 
   public function test_get_earliest_latest($object_type,$object_id){
-    $results = $this->rep->earliest_latest_data($object_type,$object_id);
+    $object_id_list = explode('-',$object_id_list);
+    $results = $this->rep->earliest_latest_data($object_type,$object_id_list);
     echo "<pre>";
     var_dump($results);
     echo "</pre>";
