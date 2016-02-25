@@ -229,8 +229,9 @@ var load_new_group_timeline_data = function(timeline_obj, object_type, group_id,
   url += start_date + "/" + end_date;
   var fv_data = timeline_obj.series[0];
   var tx_data = timeline_obj.series[1];
-
+  $('#loading_blocker_' + group_id).spin().show();
   var getter = $.get(url, function(data){
+    $('#loading_blocker_' + group_id).spin(false).hide();
     fv_data.setData(data.file_volumes,false);
     tx_data.setData(data.transaction_counts,false);
     timeline_obj.redraw();

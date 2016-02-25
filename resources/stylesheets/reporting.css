@@ -314,6 +314,30 @@ h1.underline{
   text-align:right;
 }
 
+.reporting_object_container .message_container_footer {
+  float:left;
+}
+
+.loading_blocker {
+  transition: opacity .25s ease-in-out;
+  position: absolute;
+  width: 98%;
+  height: 97%;
+  background-color: rgba(255, 255, 255, 0.65);
+  z-index:100;
+}
+
+.loading_blocker div {
+  position: absolute;
+  top: 60%;
+  width: 100%;
+  text-align: center;
+  font-size: 1.5em;
+  font-weight: bold;
+  font-style: italic;
+  color: #666;
+}
+
 .remove_icon {
   background-image:url(/resources/images/remove_icons.png);
   background-size: 16px 48px;
@@ -371,9 +395,20 @@ h1.underline{
 }*/
 
 .stats_graph {
-  height:150px;
+  /*height:150px;
+  width:33%;*/
+}
+
+.stats_graph_2_across{
+  height:250px;
+  width:50%;
+}
+
+.stats_graph_3_across{
+  height:180px;
   width:33%;
 }
+
 
 .stats_graph_left {
 

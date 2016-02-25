@@ -178,7 +178,9 @@ class Reporting_model extends CI_Model {
     extract($this->canonicalize_date_range($start_date, $end_date));
     $group_collection = array();
     //get instrument group_id list
+    // var_dump($eus_instrument_id_list);
     foreach($eus_instrument_id_list as $eus_instrument_id){
+      // echo "instrument_id => ". $eus_instrument_id;
       $new_collection = $this->get_instrument_group_list($eus_instrument_id);
       $group_collection = $group_collection + $new_collection;
     }
@@ -193,6 +195,7 @@ class Reporting_model extends CI_Model {
     );
     //get transactions for time period & group_list
     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+
     $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time);
 
     return $results;
@@ -226,6 +229,7 @@ class Reporting_model extends CI_Model {
  *    Private functionality for behind the scenes data retrieval
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
   private function get_transactions_from_group_list($group_list, $start_time, $end_time){
+    // var_dump($group_list);
     // extract($this->canonicalize_date_range($start_date, $end_date));
     $transactions = array();
     $where_clause = array('stime >=' => $start_time);
@@ -238,7 +242,7 @@ class Reporting_model extends CI_Model {
     $this->db->where_in('gi.group_id',$group_list);
     $this->db->order_by('t.transaction desc')->distinct();
     $transaction_query = $this->db->get();
-
+    // echo $this->db->last_query();
     if($transaction_query && $transaction_query->num_rows()>0){
       foreach($transaction_query->result() as $row){
         $stime = date_create($row->submit_time);

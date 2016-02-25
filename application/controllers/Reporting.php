@@ -491,8 +491,9 @@ $(function(){
       return false;
     }
     $object_list = $this->rep->get_items_for_group($group_id);
+    // var_dump($object_list);
     $retrieval_func = "summarize_uploads_by_{$object_type}_list";
-    $results = $this->rep->$retrieval_func($object_list,$start_date,$end_date,true);
+    $results = $this->rep->$retrieval_func($object_list[$object_type],$start_date,$end_date,true);
     $downselect = $results['day_graph']['by_date'];
     $return_array = array(
       'file_volumes' => array_values($downselect['file_volume_array']),

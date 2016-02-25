@@ -12,10 +12,12 @@
     </div>
 
     <div class="object_body" id="object_body_<?= $id ?>">
+      <div class="loading_blocker" id="loading_blocker_<?= $id ?>" style="display:none;"><div>Loading Updated Info...</div></div>
       <?php $this->load->view('object_types/group_body_placeholder.html',$placeholder_info[$id]); ?>
     </div>
 
     <div class="object_footer" id="object_body_<?= $id ?>">
+      <div id="message_container_footer_<?= $id ?>" class="message_container_footer">Loading...</div>
       <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
         <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
       </div>
@@ -24,6 +26,7 @@
   <script type='text/javascript'>
   //<![CDATA[
   $(function() {
+
 
       function cb(start, end) {
           $('#time_range_container_<?= $id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));

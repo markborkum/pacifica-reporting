@@ -20,9 +20,9 @@
     </ul>
   </div>
   <div id='stats_graph_container_<?= $group_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
-      <div id='proposal_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_left'></div>
-      <div id='instrument_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_center'></div>
-      <div id='user_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_right'></div>
+      <div id='proposal_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_left'></div>
+      <div id='instrument_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_center'></div>
+      <div id='user_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_right'></div>
   </div>
   <div id="new_times_<?= $group_id ?>" style="display:none;">
     <span id="new_start_time_<?= $group_id ?>"><time datetime="<?= $times['start_date'] ?>"><?= $times['start_date_object']->format('n/j/Y') ?></time></span>

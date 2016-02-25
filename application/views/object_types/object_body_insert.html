@@ -8,6 +8,7 @@
     $this->page_data['day_graph_info'] = $day_graph['by_date'];
   }
 ?>
+
 <div id="object_body_container_<?= $object_id ?>" class="object_body_container">
   <?php if(isset($summary_totals)): ?>
   <div id="totals_container_<?= $object_id ?>" class="totals_container" style='vertical-align: middle;'>
@@ -23,15 +24,15 @@
     <?php $graph_sides = array('left','right'); ?>
     <?php if($object_type != 'instrument'): ?>
       <?php $side = array_shift($graph_sides); ?>
-      <div id='instrument_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_<?= $side ?>'></div>
+      <div id='instrument_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_2_across stats_graph_<?= $side ?>'></div>
     <?php endif; ?>
     <?php if($object_type != 'proposal'): ?>
       <?php $side = array_shift($graph_sides); ?>
-      <div id='proposal_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_<?= $side ?>'></div>
+      <div id='proposal_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_2_across stats_graph_<?= $side ?>'></div>
     <?php endif; ?>
     <?php if($object_type != 'user'): ?>
       <?php $side = array_shift($graph_sides); ?>
-      <div id='user_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_<?= $side ?>'></div>
+      <div id='user_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_2_across stats_graph_<?= $side ?>'></div>
     <?php endif; ?>
   </div>
   <div id="new_times_<?= $object_id ?>" style="display:none;">
