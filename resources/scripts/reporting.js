@@ -13,7 +13,8 @@ var hc_pie_options = {
     type: 'pie'
   },
   title: {
-    style: {'fontSize':'13px', 'fontWeight':'bold'}
+    style: {'fontSize':'13px', 'fontWeight':'bold'},
+    x:-30
   },
   legend: {
     layout: 'vertical',

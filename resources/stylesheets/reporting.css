@@ -11,10 +11,31 @@ footer.short{
   height:40px;
 }
 
+.reporting_object_container .object_name a {
+  font-size:0.8em;
+  text-decoration: none;
+  color:#fff;
+}
+
+.reporting_object_container .object_name a:hover {
+  text-decoration: underline;
+}
+
+
 header.secondary .page_header{
   -webkit-box-sizing: content-box;
   -moz-box-sizing: content-box;
   box-sizing: content-box;
+}
+
+header.secondary .tab_selector{
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  padding: 10px 19px 0px 2px;
+  margin-top: -6px;
+  height: 36px;
+  background: #53682b url(../images/menu-angle.png) scroll no-repeat 0 0;
 }
 
 #last_update_timestamp{

@@ -110,7 +110,7 @@ class Reporting extends Baseline_controller {
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
 
     if(empty($my_groups)){
-      $examples = $this->add_groups_instructions($object_type);
+      $examples = $this->add_objects_instructions($object_type);
       $this->page_data['examples'] = $examples;
 //       $this->page_data['js'] .= "
 // $(function(){
@@ -120,18 +120,7 @@ class Reporting extends Baseline_controller {
       $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
     }else{
       $this->page_data['my_groups'] = '';
-      // $object_list = array_map('strval', array_keys($my_groups[$object_type]));
-      // if(!empty($default_object_id) && in_array($default_object_id,$object_list)){
-      //   $object_list = array(strval($default_object_id));
-      // }
-      // $transaction_info = array();
       $object_list = array();
-      //get just the raw object_ids for lookup purposes
-      // foreach($my_groups as $group_id => $group_info){
-      //   $object_list = array_merge($object_list, $group_info['item_list']);
-      // }
-
-      // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}";
       foreach($my_groups as $group_id => $group_info){
         $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
         $object_list = array_merge($object_list,$group_info['item_list']);
@@ -175,7 +164,7 @@ class Reporting extends Baseline_controller {
   }
 
 
-  public function view($object_type, $time_range = '1-month', $start_date = false, $end_date = false){
+  public function view($object_type, $group_id, $time_range = '1-month', $start_date = false, $end_date = false){
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
     if(!in_array($object_type,$accepted_object_types)){
@@ -203,7 +192,7 @@ class Reporting extends Baseline_controller {
     $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
 
-    $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type);
+    $my_object_list = $this->rep->get_selected_objects($this->user_id,$object_type,$group_id);
     if(empty($my_object_list)){
       $examples = $this->add_objects_instructions($object_type);
       $this->page_data['examples'] = $examples;

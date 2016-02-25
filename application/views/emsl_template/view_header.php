@@ -42,15 +42,23 @@
             <div class="logo_image">&nbsp;</div>
           </div>
           <div class="site_slogan">Environmental Molecular Sciences Laboratory</div>
-          <div id="menu_block_container" style="display:none;">
+          <div id="tab_selector_container" class="tab_selector">
             <nav>
               <ul id="page_menu">
-                <li><a href="https://www.emsl.pnl.gov/emslweb/">Home</a><span class='menu_separator'>|</span></li>
-                <li>About<span class='menu_separator'>|</span></li>
-                <li>Science<span class='menu_separator'>|</span></li>
-                <li>Capabilities<span class='menu_separator'>|</span></li>
-                <li>Working With Us<span class='menu_separator'>|</span></li>
-                <li>News</li>
+                <?php $menu_types = $this->accepted_object_types; ?>
+                <?php while($menu_types): ?>
+                  <?php $object_type = strtolower(array_shift($menu_types)); ?>
+                  <li>
+                    <?php if($my_object_type == $object_type): ?>
+                    <?= $object_type ?>
+                    <?php else: ?>
+                    <a href="<?= base_url() ?>index.php/reporting/group_view/<?= $object_type ?>"><?= $object_type ?></a>
+                  <?php endif; ?>
+                    <?php if(sizeof($menu_types) > 0): ?>
+                    <span class="menu_separator">|</span>
+                    <?php endif; ?>
+                  </li>
+                <?php endwhile; ?>
               </ul>
             </nav>
           </div>

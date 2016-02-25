@@ -18,6 +18,12 @@
       <li><span id='transaction_count_<?= $group_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></li>
       <li><span id='file_count_<?= $group_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $group_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
+    <div id="contained_objects_header_<?= $group_id ?>" class="stats_header"><?= ucwords(plural($object_type)) ?> Referenced</div>
+    <ul id="contained_objects_<?= $group_id ?>">
+    <?php foreach($object_id_list as $item_id): ?>
+      <li><?= $item_id ?></li>
+    <?php endforeach; ?>
+    </ul>
   </div>
   <div id='stats_graph_container_<?= $group_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
       <div id='proposal_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_left'></div>
