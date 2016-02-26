@@ -19,11 +19,13 @@
       <li><span id='file_count_<?= $group_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $group_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
     <div id="contained_objects_header_<?= $group_id ?>" class="stats_header"><?= ucwords(plural($object_type)) ?> Referenced</div>
-    <ul id="contained_objects_<?= $group_id ?>">
-    <?php foreach($object_id_list as $item_id): ?>
-      <li><?= $item_id ?></li>
-    <?php endforeach; ?>
-    </ul>
+    <?php $processed_obj_list = array_chunk($object_id_list,3); ?>
+    <?php $processed_obj_list_strings = array();
+          foreach($processed_obj_list as $line){
+            $processed_obj_list_strings[] = implode(', ',$line);
+          }
+    ?>
+    <p><?= implode('<br />',$processed_obj_list_strings) ?></p>
   </div>
   <div id='stats_graph_container_<?= $group_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
       <div id='proposal_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_left'></div>

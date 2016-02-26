@@ -8,7 +8,7 @@ var hc_pie_options = {
     spacing: [10,0,0,0],
     style: {
       fontFamily: 'Helvetica, Arial, sans-serif',
-      fontSize: '12px'
+      fontSize: '10px'
     },
     type: 'pie'
   },
