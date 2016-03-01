@@ -212,10 +212,14 @@ header.secondary .tab_selector{
 
 
 
-h1.underline{
+/*h1.underline{
   border-radius:0;
   margin-bottom:0;
   padding-left:0.5em;
+}*/
+
+h1.underline{
+  padding:0.5em;
 }
 
 .themed_button {
@@ -268,8 +272,8 @@ h1.underline{
 
 
 .reporting_object_container {
-  margin-bottom:2em;
-  margin-top:2em;
+  margin-bottom:1em;
+  margin-top:1em;
 }
 
 .reporting_object_container > .object_header{
@@ -278,10 +282,16 @@ h1.underline{
   font-weight:bold;
   background-color:#999;
   color:#fff;
-   border-radius: 5px 5px 0px 0px;
+  border-radius: 5px 5px 0px 0px;
+  transition: all 0.25s ease-in-out;
 }
 
-.reporting_object_container > .object_body{
+.reporting_object_container > .object_header.closed {
+  border-radius:5px;
+  /*margin-bottom:2em;*/
+}
+
+.reporting_object_container .object_body{
   position:relative;
   padding:8px;
   padding-bottom:15px;
@@ -290,7 +300,7 @@ h1.underline{
   border: 1px solid #ccc;
 }
 
-.reporting_object_container > .object_footer{
+.reporting_object_container .object_footer{
   font-size:0.925em;
   color:#4e4e4e;
   font-weight:bold;
@@ -393,6 +403,41 @@ h1.underline{
 .dc_down:hover {background-position: -16px -16px;}
 .dc_up:active {background-position: 0px -32px;}
 .dc_down:active {background-position: -16px -32px;}
+
+
+.disclosure_triangle {
+  background-image:url(/resources/images/disclosure_triangle_right@2x.png);
+  position: absolute;
+  left: 7px;
+  top: 7px;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-size: 12px 12px;
+  height: 12px;
+  width:12px;
+  transition: all 0.25s ease-in-out;
+}
+
+.disclosure_triangle.opened {
+  -webkit-transform: rotate(90deg);
+  -moz-transform: rotate(90deg);
+  -ms-transform: rotate(90deg);
+  -o-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.disclosure_triangle.closed {
+  -webkit-transform: rotate(0deg);
+  -moz-transform: rotate(0deg);
+  -ms-transform: rotate(0deg);
+  -o-transform: rotate(0deg);
+  transform: rotate(0deg);
+}
+
+span.container_name {
+  margin-left: 12px;
+}
+
 
 .transaction_details_loader{
   font-weight: bold;

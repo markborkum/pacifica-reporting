@@ -819,6 +819,7 @@ class Reporting_model extends CI_Model {
     if($restrict_type){
       $DB_prefs->where('g.group_type',$restrict_type);
     }
+    $DB_prefs->order_by('ordering ASC');
     $DB_prefs->from('reporting_object_groups g')->join('reporting_selection_prefs p', 'g.group_id = p.group_id');
     $query = $DB_prefs->get();
     $results = array();

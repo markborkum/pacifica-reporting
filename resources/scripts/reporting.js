@@ -422,4 +422,20 @@ $(function(){
   $('.remove_icon').mouseout(function(event) {
     $(event.target).siblings('.remove_message').fadeOut('fast');
   });
+  $('.disclosure_triangle').click(function(event){
+    var el = $(event.target);
+    var current_state = el.hasClass('opened') ? 'open' : 'closed';
+    var closeable = el.parents('.reporting_object_container').find('.object_closeable');
+    var header_block = el.parents('.object_header');
+    if(current_state == 'open'){
+      closeable.slideUp(250);
+      el.removeClass('opened').addClass('closed');
+      header_block.addClass('closed');
+    }else{
+      closeable.slideDown(250);
+      el.removeClass('closed').addClass('opened');
+      header_block.removeClass('closed');
+    }
+  });
+
 });

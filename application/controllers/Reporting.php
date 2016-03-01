@@ -84,7 +84,7 @@ class Reporting extends Baseline_controller {
     if(!in_array($object_type,$accepted_object_types)){
       redirect('reporting/group_view/instrument/{$time_range}');
     }
-    $this->page_data['page_header'] = "MyEMSL Uploads per ".ucwords($object_type);
+    $this->page_data['page_header'] = "Aggregated MyEMSL Uploads by ".ucwords($object_type)." Grouping";
     $this->page_data['my_object_type'] = $object_type;
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",

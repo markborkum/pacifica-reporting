@@ -1,10 +1,12 @@
 <?php foreach($my_groups as $id => $group_info): ?>
+  <?php $current_state = " opened"; ?>
   <?php $display_group_name = ucwords($group_info['group_type']); ?>
   <?php $clean_time_range = str_replace(' ','-',$placeholder_info[$id]['time_range']); ?>
   <div class='reporting_object_container' id="reporting_object_container_<?= $id ?>">
     <div class="object_header" style="position:relative;">
       <div class="object_name">
-        <?= $display_group_name ?> Grouping - <?= $group_info['group_name'] ?>
+        <div class="disclosure_triangle<?= $current_state ?>" id="disclosure_triangle_<?= $id ?>"></div>
+        <span class="container_name"><?= $display_group_name ?> Grouping - <?= $group_info['group_name'] ?></span>
         <span><a href="<?= base_url() ?>index.php/reporting/view/<?= $my_object_type ?>/<?= $id ?>/<?= $clean_time_range ?>" target="_blank">[Details]</a></span>
       </div>
       <div class="object_name_short"><?= $group_info['group_name'] ?></div>
@@ -14,16 +16,17 @@
       <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
       <span class="remove_dialog_message" style="display:none;">Really remove this <?= $group_info['group_type'] ?> grouping?</span>
     </div>
+    <div class="object_closeable" id="object_closeable_<?= $id ?>">      
+      <div class="object_body" id="object_body_<?= $id ?>">
+        <div class="loading_blocker" id="loading_blocker_<?= $id ?>" style="display:none;"><div>Loading Updated Info...</div></div>
+        <?php $this->load->view('object_types/group_body_placeholder.html',$placeholder_info[$id]); ?>
+      </div>
 
-    <div class="object_body" id="object_body_<?= $id ?>">
-      <div class="loading_blocker" id="loading_blocker_<?= $id ?>" style="display:none;"><div>Loading Updated Info...</div></div>
-      <?php $this->load->view('object_types/group_body_placeholder.html',$placeholder_info[$id]); ?>
-    </div>
-
-    <div class="object_footer" id="object_body_<?= $id ?>">
-      <div id="message_container_footer_<?= $id ?>" class="message_container_footer"></div>
-      <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
-        <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
+      <div class="object_footer" id="object_body_<?= $id ?>">
+        <div id="message_container_footer_<?= $id ?>" class="message_container_footer"></div>
+        <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
+          <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
+        </div>
       </div>
     </div>
   </div>
