@@ -151,8 +151,9 @@ var get_transaction_info = function(el,transaction_list){
 };
 
 var submit_object_change_worker = function(el, object_type, object_id, action){
-  var update_list = JSON.stringify([{ 'object_id' : object_id, 'action' : action }]);
-  var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type;
+  var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
+  var update_list = JSON.stringify([{ 'object_id' : object_id, 'group_id' : group_id, 'action' : action }]);
+  var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type + '/' + group_id;
 
   $.post(url, update_list, function(data){
     //need to update the DOM to add/remove the appropriate object

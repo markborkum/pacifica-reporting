@@ -326,8 +326,8 @@ h1.underline{
   position: absolute;
   height: 16px;
   width: 16px;
-  right: 149px;
-  top: 8px;
+  right: 7px;
+  top: 7px;
 }
 
 .clear_field_icon {background-position: 0px 0px;}
@@ -759,9 +759,5 @@ span.container_name {
   }
   .stats_list > li {
      text-align: center !important;
-  }
-  .clear_field_icon {
-    right: 16.5%;
-    top: 7px;
   }
 }

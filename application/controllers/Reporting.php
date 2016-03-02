@@ -560,7 +560,7 @@ $(function(){
   }
 
 
-  public function update_object_preferences($object_type){
+  public function update_object_preferences($object_type, $group_id = false){
     if($this->input->post()){
       $object_list = $this->input->post();
     }elseif($this->input->is_ajax_request() || file_get_contents('php://input')){
@@ -570,7 +570,7 @@ $(function(){
       //return a 404 error
     }
     $new_set = array();
-    if($this->rep->update_object_preferences($object_type,$object_list)){
+    if($this->rep->update_object_preferences($object_type,$object_list,$group_id)){
       $new_set = $this->rep->get_selected_objects($this->user_id,$object_type);
       if(empty($new_set)){
 
