@@ -16,13 +16,30 @@
       <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
       <span class="remove_dialog_message" style="display:none;">Really remove this <?= $group_info['group_type'] ?> grouping?</span>
     </div>
-    <div class="object_closeable" id="object_closeable_<?= $id ?>">      
+    <div class="object_closeable" id="object_closeable_<?= $id ?>">
       <div class="object_body" id="object_body_<?= $id ?>">
         <div class="loading_blocker" id="loading_blocker_<?= $id ?>" style="display:none;"><div>Loading Updated Info...</div></div>
         <?php $this->load->view('object_types/group_body_placeholder.html',$placeholder_info[$id]); ?>
       </div>
 
-      <div class="object_footer" id="object_body_<?= $id ?>">
+      <div class="group_edit_section closed" id="group_edit_section_<?= $id ?>" style="display:none;">
+        <div class="group_search_bar_container" id="group_search_bar_container_<?= $id ?>">
+          <form onsubmit="return false;" id="group_search_form_<?= $id ?>" class="group_search_form">
+            <div style="position:relative;">
+              <div class='magnifying_glass_icon' id='magnifying_glass_icon'>&nbsp;</div>
+              <div class='clear_field_icon' id='clear_field_icon' style="display:none;">&nbsp;</div>
+              <input class='object_search_box' id='object_search_box' type='text' placeholder="Search for a(n) <?= $my_object_type ?> to add to the report" />
+              <input type="hidden" id="group_id_<?= $id ?>" name="group_id_<?= $id ?>" class="group_id" value="<?= $id ?>" />
+              <input type="hidden" id="object_type_<?= $id ?>" name="object_type_<?= $id ?>" class="object_type" value="<?= $my_object_type ?>" />
+            </div>
+          </form>
+        </div>
+        <div id="object_search_results_container_<?= $id ?>" class="search_results_display"></div>
+      </div>
+      <div class="object_footer" id="object_footer_<?= $id ?>">
+        <div id="edit_grouping_container_<?= $id ?>" class="edit_grouping_container">
+          <input type="button" class="edit_grouping_button" id="edit_grouping_button_<?= $id ?>" name="edit_grouping_button_<?= $id ?>" value="Edit Group" />
+        </div>
         <div id="message_container_footer_<?= $id ?>" class="message_container_footer"></div>
         <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
           <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>

@@ -770,7 +770,7 @@ class Reporting_model extends CI_Model {
   }
 
 
-  public function get_selected_objects($eus_person_id,$restrict_type = false, $group_id = false){
+  public function get_selected_objects($eus_person_id,$restrict_type = false,$group_id = false){
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     $DB_prefs->select(array('eus_person_id','item_type','item_id','group_id'));
     $DB_prefs->where('deleted is null');

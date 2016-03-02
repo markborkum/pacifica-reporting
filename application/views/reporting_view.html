@@ -2,11 +2,13 @@
   $this->template_version = $this->config->item('template');
   $this->load->view("{$this->template_version}_template/view_header");
   $js = isset($js) ? $js : "";
+  //$display_search = $this->router->fetch_method() == 'view' ? "" : ' style="display:none;"';
+  $display_search = ' style="display:none;"';
 ?>
 
   <div id="container">
     <div id="main">
-      <div class="search_bar_container" id="search_bar_container" style="display:none;">
+      <div class="search_bar_container" id="search_bar_container"<?= $display_search ?>>
         <form onsubmit="return false;">
           <div style="position:relative;">
             <div class='magnifying_glass_icon' id='magnifying_glass_icon'>&nbsp;</div>
@@ -18,7 +20,9 @@
       </div>
       <div id="search_results_display" style="display:none;">&nbsp;</div>
       <?php $this->load->view($content_view); ?>
+      <?php if($this->router->fetch_method() == 'group_view'): ?>
       <?php $this->load->view('object_types/insert_new_group.html') ?>
+      <?php endif; ?>
     </div>
   </div>
   <?php $this->load->view("{$this->template_version}_template/view_footer_short"); ?>
