@@ -845,20 +845,19 @@ class Reporting_model extends CI_Model {
   function update_object_preferences($object_type,$object_list,$group_id = false){
     //object list should look like array('object_id' => $object_id, 'action' => $action)
     //if $group_id is set, check to make sure that it's valid and active
-    if($group_id && is_numeric($group_id)){
-      $group_items = $this->get_items_for_group($group_id);
-    }
-
+    // if($group_id && is_numeric($group_id)){
+    //   $group_items = $this->get_items_for_group($group_id);
+    // }
     $table = 'reporting_selection_prefs';
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     $additions = array();
     $removals = array();
     $existing = array();
     $where_clause = array('item_type' => $object_type, 'eus_person_id' => $this->user_id);
-    if(sizeof($group_items) > 0){
+    if($group_id && is_numeric($group_id)){
       $where_clause['group_id'] = $group_id;
     }
-    $DB_prefs->select(array('item_id','group_id'));
+    $DB_prefs->select('item_id');
     $check_query = $DB_prefs->get_where($table, $where_clause);
     if($check_query && $check_query->num_rows() > 0){
       foreach($check_query->result() as $row){
@@ -882,7 +881,8 @@ class Reporting_model extends CI_Model {
           $insert_object = array(
             'eus_person_id' => $this->user_id,
             'item_type' => $object_type,
-            'item_id' => strval($object_id)
+            'item_id' => strval($object_id),
+            'group_id' => $group_id
           );
           $DB_prefs->insert($table,$insert_object);
         }

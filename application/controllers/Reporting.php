@@ -569,14 +569,16 @@ $(function(){
     }else{
       //return a 404 error
     }
+    $filter = $object_list[0]['current_search_string'];
     $new_set = array();
     if($this->rep->update_object_preferences($object_type,$object_list,$group_id)){
-      $new_set = $this->rep->get_selected_objects($this->user_id,$object_type);
-      if(empty($new_set)){
-
-      }
+      $this->get_object_group_lookup($object_type, $group_id, $filter);
+      // $new_set = $this->rep->get_selected_objects($this->user_id,$object_type,$group_id);
+      // if(empty($new_set)){
+      //
+      // }
     }
-    send_json_array($new_set);
+    //send_json_array($new_set);
   }
 
   public function add_objects_instructions($object_type){

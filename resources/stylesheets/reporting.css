@@ -242,6 +242,20 @@ header.secondary .tab_selector{
   font-size:1.5em;
 }
 
+.search_input_container, .group_name_edit_container {
+  position: relative;
+  width: 93%;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.group_name_edit_container {
+  margin-bottom:1em;
+}
+
+.group_name_edit_container input[type="text"]{
+  padding: 0;
+}
 
 
 #insert_new_group_container {

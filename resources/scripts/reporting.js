@@ -150,9 +150,39 @@ var get_transaction_info = function(el,transaction_list){
   }
 };
 
+var submit_group_change_worker = function(el, object_type, object_id, action){
+  var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
+  var current_search_string = el.parents('.group_edit_section').find('.object_search_box').val();
+  var update_list = JSON.stringify(
+    [
+      { 'object_id' : object_id,
+        'group_id' : group_id,
+        'action' : action,
+        'current_search_string' : current_search_string
+      }
+    ]);
+  var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type + '/' + group_id;
+  var poster = $.post(url,update_list, function(data){
+    if(data){
+      el.parents('.search_results_display').html(data);
+    }
+
+  });
+}
+
+
 var submit_object_change_worker = function(el, object_type, object_id, action){
   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
-  var update_list = JSON.stringify([{ 'object_id' : object_id, 'group_id' : group_id, 'action' : action }]);
+  debugger;
+  var current_search_string = el.parents('.group_edit_section').find('.object_search_box').val();
+  var update_list = JSON.stringify(
+    [
+      { 'object_id' : object_id,
+        'group_id' : group_id,
+        'action' : action,
+        'current_search_string' : current_search_string
+      }
+    ]);
   var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type + '/' + group_id;
 
   $.post(url, update_list, function(data){
@@ -240,6 +270,10 @@ var load_new_group_timeline_data = function(timeline_obj, object_type, group_id,
   });
 };
 
+var submit_group_change = function(el, object_type, object_id, action){
+  submit_group_change_worker(el, object_type, object_id, action)
+}
+
 var submit_object_change = function(el, object_type, object_id, action){
   //action is add or remove
   if(el.is('input[type="checkbox"]')){
@@ -326,12 +360,12 @@ var get_search_results = function(el, filter_text){
 
 
 var setup_search_checkboxes = function(){
-  $('.object_selection_checkbox').click(function(el){
-    var el = $(el.target);
+  $('.object_selection_checkbox').click(function(event){
+    var el = $(event.target);
     var id = el.attr('id');
     var object_id = parseInt(id.substr(id.lastIndexOf("_")+1),10);
     var action = el.is(":checked") ? 'add' : 'remove';
-    submit_object_change(el, object_type, object_id, action);
+    submit_group_change(el, object_type, object_id, action);
   });
 }
 
@@ -446,13 +480,13 @@ $(function(){
   //   clear_results();
   //   $(this).disable();
   // });
-  $('.remove_icon').mouseover(function(event){
-    $(event.target).siblings('.remove_message').fadeIn('fast');
-
-  });
-  $('.remove_icon').mouseout(function(event) {
-    $(event.target).siblings('.remove_message').fadeOut('fast');
-  });
+  // $('.remove_icon').mouseover(function(event){
+  //   $(event.target).siblings('.remove_message').fadeIn('fast');
+  //
+  // });
+  // $('.remove_icon').mouseout(function(event) {
+  //   $(event.target).siblings('.remove_message').fadeOut('fast');
+  // });
   $('.edit_grouping_button').click(function(event){
     var el = $(event.target);
     get_group_objects(el)
