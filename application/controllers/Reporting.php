@@ -10,7 +10,7 @@ class Reporting extends Baseline_controller {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
     $this->load->library('myemsl-eus-library/EUS','','eus');
-    $this->load->helper(array('network','file_info','inflector','time','item','search_term'));
+    $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');
   }
@@ -77,13 +77,43 @@ class Reporting extends Baseline_controller {
     return $times;
   }
 
+  private function set_time_range_cookie($time_range, $object_type){
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    $cookie_name = "myemsl_group_view_{$object_type}";
+    $valid_time_range = !empty($time_range) && date_create($time_range);
+    $existing_cookie = $this->input->cookie($cookie_name);
+    $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
+    $cookie_contents = array(
+      'name' => $cookie_name,
+      'value' => $stored_time_range,
+      'expire' => 604800,
+      'prefix' => '',
+      'path' => '/'
+    );
 
-  public function group_view($object_type,$time_range = '1-month', $start_date = false, $end_date = false){
+    //check time-range for validity
+    if($valid_time_range){
+      //let them change the stored value if they specify in the url
+      $this->input->set_cookie($cookie_contents);
+      $new_time_range = $time_range;
+    }elseif($existing_cookie == FALSE){
+      //no cookie and nothing specified in the url
+      $new_time_range = str_replace('-',' ',$cookie_contents['value']);
+      $this->input->set_cookie($cookie_contents);
+    }else{
+      $new_time_range = str_replace('-',' ',$existing_cookie);
+    }
+    return $new_time_range;
+  }
+
+
+  public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false){
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
     if(!in_array($object_type,$accepted_object_types)){
-      redirect('reporting/group_view/instrument/{$time_range}');
+      redirect('reporting/group_view/instrument');
     }
+    $time_range = $this->set_time_range_cookie($time_range, $object_type);
     $this->page_data['page_header'] = "Aggregated MyEMSL Uploads by ".ucwords($object_type)." Grouping";
     $this->page_data['my_object_type'] = $object_type;
     $this->page_data['css_uris'] = array(

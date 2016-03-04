@@ -23,14 +23,15 @@
           <div class="group_name_edit_container" id="group_name_edit_container_<?= $id ?>">
             <label for="group_name_editor_<?= $id ?>" style="color:#222;">Group Name</label>
             <input type="text" class="group_name_editor" id="group_name_editor_<?= $id ?>" name="group_name_editor_<?= $id ?>" value="<?= $group_info['group_name'] ?>" />
-            <input type="button" class="group_name_editor_commit" id="group_name_edit_done_button_<?= $id ?>" name="group_name_edit_done_button_<?= $id ?>" value="Save" />
-            <input type="button" class="group_name_editor_cancel" id="group_name_edit_cancel_button_<?= $id ?>" name="group_name_edit_cancel_button_<?= $id ?>" value="Cancel" />
+            <div class="group_name_editor_commit change_icon_accept_reject accept" id="group_name_edit_done_button_<?= $id ?>" style="display:none;">&nbsp;</div>
+            <div class="group_name_editor_commit change_icon_accept_reject reject" id="group_name_edit_cancel_button_<?= $id ?>" style="display:none;">&nbsp;</div>
           </div>
           <form onsubmit="return false;" id="group_search_form_<?= $id ?>" class="group_search_form">
             <div class="search_input_container">
               <div class='magnifying_glass_icon' id='magnifying_glass_icon'>&nbsp;</div>
               <div class='clear_field_icon' id='clear_field_icon' style="display:none;">&nbsp;</div>
               <input class='object_search_box' id='object_search_box' type='text' placeholder="Search for a(n) <?= $my_object_type ?> to add to the report" />
+              <input type="hidden" id="group_name_<?= $id ?>" name="group_name_<?= $id ?>" class="group_name" value="<?= $group_info['group_name'] ?>" />
               <input type="hidden" id="group_id_<?= $id ?>" name="group_id_<?= $id ?>" class="group_id" value="<?= $id ?>" />
               <input type="hidden" id="object_type_<?= $id ?>" name="object_type_<?= $id ?>" class="object_type" value="<?= $my_object_type ?>" />
             </div>

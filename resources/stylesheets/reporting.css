@@ -147,7 +147,7 @@ header.secondary .tab_selector{
 .group_search_bar_container input[type="text"]{
   border: 3px solid #aaa;
   border-radius: 12px;
-  height: 30px;
+  height: 31px;
   width: 100%;
   padding: 8px 0px 5px 20px;
   transition: box-shadow 0.3s, border 0.3s;
@@ -250,11 +250,12 @@ header.secondary .tab_selector{
 }
 
 .group_name_edit_container {
-  margin-bottom:1em;
+  margin-bottom:1em;gr
 }
 
 .group_name_edit_container input[type="text"]{
   padding: 0;
+  padding-left:10px;
 }
 
 
@@ -670,6 +671,30 @@ span.container_name {
   padding: 10px auto;
 }
 
+.change_icon_accept_reject {
+  background-image:url(/resources/images/checkbox_sprites@2x.png);
+  background-size: 48px 72px;
+  background-repeat:no-repeat;
+  height: 24px;
+  width: 24px;
+  position:absolute;
+  bottom:4px;
+}
+
+.change_icon_accept_reject.accept {
+  background-position: 0px 0px;
+  right:28px;
+}
+.change_icon_accept_reject.accept:hover { background-position: 0px -24px; }
+.change_icon_accept_reject.accept:active { background-position: 0px -48px; }
+.change_icon_accept_reject.reject {
+  background-position: -24px 0px;
+  right:3px;
+}
+.change_icon_accept_reject.reject:hover { background-position: -24px -24px; }
+.change_icon_accept_reject.reject:active { background-position: -24px -48px; }
+
+
 
 /* @2x Images (Pixel Ratio of 1.25+) */
 @media only screen and (-o-min-device-pixel-ratio: 5/4),
@@ -681,6 +706,7 @@ span.container_name {
     .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
     .clear_field_icon {  background-image:url(/resources/images/clear_boxes@2x.png); }
     .disclosure_triangle {   background-image:url(/resources/images/disclosure_triangle_right@2x.png); }
+    .change_icon_accept_reject { background-image:url(/resources/images/checkbox_sprites@2px.png); }
 }
 
 /* @3x Images (Pixel Ratio of 2.25+) */
@@ -693,6 +719,7 @@ span.container_name {
     .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
     .clear_field_icon {  background-image:url(/resources/images/clear_boxes@3x.png); }
     .disclosure_triangle {   background-image:url(/resources/images/disclosure_triangle_right@3x.png); }
+    .change_icon_accept_reject { background-image:url(/resources/images/checkbox_sprites@3px.png); }
 }
 
 
