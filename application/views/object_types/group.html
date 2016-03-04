@@ -6,10 +6,10 @@
     <div class="object_header" style="position:relative;">
       <div class="object_name">
         <div class="disclosure_triangle<?= $current_state ?>" id="disclosure_triangle_<?= $id ?>"></div>
-        <span class="container_name"><?= $display_group_name ?> Grouping - <?= $group_info['group_name'] ?></span>
+        <span class="container_name"><?= $display_group_name ?> Grouping - <span class="displayed_group_name"><?= $group_info['group_name'] ?></span></span>
         <span><a href="<?= base_url() ?>index.php/reporting/view/<?= $my_object_type ?>/<?= $id ?>/<?= $clean_time_range ?>" target="_blank">[Details]</a></span>
       </div>
-      <div class="object_name_short"><?= $group_info['group_name'] ?></div>
+      <div class="object_name_short"><span class="displayed_group_name"><?= $group_info['group_name'] ?></span></div>
       <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
     </div>
     <div class="object_closeable" id="object_closeable_<?= $id ?>">
@@ -20,13 +20,16 @@
 
       <div class="group_edit_section closed" id="group_edit_section_<?= $id ?>" style="display:none;">
         <div class="group_search_bar_container" id="group_search_bar_container_<?= $id ?>">
-          <div class="group_name_edit_container" id="group_name_edit_container_<?= $id ?>">
-            <label for="group_name_editor_<?= $id ?>" style="color:#222;">Group Name</label>
-            <input type="text" class="group_name_editor" id="group_name_editor_<?= $id ?>" name="group_name_editor_<?= $id ?>" value="<?= $group_info['group_name'] ?>" />
-            <div class="group_name_editor_commit change_icon_accept_reject accept" id="group_name_edit_done_button_<?= $id ?>" style="display:none;">&nbsp;</div>
-            <div class="group_name_editor_commit change_icon_accept_reject reject" id="group_name_edit_cancel_button_<?= $id ?>" style="display:none;">&nbsp;</div>
-          </div>
           <form onsubmit="return false;" id="group_search_form_<?= $id ?>" class="group_search_form">
+            <h4>Edit Group Name</h4>
+            <div class="group_name_edit_container" id="group_name_edit_container_<?= $id ?>">
+              <input type="text" class="group_name_editor" id="group_name_editor_<?= $id ?>" name="group_name_editor_<?= $id ?>" placeholder="<?= $group_info['group_name'] ?>" />
+              <div class="group_edit_confirm_buttons" style="display:none;">
+                <div class="group_name_editor_commit change_icon_accept_reject accept" id="group_name_edit_done_button_<?= $id ?>" >&nbsp;</div>
+                <div class="group_name_editor_commit change_icon_accept_reject reject" id="group_name_edit_cancel_button_<?= $id ?>" >&nbsp;</div>
+              </div>
+            </div>
+            <h4>Change <?= plural(ucwords($my_object_type)) ?> in this Group</h4>
             <div class="search_input_container">
               <div class='magnifying_glass_icon' id='magnifying_glass_icon'>&nbsp;</div>
               <div class='clear_field_icon' id='clear_field_icon' style="display:none;">&nbsp;</div>

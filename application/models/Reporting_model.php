@@ -911,6 +911,33 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
+  public function change_group_name($group_id,$group_name){
+    $new_group_info = false;
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $update_array = array('group_name' => $group_name);
+    $DB_prefs->where('group_id',$group_id)->set('group_name',$group_name)->update('reporting_object_groups');
+    if($DB_prefs->affected_rows() > 0){
+      $new_group_info = $this->get_group_info($group_id);
+    }
+    return $new_group_info;
+  }
+
+  public function get_group_info($group_id){
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $query = $DB_prefs->get_where('reporting_object_groups',array('group_id' => $group_id),1);
+    $group_info = false;
+    if($query && $query->num_rows()>0){
+      $group_info = $query->row_array();
+      $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+      if($member_query && $member_query->num_rows()>0){
+        foreach($member_query->result() as $row){
+          $group_info['item_list'][] = $row->item_id;
+        }
+      }
+    }
+    return $group_info;
+  }
+
 
 }
 ?>

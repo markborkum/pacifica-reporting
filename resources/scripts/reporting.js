@@ -387,6 +387,23 @@ var clear_results = function(){
 var setup_confirmation_dialog_boxes = function(e){
 };
 
+var submit_group_name_change = function(group_name, group_id, input_el){
+  var url = base_url + 'index.php/reporting/change_group_name/' + group_id + '/';
+  var update_list = {group_name : group_name}
+  var posting = $.post(url, JSON.stringify(update_list), function(data){
+    var new_input_field = $('<input/>',{
+      type:'text',
+      class:'group_name_editor',
+      id:'group_name_editor_' + data.group_id,
+      name:'group_name_editor_' + data.group_id,
+      placeholder: data.group_name
+    });
+    input_el.siblings('.group_edit_confirm_buttons').hide();
+    input_el.replaceWith(new_input_field);
+    $('span.displayed_group_name').html(data.group_name);
+  });
+};
+
 var get_group_objects = function(el,filter_text){
   filter_text = filter_text != null ? filter_text : "";
   var edit_el = el.parents('.reporting_object_container').find('.group_edit_section');
@@ -491,6 +508,29 @@ $(function(){
     var el = $(event.target);
     get_group_objects(el)
   });
+  $('.group_name_editor').keyup(function(event){
+    var el = $(event.target);
+    var button_container = el.siblings('.group_edit_confirm_buttons');
+    if(button_container.is(":hidden") && el.val().length > 0){
+      button_container.fadeIn();
+    }else if(el.val().length == 0){
+      button_container.hide();
+    }
+  });
+
+  $('.group_edit_confirm_buttons .change_icon_accept_reject').click(function(event){
+    var el = $(event.target);
+    var my_field = el.parents('.group_name_edit_container').find('input[type="text"]');
+    var my_group_id = parseInt(el.parents('.group_search_bar_container').find('input.group_id').val(),10);
+    if(el.hasClass('accept')){
+      submit_group_name_change(my_field.val(), my_group_id, my_field);
+    }
+    if(el.hasClass('reject')){
+      my_field.val('');
+      my_field.siblings('.group_edit_confirm_buttons').fadeOut('fast');
+    }
+  });
+
 
   $('.disclosure_triangle').click(function(event){
     var el = $(event.target);

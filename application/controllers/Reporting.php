@@ -287,6 +287,49 @@ $(function(){
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* API functionality for Ajax calls from UI                  */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  public function change_group_name($group_id){
+    $new_group_name = false;
+    $group_info = $this->rep->get_group_info($group_id);
+    if(!$group_info){
+      $this->output->set_status_header(404, "Group ID {$group_id} was not found");
+      return;
+    }
+    if($this->input->post()){
+      $new_group_name = $this->input->post('group_name');
+    }elseif($this->input->is_ajax_request() || file_get_contents('php://input')){
+      $HTTP_RAW_POST_DATA = file_get_contents('php://input');
+      $post_info = json_decode($HTTP_RAW_POST_DATA,true);
+      if(array_key_exists('group_name',$post_info)){
+        $new_group_name = $post_info['group_name'];
+      }
+    }else{
+      $this->output->set_status_header(400, 'No update information was sent');
+      return;
+    }
+    if($new_group_name){
+      //check for authorization
+      if($this->user_id != $group_info['person_id']){
+        $this->output->set_status_header(401, 'You are not allowed to alter this group');
+        return;
+      }
+      if($new_group_name == $group_info['group_name']){
+        //no change to name
+        $this->output->set_status_header(400, 'Group name is unchanged');
+        return;
+      }
+
+      $new_group_info = $this->rep->change_group_name($group_id,$new_group_name);
+      if($new_group_info && is_array($new_group_info)){
+        send_json_array($new_group_info);
+      }else{
+        $this->output->set_status_header(500, 'A database error occurred during the update process');
+        return;
+      }
+    }else{
+      $this->output->set_status_header(400, 'Changed "group_name" attribute was not found');
+      return;
+    }
+  }
 
   public function get_reporting_info($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
     $this->get_reporting_info_base($object_type, $object_id,$time_range,$start_date,$end_date,true);
