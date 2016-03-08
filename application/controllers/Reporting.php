@@ -5,6 +5,7 @@ require_once('Baseline_controller.php');
 class Reporting extends Baseline_controller {
   public $last_update_time;
   public $accepted_object_types;
+  public $accepted_time_basis_types;
 
   function __construct() {
     parent::__construct();
@@ -13,6 +14,7 @@ class Reporting extends Baseline_controller {
     $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');
+    $this->accepted_time_basis_types = array('submit_time','create_time','modified_time');
   }
 
 
@@ -55,7 +57,6 @@ class Reporting extends Baseline_controller {
     $this->load->view("object_types/object.html", $this->page_data);
   }
 
-
   private function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false){
     // echo "start_date => {$start_date}   end_date => {$end_date}";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
@@ -77,29 +78,58 @@ class Reporting extends Baseline_controller {
     return $times;
   }
 
-  private function set_time_range_cookie($time_range, $object_type){
+  public function set_time_basis_cookie($time_basis, $object_type, $group_id = 0){
+    if(!in_array($object_type, $this->accepted_object_types)){
+      return $this->set_time_basis_cookie($time_basis, 'instrument', $group_id);
+    }
+    if(!in_array($time_basis,$this->accepted_time_basis_types)){
+      return $this->set_time_basis_cookie('submit_time', $object_type, $group_id);
+    }
+    $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
+    $cookie_name = "myemsl_group_view_{$object_type}_time_basis{$group_id_specifics}";
+    // echo "cookie_name => {$cookie_name}";
+    $existing_cookie = get_cookie($cookie_name);
+    //echo "existing cookie => {$existing_cookie}<br />";
+    // $cookie_contents = array(
+    //   'name' => $cookie_name,
+    //   'value' => $time_basis,
+    //   'expire' => 604800,
+    //   'prefix' => '',
+    //   'path' => '/'
+    // );
+    // var_dump($cookie_contents);
+    //echo "time_basis = '{$time_basis}'";
+    if(!$existing_cookie || $existing_cookie != $time_basis){
+      set_cookie($cookie_name, $time_basis);
+    }
+    return get_cookie($cookie_name);
+
+  }
+
+  private function set_time_range_cookie($time_range, $object_type, $group_id = 0){
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    $cookie_name = "myemsl_group_view_{$object_type}";
+    $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
+    $cookie_name = "myemsl_group_view_{$object_type}_time_range{$group_id_specifics}";
     $valid_time_range = !empty($time_range) && date_create($time_range);
-    $existing_cookie = $this->input->cookie($cookie_name);
+    $existing_cookie = get_cookie($cookie_name);
     $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
-    $cookie_contents = array(
-      'name' => $cookie_name,
-      'value' => $stored_time_range,
-      'expire' => 604800,
-      'prefix' => '',
-      'path' => '/'
-    );
+    // $cookie_contents = array(
+    //   'name' => $cookie_name,
+    //   'value' => $stored_time_range,
+    //   'expire' => 604800,
+    //   'prefix' => '',
+    //   'path' => '/'
+    // );
 
     //check time-range for validity
     if($valid_time_range){
       //let them change the stored value if they specify in the url
-      $this->input->set_cookie($cookie_contents);
+      set_cookie($cookie_name,$stored_time_range);
       $new_time_range = $time_range;
     }elseif($existing_cookie == FALSE){
       //no cookie and nothing specified in the url
-      $new_time_range = str_replace('-',' ',$cookie_contents['value']);
-      $this->input->set_cookie($cookie_contents);
+      $new_time_range = str_replace('-',' ',$stored_time_range);
+      set_cookie($cookie_name,$stored_time_range);
     }else{
       $new_time_range = str_replace('-',' ',$existing_cookie);
     }
@@ -107,12 +137,13 @@ class Reporting extends Baseline_controller {
   }
 
 
-  public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false){
+  public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = 'submit_time'){
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
     if(!in_array($object_type,$accepted_object_types)){
       redirect('reporting/group_view/instrument');
     }
+    // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type);
     $time_range = $this->set_time_range_cookie($time_range, $object_type);
     $this->page_data['page_header'] = "Aggregated MyEMSL Uploads by ".ucwords($object_type)." Grouping";
     $this->page_data['my_object_type'] = $object_type;
@@ -127,6 +158,7 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
+      "/resources/scripts/select2/select2.min.js",
       base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
       base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
       base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
@@ -135,7 +167,7 @@ class Reporting extends Baseline_controller {
     );
     $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
-
+    //$this->page_data['time_basis'] = $time_basis;
     // $my_object_list = $this->rep->get_selected_objects($this->user_id, $object_type);
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
 
@@ -152,6 +184,9 @@ class Reporting extends Baseline_controller {
       $this->page_data['my_groups'] = '';
       $object_list = array();
       foreach($my_groups as $group_id => $group_info){
+        // var_dump($time_basis);
+        $time_basis = $this->set_time_basis_cookie($time_basis, $object_type,$group_id);
+        // var_dump($time_basis);
         $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
         $object_list = array_merge($object_list,$group_info['item_list']);
 
@@ -178,6 +213,7 @@ class Reporting extends Baseline_controller {
           'object_type' => $object_type,
           'group_name' => $group_info['group_name'],
           'item_list' => $group_info['item_list'],
+          'time_basis' => $time_basis,
           'time_range' => $time_range,
           'times' => $my_times
         );
@@ -423,16 +459,18 @@ $(function(){
     }
   }
 
-  public function get_reporting_info_list($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
-    $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,true);
+  public function get_reporting_info_list($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $time_basis = false){
+    $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,true, false, $time_basis);
   }
 
-  public function get_reporting_info_list_no_timeline($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false){
-    $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,false);
+  public function get_reporting_info_list_no_timeline($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $time_basis = false){
+    $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,false,false,$time_basis);
   }
 
 
-  private function get_reporting_info_list_base($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false){
+  private function get_reporting_info_list_base($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false, $time_basis){
+    $time_basis = $this->set_time_basis_cookie($time_basis, $object_type, $group_id);
+    echo "time_basis => '{$time_basis}'";
     $group_info = $this->rep->get_items_for_group($group_id);
     $object_id_list = array_values($group_info[$object_type]);
     $this->page_data['object_id_list'] = $object_id_list;
@@ -499,7 +537,7 @@ $(function(){
 
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}_list";
     $transaction_info = array();
-    $transaction_info = $this->rep->$transaction_retrieval_func($object_id_list,$start_date,$end_date, $with_timeline);
+    $transaction_info = $this->rep->$transaction_retrieval_func($object_id_list,$start_date,$end_date, $with_timeline, $time_basis);
     $this->page_data['transaction_info'] = $transaction_info;
     $this->page_data['group_id'] = $group_id;
     $this->page_data['times'] = $times;

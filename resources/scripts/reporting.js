@@ -337,7 +337,10 @@ var load_results = function(object_type, object_id){
 
 var load_group_results = function(object_type, group_id, item_list){
   $('#loading_status_' + group_id).spin();
-  var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
+  var cookie_name = 'myemsl_group_view_' + object_type + '_time_basis_group_' + group_id;
+  var time_basis = $.cookie(cookie_name) != undefined ? '/' + $.cookie(cookie_name) : '' ;
+  debugger;
+  var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range + time_basis;
   var getter = $.get(url);
   getter.done(function(data,status){
     $('#loading_status_' + group_id).spin(false);
@@ -351,7 +354,7 @@ var get_search_results = function(el, filter_text){
     var url = base_url + 'index.php/reporting/get_object_lookup/' + object_type + '/' + filter_text;
     $.get(url, function(data){
       $('#search_results_display').html(data);
-      $('#search_results_display').slideDown();
+      //$('#search_results_display').slideDown();
     });
   }else{
     clear_results();
@@ -412,16 +415,13 @@ var get_group_objects = function(el,filter_text){
   var dl_url = base_url + 'index.php/reporting/get_object_group_lookup/' + object_type + '/' + group_id;
   var results_container = edit_el.find('.search_results_display');
   if(el.hasClass('edit_grouping_button')){
-    if(!edit_el.hasClass('closed')){
-      edit_el.slideUp(function(){
-        edit_el.addClass('closed');
-      });
+    // if(!edit_el.hasClass('closed')){
+    if(edit_el.is(':visible')){
+      edit_el.hide();
     }else{
       $.get(dl_url, function(data){
         results_container.html(data);
-        edit_el.slideDown(function(){
-          edit_el.removeClass('closed');
-        });
+        edit_el.show();
       });
     }
   }
@@ -530,7 +530,21 @@ $(function(){
       my_field.siblings('.group_edit_confirm_buttons').fadeOut('fast');
     }
   });
+  $('.time_basis_selector').select2();
+  $('.select2-search').hide();
+  $('.time_basis_selector').change(function(event){
+    //update the time-basis cookie
+    var form_items = $(event.target)
+      .parents('.reporting_object_container')
+      .find('.search_input_container');
+    var my_group_id = form_items.find('.group_id').val();
+    var my_object_type = form_items.find('.object_type').val();
+    var cookie_name = 'myemsl_group_view_' + my_object_type + '_time_basis_group_' + my_group_id;
+    debugger;
+    $.cookie(cookie_name, $(event.target).val(), { path : '/' });
 
+    //reload the object guts
+  });
 
   $('.disclosure_triangle').click(function(event){
     var el = $(event.target);

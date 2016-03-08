@@ -1,3 +1,11 @@
+<?php
+  $time_basis_types = array(
+    'submit_time' => array('title' => "Submission Time", 'text' => "By Submission (Upload) Time"),
+    'create_time' => array('title' => "Creation Time", 'text' => "By File Creation Time"),
+    'modified_time' => array('title' => "Modification Time", 'text' => "By File Modification Time")
+  );
+?>
+
 <?php foreach($my_groups as $id => $group_info): ?>
   <?php $current_state = " opened"; ?>
   <?php $display_group_name = ucwords($group_info['group_type']); ?>
@@ -47,6 +55,14 @@
           <input type="button" class="edit_grouping_button" id="edit_grouping_button_<?= $id ?>" name="edit_grouping_button_<?= $id ?>" value="Edit Group" />
         </div>
         <div id="message_container_footer_<?= $id ?>" class="message_container_footer"></div>
+        <div id="time_basis_selector_container_<?= $id ?>" class="time_basis_selector_container" style="width:25%;">
+          <select id="time_basis_selector_<?= $id ?>" name="time_basis_selector_<?= $id ?>" class="time_basis_selector" style="width:100%;">
+            <?php foreach($time_basis_types as $value => $info): ?>
+              <?php $selected_basis = $value == $time_basis ? " checked='checked'" : ""; ?>
+            <option value="<?= $value ?>" title="<?= $info['title'] ?>"<?= $selected_basis ?>><?= $info['text'] ?></option>
+            <?php endforeach; ?>
+          </select>
+        </div>
         <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
           <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
         </div>

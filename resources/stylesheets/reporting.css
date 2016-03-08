@@ -280,7 +280,7 @@ header.secondary .tab_selector{
   padding:5px;
   position:relative;
   height: 2.75em;
-  transition: all 0.1s ease-in-out;
+  /*transition: all 0.1s ease-in-out;*/
 }
 
 #insert_new_group_container:hover {
@@ -465,14 +465,14 @@ h1.underline{
   border-right-color: #ccc;
   border-right-width: 1px;
   border-right-style: solid;
-  transition: all 0.400s ease-in-out;
+  /*transition: all 0.400s ease-in-out;*/
   background-color:#fafafa;
 }
 
-.reporting_object_container .group_edit_section.closed {
+/*.reporting_object_container .group_edit_section.closed {
   min-height:0;
   height:0;
-}
+}*/
 
 .object_body_container .stats_header{
   font-weight:bold;
@@ -681,6 +681,13 @@ span.container_name {
 .form_container th {
   text-align: center;
   padding: 10px auto;
+}
+
+.time_basis_selector_container {
+  position:absolute;
+  left:10%;
+  top:6px;
+  width: 25%;
 }
 
 .change_icon_accept_reject {
