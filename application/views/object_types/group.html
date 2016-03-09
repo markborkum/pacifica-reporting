@@ -58,7 +58,7 @@
         <div id="time_basis_selector_container_<?= $id ?>" class="time_basis_selector_container" style="width:25%;">
           <select id="time_basis_selector_<?= $id ?>" name="time_basis_selector_<?= $id ?>" class="time_basis_selector" style="width:100%;">
             <?php foreach($time_basis_types as $value => $info): ?>
-              <?php $selected_basis = $value == $time_basis ? " checked='checked'" : ""; ?>
+              <?php $selected_basis = $value == $group_info['options_list']['time_basis'] ? " selected='selected'" : ""; ?>
             <option value="<?= $value ?>" title="<?= $info['title'] ?>"<?= $selected_basis ?>><?= $info['text'] ?></option>
             <?php endforeach; ?>
           </select>

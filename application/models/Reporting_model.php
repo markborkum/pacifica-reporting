@@ -936,7 +936,7 @@ class Reporting_model extends CI_Model {
       $DB_prefs->insert($table_name, $update_array + $where_array);
     }
     //$DB_prefs->replace('reporting_object_group_options',$update_array);
-    if($DB_prefs->affected_rows() > 1){
+    if($DB_prefs->affected_rows() > 0){
       return $update_array + $where_array;
     }
     return false;

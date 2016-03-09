@@ -170,10 +170,19 @@ var submit_group_change_worker = function(el, object_type, object_id, action){
   });
 }
 
+var submit_group_option_change = function(el, option_type, new_value){
+  var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
+  var update_list = JSON.stringify([{ 'group_id' : group_id, 'option_type' : option_type,'option_value' : new_value }]);
+  var url = base_url + 'index.php/reporting/change_group_option/' + group_id;
+  var poster = $.post(url, update_list, function(data){
+    load_group_results(object_type,group_id);
+  },'json');
+};
+
+
 
 var submit_object_change_worker = function(el, object_type, object_id, action){
   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
-  debugger;
   var current_search_string = el.parents('.group_edit_section').find('.object_search_box').val();
   var update_list = JSON.stringify(
     [
@@ -337,9 +346,9 @@ var load_results = function(object_type, object_id){
 
 var load_group_results = function(object_type, group_id, item_list){
   $('#loading_status_' + group_id).spin();
-  var cookie_name = 'myemsl_group_view_' + object_type + '_time_basis_group_' + group_id;
-  var time_basis = $.cookie(cookie_name) != undefined ? '/' + $.cookie(cookie_name) : '' ;
-  var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range + time_basis;
+  // var cookie_name = 'myemsl_group_view_' + object_type + '_time_basis_group_' + group_id;
+  //var time_basis = $.cookie(cookie_name) != undefined ? '/' + $.cookie(cookie_name) : '' ;
+  var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
   var getter = $.get(url);
   getter.done(function(data,status){
     $('#loading_status_' + group_id).spin(false);
@@ -538,9 +547,8 @@ $(function(){
       .find('.search_input_container');
     var my_group_id = form_items.find('.group_id').val();
     var my_object_type = form_items.find('.object_type').val();
-    var cookie_name = 'myemsl_group_view_' + my_object_type + '_time_basis_group_' + my_group_id;
-    debugger;
-    $.cookie(cookie_name, $(event.target).val(), { path : '/' });
+    var new_value = $(this).select2('val');
+    submit_group_option_change(form_items,'time_basis',new_value);
 
     //reload the object guts
   });

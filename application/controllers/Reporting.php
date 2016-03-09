@@ -188,9 +188,9 @@ class Reporting extends Baseline_controller {
         $end_date = isset($end_date) ? $end_date : $options_list['end_time'];
         $end_date = strtotime($end_date) ? $end_date : false;
 
-
         $time_basis = $options_list['time_basis'];
         $time_range = isset($time_range) ? $time_range : $options_list['time_range'];
+        // echo "time_range = {$time_range}";
         if($time_range && $time_range != $options_list['time_range']){
           $this->rep->change_group_option($group_id,'time_range',$time_range);
         }
@@ -218,6 +218,7 @@ class Reporting extends Baseline_controller {
         $this->page_data['placeholder_info'][$group_id] = array(
           'group_id' => $group_id,
           'object_type' => $object_type,
+          'options_list' => $options_list,
           'group_name' => $group_info['group_name'],
           'item_list' => $group_info['item_list'],
           'time_basis' => $time_basis,
@@ -393,6 +394,7 @@ $(function(){
     }elseif($this->input->is_ajax_request() || $this->input->raw_input_stream){
       // $HTTP_RAW_POST_DATA = file_get_contents('php://input');
       $post_info = json_decode($this->input->raw_input_stream,true);
+      $post_info = $post_info[0];
       $option_type = array_key_exists('option_type',$post_info) ? $post_info['option_type'] : false;
       $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : false;
     }
@@ -502,6 +504,7 @@ $(function(){
     // exit;
     $this->page_data['transaction_info'] = $transaction_info;
     $this->page_data['times'] = $times;
+    $this->page_data['options_list'] = $options_list;
     $this->page_data['include_timeline'] = $with_timeline;
     // echo "<pre>";
     // var_dump($this->page_data);
@@ -515,33 +518,44 @@ $(function(){
     }
   }
 
-  public function get_reporting_info_list($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $time_basis = false){
+  public function get_reporting_info_list($object_type,$group_id,$time_range = false, $start_date = false, $end_date = false, $with_timeline = true, $time_basis = false){
     $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,true, false, $time_basis);
   }
 
-  public function get_reporting_info_list_no_timeline($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $time_basis = false){
+  public function get_reporting_info_list_no_timeline($object_type,$group_id,$time_range = false, $start_date = false, $end_date = false, $time_basis = false){
     $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,false,false,$time_basis);
   }
 
 
-  private function get_reporting_info_list_base($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false, $time_basis){
+  private function get_reporting_info_list_base($object_type,$group_id,$time_range,$start_date = false, $end_date = false, $with_timeline = true, $full_object = false, $time_basis){
     // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type, $group_id);
     $group_info = $this->rep->get_group_info($group_id);
     $item_list = $group_info['item_list'];
     $options_list = $group_info['options_list'];
+    if($time_range && $time_range != $options_list['time_range']){
+      //looks like they want to update the default
+      $this->rep->change_group_option($group_id,'time_range',$time_range);
+    }else{
+      $time_range = $options_list['time_range'];
+    }
     $time_basis = $options_list['time_basis'];
+    $start_date = !$start_date || !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
+    $end_date = !$end_date || !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;
+
     $object_id_list = array_values($item_list);
     $this->page_data['object_id_list'] = $object_id_list;
     // $this->page_data['object_id'] = $object_id;
     $this->page_data["{$object_type}_id_list"] = $object_id_list;
     $this->page_data['object_type'] = $object_type;
+    $this->page_data['group_id'] = $group_id;
+
     $available_time_range = $this->rep->earliest_latest_data_for_list($object_type,$object_id_list);
 
     $latest_data = is_array($available_time_range) && array_key_exists('latest',$available_time_range) ? $available_time_range['latest'] : false;
     if(!$latest_data){
       //no data available for this object
-      $this->page_data['results_message'] = "No Data Available for this group of ".ucwords($object_type);
-      $this->load->view("object_types/object_body_insert.html", $this->page_data);
+      $this->page_data['results_message'] = "No Data Available for this group of ".plural(ucwords($object_type));
+      $this->load->view("object_types/group_body_insert.html", $this->page_data);
       return;
     }
     $latest_data_object = new DateTime($latest_data);
@@ -597,7 +611,6 @@ $(function(){
     $transaction_info = array();
     $transaction_info = $this->rep->$transaction_retrieval_func($object_id_list,$start_date,$end_date, $with_timeline, $time_basis);
     $this->page_data['transaction_info'] = $transaction_info;
-    $this->page_data['group_id'] = $group_id;
     $this->page_data['times'] = $times;
     $this->page_data['include_timeline'] = $with_timeline;
 
