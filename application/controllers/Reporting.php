@@ -106,35 +106,35 @@ class Reporting extends Baseline_controller {
 
   }
 
-  private function set_time_range_cookie($time_range, $object_type, $group_id = 0){
-    $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
-    $cookie_name = "myemsl_group_view_{$object_type}_time_range{$group_id_specifics}";
-    $valid_time_range = !empty($time_range) && date_create($time_range);
-    $existing_cookie = get_cookie($cookie_name);
-    $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
-    // $cookie_contents = array(
-    //   'name' => $cookie_name,
-    //   'value' => $stored_time_range,
-    //   'expire' => 604800,
-    //   'prefix' => '',
-    //   'path' => '/'
-    // );
-
-    //check time-range for validity
-    if($valid_time_range){
-      //let them change the stored value if they specify in the url
-      set_cookie($cookie_name,$stored_time_range);
-      $new_time_range = $time_range;
-    }elseif($existing_cookie == FALSE){
-      //no cookie and nothing specified in the url
-      $new_time_range = str_replace('-',' ',$stored_time_range);
-      set_cookie($cookie_name,$stored_time_range);
-    }else{
-      $new_time_range = str_replace('-',' ',$existing_cookie);
-    }
-    return $new_time_range;
-  }
+  // private function set_time_range_cookie($time_range, $object_type, $group_id = 0){
+  //   $time_range = str_replace(array('-','_','+'),' ',$time_range);
+  //   $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
+  //   $cookie_name = "myemsl_group_view_{$object_type}_time_range{$group_id_specifics}";
+  //   $valid_time_range = !empty($time_range) && date_create($time_range);
+  //   $existing_cookie = get_cookie($cookie_name);
+  //   $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
+  //   // $cookie_contents = array(
+  //   //   'name' => $cookie_name,
+  //   //   'value' => $stored_time_range,
+  //   //   'expire' => 604800,
+  //   //   'prefix' => '',
+  //   //   'path' => '/'
+  //   // );
+  //
+  //   //check time-range for validity
+  //   if($valid_time_range){
+  //     //let them change the stored value if they specify in the url
+  //     set_cookie($cookie_name,$stored_time_range);
+  //     $new_time_range = $time_range;
+  //   }elseif($existing_cookie == FALSE){
+  //     //no cookie and nothing specified in the url
+  //     $new_time_range = str_replace('-',' ',$stored_time_range);
+  //     set_cookie($cookie_name,$stored_time_range);
+  //   }else{
+  //     $new_time_range = str_replace('-',' ',$existing_cookie);
+  //   }
+  //   return $new_time_range;
+  // }
 
 
   public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = 'submit_time'){
@@ -144,7 +144,7 @@ class Reporting extends Baseline_controller {
       redirect('reporting/group_view/instrument');
     }
     // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type);
-    $time_range = $this->set_time_range_cookie($time_range, $object_type);
+    // $time_range = $this->rep->change_group_option($group_id, 'time_range', $time_range);
     $this->page_data['page_header'] = "Aggregated MyEMSL Uploads by ".ucwords($object_type)." Grouping";
     $this->page_data['my_object_type'] = $object_type;
     $this->page_data['css_uris'] = array(
@@ -165,8 +165,6 @@ class Reporting extends Baseline_controller {
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"
     );
-    $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
-    $time_range = str_replace(array('-','_','+'),' ',$time_range);
     //$this->page_data['time_basis'] = $time_basis;
     // $my_object_list = $this->rep->get_selected_objects($this->user_id, $object_type);
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
@@ -184,9 +182,18 @@ class Reporting extends Baseline_controller {
       $this->page_data['my_groups'] = '';
       $object_list = array();
       foreach($my_groups as $group_id => $group_info){
-        // var_dump($time_basis);
-        $time_basis = $this->set_time_basis_cookie($time_basis, $object_type,$group_id);
-        // var_dump($time_basis);
+        $options_list = $group_info['options_list'];
+        $start_date = isset($start_date) ? $start_date : $options_list['start_time'];
+        $start_date = strtotime($start_date) ? $start_date : false;
+        $end_date = isset($end_date) ? $end_date : $options_list['end_time'];
+        $end_date = strtotime($end_date) ? $end_date : false;
+
+
+        $time_basis = $options_list['time_basis'];
+        $time_range = isset($time_range) ? $time_range : $options_list['time_range'];
+        if($time_range && $time_range != $options_list['time_range']){
+          $this->rep->change_group_option($group_id,'time_range',$time_range);
+        }
         $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
         $object_list = array_merge($object_list,$group_info['item_list']);
 
@@ -221,6 +228,8 @@ class Reporting extends Baseline_controller {
       $object_info = $this->eus->get_object_info($object_list,$object_type);
 
       // var_dump($object_info);
+      $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
+      $time_range = str_replace(array('-','_','+'),' ',$time_range);
       $this->page_data['my_objects'] = $object_info;
       $this->page_data['my_groups'] = $my_groups;
       $this->page_data['content_view'] = "object_types/group.html";
@@ -367,6 +376,53 @@ $(function(){
     }
   }
 
+  public function change_group_option($group_id = false){
+    if(!$group_id){
+      //send a nice error message about why you should include a group_id
+    }
+    $option_type = false;
+    $option_value = false;
+    $group_info = $this->rep->get_group_info($group_id);
+    if(!$group_info){
+      $this->output->set_status_header(404, "Group ID {$group_id} was not found");
+      return;
+    }
+    if($this->input->post()){
+      $option_type = $this->input->post('option_type');
+      $option_value = $this->input->post('option_value');
+    }elseif($this->input->is_ajax_request() || $this->input->raw_input_stream){
+      // $HTTP_RAW_POST_DATA = file_get_contents('php://input');
+      $post_info = json_decode($this->input->raw_input_stream,true);
+      $option_type = array_key_exists('option_type',$post_info) ? $post_info['option_type'] : false;
+      $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : false;
+    }
+    if(!$option_type || !$option_value){
+      $missing_types = array();
+      $message = "Group option update information was incomplete (missing '";
+      //$message .= !$option_type ? " 'option_type' "
+      if(!$option_type){
+        $missing_types[] = 'option_type';
+      }
+      if(!$option_value){
+        $missing_types[] = 'option_value';
+      }
+      $message .= implode("' and '",$missing_types);
+      $message .= "' entries)";
+      $this->output->set_status_header(400, $message);
+      return;
+    }
+
+    $success = $this->rep->change_group_option($group_id,$option_type,$option_value);
+    if($success && is_array($success)){
+      send_json_array($success);
+    }else{
+      $message = "Could not set options for group ID {$group_id}";
+      $this->output->set_status_header('500',$message);
+      return;
+    }
+    return;
+  }
+
   public function get_reporting_info($object_type,$object_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true){
     $this->get_reporting_info_base($object_type, $object_id,$time_range,$start_date,$end_date,true);
   }
@@ -469,10 +525,12 @@ $(function(){
 
 
   private function get_reporting_info_list_base($object_type,$group_id,$time_range = '1-week', $start_date = false, $end_date = false, $with_timeline = true, $full_object = false, $time_basis){
-    $time_basis = $this->set_time_basis_cookie($time_basis, $object_type, $group_id);
-    echo "time_basis => '{$time_basis}'";
-    $group_info = $this->rep->get_items_for_group($group_id);
-    $object_id_list = array_values($group_info[$object_type]);
+    // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type, $group_id);
+    $group_info = $this->rep->get_group_info($group_id);
+    $item_list = $group_info['item_list'];
+    $options_list = $group_info['options_list'];
+    $time_basis = $options_list['time_basis'];
+    $object_id_list = array_values($item_list);
     $this->page_data['object_id_list'] = $object_id_list;
     // $this->page_data['object_id'] = $object_id;
     $this->page_data["{$object_type}_id_list"] = $object_id_list;
@@ -760,6 +818,12 @@ $(function(){
     var_dump($results);
     echo "</pre>";
   }
+  public function test_get_selected_groups($eus_person_id){
+    $results = $this->rep->get_selected_groups($eus_person_id);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+  }
 
   public function test_get_object_list($object_type,$filter = ""){
     $results = $this->eus->get_object_list($object_type,$filter);
@@ -783,6 +847,20 @@ $(function(){
     var_dump($results);
     echo "</pre>";
 
+  }
+
+  public function test_get_group_info($group_id){
+    $results = $this->rep->get_group_info($group_id);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+  }
+
+  public function test_get_items_for_group($group_id){
+    $results = $this->rep->get_items_for_group($group_id);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
   }
 
 

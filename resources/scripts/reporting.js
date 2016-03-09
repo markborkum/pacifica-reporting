@@ -339,7 +339,6 @@ var load_group_results = function(object_type, group_id, item_list){
   $('#loading_status_' + group_id).spin();
   var cookie_name = 'myemsl_group_view_' + object_type + '_time_basis_group_' + group_id;
   var time_basis = $.cookie(cookie_name) != undefined ? '/' + $.cookie(cookie_name) : '' ;
-  debugger;
   var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range + time_basis;
   var getter = $.get(url);
   getter.done(function(data,status){

@@ -223,7 +223,6 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *    Private functionality for behind the scenes data retrieval
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -569,6 +568,7 @@ class Reporting_model extends CI_Model {
 
 
   private function available_instrument_data_spread($object_id_list){
+    if(empty($object_id_list)) return false;
     $group_collection = array();
     foreach($object_id_list as $object_id){
       $group_collection += $this->get_instrument_group_list($object_id);
@@ -605,6 +605,7 @@ class Reporting_model extends CI_Model {
 
 
   private function available_proposal_data_spread($object_id_list){
+    if(empty($object_id_list)) return false;
     $group_collection = array();
     foreach($object_id_list as $object_id){
       $group_collection += $this->get_proposal_group_list($object_id);
@@ -660,6 +661,7 @@ class Reporting_model extends CI_Model {
 
 
   private function available_user_data_spread($object_id_list){
+    if(empty($object_id_list)) return false;
     $this->db->select(array(
       'MAX(t.stime) as most_recent_upload',
       'MIN(t.stime) as earliest_upload')
@@ -817,10 +819,10 @@ class Reporting_model extends CI_Model {
 
   public function get_selected_groups($eus_person_id,$restrict_type = false){
     $DB_prefs = $this->load->database('website_prefs',TRUE);
-    $select_array = array(
-      'g.group_id','g.group_name','g.group_type','g.person_id as user','p.item_id'
-    );
-    $DB_prefs->select($select_array);
+    // $select_array = array(
+    //   'g.group_id','g.group_name','g.group_type','g.person_id as user','p.item_id'
+    // );
+    $DB_prefs->select('g.group_id');
     $person_array = array($eus_person_id);
     $DB_prefs->where_in('g.person_id',$person_array);
     $DB_prefs->where('g.deleted is NULL');
@@ -828,21 +830,12 @@ class Reporting_model extends CI_Model {
       $DB_prefs->where('g.group_type',$restrict_type);
     }
     $DB_prefs->order_by('ordering ASC');
-    $DB_prefs->from('reporting_object_groups g')->join('reporting_selection_prefs p', 'g.group_id = p.group_id');
-    $query = $DB_prefs->get();
-    $results = array();
+    $query = $DB_prefs->get('reporting_object_groups g');
+    $group_id_list = array();
     if($query && $query->num_rows()>0){
       foreach($query->result() as $row){
-        if(!array_key_exists($row->group_id, $results)){
-          $results[$row->group_id] = array(
-            'group_name' => $row->group_name,
-            'group_type' => $row->group_type,
-            'user' => $row->user,
-            'item_list' => array($row->item_id)
-          );
-        }else{
-          $results[$row->group_id]['item_list'][] = $row->item_id;
-        }
+        $group_info = $this->get_group_info($row->group_id);
+        $results[$row->group_id] = $group_info;
       }
     }
     return $results;
@@ -923,29 +916,72 @@ class Reporting_model extends CI_Model {
     $new_group_info = false;
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     $update_array = array('group_name' => $group_name);
-    $DB_prefs->where('group_id',$group_id)->set('group_name',$group_name)->update('reporting_object_groups');
+    $DB_prefs->where('group_id',$group_id)->set('group_name',$group_name)->update('reporting_object_groups',$update_array);
     if($DB_prefs->affected_rows() > 0){
       $new_group_info = $this->get_group_info($group_id);
     }
     return $new_group_info;
   }
 
+  public function change_group_option($group_id, $option_type, $value){
+    $DB_prefs = $this->load->database('website_prefs', TRUE);
+    $table_name = 'reporting_object_group_options';
+    $where_array = array('group_id' => $group_id, 'option_type' => $option_type);
+    $update_array = array('option_value' => $value);
+    $query = $DB_prefs->where($where_array)->get($table_name);
+    if($query && $query->num_rows() > 0){
+      //row present, just update
+      $DB_prefs->where($where_array)->update($table_name, $update_array);
+    }else{
+      $DB_prefs->insert($table_name, $update_array + $where_array);
+    }
+    //$DB_prefs->replace('reporting_object_group_options',$update_array);
+    if($DB_prefs->affected_rows() > 1){
+      return $update_array + $where_array;
+    }
+    return false;
+    // $DB_prefs->where('group_id',$group_id)->where('option_type',$option_type);
+    // $DB_prefs->update()
+  }
+
   public function get_group_info($group_id){
+    $option_defaults = $this->get_group_option_defaults();
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     $query = $DB_prefs->get_where('reporting_object_groups',array('group_id' => $group_id),1);
     $group_info = false;
+    $options = array();
     if($query && $query->num_rows()>0){
+      $options_query = $DB_prefs->get_where('reporting_object_group_options', array('group_id' => $group_id));
+      if($options_query && $options_query->num_rows()>0){
+        foreach($options_query->result() as $option_row){
+          $options[$option_row->option_type] = $option_row->option_value;
+        }
+      }
       $group_info = $query->row_array();
       $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
       if($member_query && $member_query->num_rows()>0){
         foreach($member_query->result() as $row){
           $group_info['item_list'][] = $row->item_id;
         }
+      }else{
+        $group_info['item_list'] = array();
       }
+      $group_info['options_list'] = $options + $option_defaults;
     }
     return $group_info;
   }
 
+  public function get_group_option_defaults(){
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $query = $DB_prefs->get('reporting_object_group_option_defaults');
+    $defaults = array();
+    if($query && $query->num_rows() > 0){
+      foreach($query->result() as $row){
+        $defaults[$row->option_type] = $row->option_default;
+      }
+    }
+    return $defaults;
+  }
 
 }
 ?>
