@@ -170,6 +170,31 @@ var submit_group_change_worker = function(el, object_type, object_id, action){
   });
 }
 
+var remove_containing_group = function(el){
+  var my_container = el.parents('.reporting_object_container');
+  var group_id = parseInt(my_container.find('.group_search_form .group_id').val(),10);
+  var url = base_url + 'index.php/reporting/remove_group/' + group_id;
+  var my_confirm_object = my_container.find('.confirm_removal_dialog');
+  my_confirm_object.dialog({
+    resizable:false,
+    height:140,
+    modal:true,
+    buttons: {
+      "Delete Group" : function(){
+        var getter = $.get(url, function(data){
+          my_container.remove();
+        })
+        getter.fail(function(jqXHR, textStatus, errorThrown){
+          alert("An error occurred before the group could be deleted.<br />" + textStatus);
+        })
+      },
+      "Cancel" : function() {
+        $(this).dialog("close");
+      }
+    }
+  })
+}
+
 var submit_group_option_change = function(el, option_type, new_value){
   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
   var update_list = JSON.stringify([{ 'group_id' : group_id, 'option_type' : option_type,'option_value' : new_value }]);
@@ -315,12 +340,6 @@ var submit_object_change = function(el, object_type, object_id, action){
   }else{
     submit_object_change_worker(el, object_type,object_id,action);
   }
-
-
-
-
-
-
 }
 
 var remove_empty_uls = function(){
@@ -426,6 +445,7 @@ var get_group_objects = function(el,filter_text){
     // if(!edit_el.hasClass('closed')){
     if(edit_el.is(':visible')){
       edit_el.hide();
+      load_group_results(object_type,group_id);
     }else{
       $.get(dl_url, function(data){
         results_container.html(data);
@@ -498,20 +518,7 @@ $(function(){
     clear_results();
   });
   $('.object_search_box').typeWatch(options);
-  // $('.search_done_button').click(function(){
-  //   var input_field = $('#object_search_box');
-  //   input_field.val("");
-  //   input_field.siblings('.clear_field_icon').fadeOut('fast');
-  //   clear_results();
-  //   $(this).disable();
-  // });
-  // $('.remove_icon').mouseover(function(event){
-  //   $(event.target).siblings('.remove_message').fadeIn('fast');
-  //
-  // });
-  // $('.remove_icon').mouseout(function(event) {
-  //   $(event.target).siblings('.remove_message').fadeOut('fast');
-  // });
+
   $('.edit_grouping_button').click(function(event){
     var el = $(event.target);
     get_group_objects(el)
@@ -551,6 +558,18 @@ $(function(){
     submit_group_option_change(form_items,'time_basis',new_value);
 
     //reload the object guts
+  });
+
+  $('.remove_group_button').click(function(event){
+    var el = $(event.target);
+    remove_containing_group(el);
+  });
+
+  $('.refresh_data_button').click(function(event){
+    var el = $(event.target);
+    var my_container = el.parents('.reporting_object_container');
+    var group_id = parseInt(my_container.find('.search_input_container > .group_id').val(),10);
+    load_group_results(object_type,group_id);
   });
 
   $('.disclosure_triangle').click(function(event){

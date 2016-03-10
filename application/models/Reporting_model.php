@@ -104,10 +104,9 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
-  function summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, $make_day_graph, $time_basis){
+  function summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false){
     //canonicalize start and end times (yields $start_time & $end_time)
     // echo "start_date => {$start_date}   end_date => {$end_date}";
-
     extract($this->canonicalize_date_range($start_date, $end_date));
 
     //get user transactions
@@ -147,7 +146,7 @@ class Reporting_model extends CI_Model {
   }
 
 
-  function summarize_uploads_by_proposal_list($eus_proposal_id_list, $start_date, $end_date, $make_day_graph, $time_basis){
+  function summarize_uploads_by_proposal_list($eus_proposal_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false){
     //canonicalize start and end times (yields $start_time & $end_time)
     extract($this->canonicalize_date_range($start_date, $end_date));
 
@@ -174,7 +173,7 @@ class Reporting_model extends CI_Model {
   }
 
 
-  function summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, $make_day_graph, $time_basis){
+  function summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false){
     extract($this->canonicalize_date_range($start_date, $end_date));
     $group_collection = array();
     //get instrument group_id list
@@ -601,9 +600,6 @@ class Reporting_model extends CI_Model {
   }
 
 
-
-
-
   private function available_proposal_data_spread($object_id_list){
     if(empty($object_id_list)) return false;
     $group_collection = array();
@@ -636,28 +632,6 @@ class Reporting_model extends CI_Model {
       return false;
     }
   }
-
-
-  // private function old_latest_available_user_data($person_id){
-  //   $this->db->select(array("t.stime as most_recent_upload","t.transaction"));
-  //   $this->db->where('t.stime is not null')->order_by("t.transaction desc");
-  //   $query = $this->db->get_where("transactions t", array('submitter' => $person_id),1);
-  //   echo $this->db->last_query();
-  //
-  //   if($query && $query->num_rows() > 0){
-  //     //blank stime in trans table
-  //     $latest_time = new DateTime($query->row()->most_recent_upload);
-  //   }else{
-  //     $this->db->order_by('f.transaction desc');
-  //     $file_query = $this->db->get_where('files f', array('f.transaction' => $query->row()->transaction),1);
-  //     if($file_query && $file_query->num_rows()>0){
-  //       $latest_time = new DateTime($file_query->row()->most_recent_upload);
-  //     }else{
-  //       $latest_time = new DateTime('1991-01-01 00:00:00');
-  //     }
-  //   }
-  //   return $latest_time->format('Y-m-d H:i');
-  // }
 
 
   private function available_user_data_spread($object_id_list){
@@ -841,14 +815,26 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
+  public function remove_group_object($group_id, $full_delete = false){
+    //cascade remove all the objects associated with this...
+    $tables = array(
+      'reporting_object_group_options','reporting_selection_prefs','reporting_object_groups'
+    );
+    $DB_prefs = $this->load->database('website_prefs',TRUE);
+    $where_clause = array('group_id' => $group_id);
 
+    if($full_delete){ //permanently remove
+      $DB_prefs->delete($tables, $where_clause);
+    }else{ //just update deleted_at column
+      foreach($tables as $table_name){
+        $DB_prefs->update($table_name, array('deleted' => 'now()'), $where_clause);
+      }
+    }
+
+  }
 
   function update_object_preferences($object_type,$object_list,$group_id = false){
     //object list should look like array('object_id' => $object_id, 'action' => $action)
-    //if $group_id is set, check to make sure that it's valid and active
-    // if($group_id && is_numeric($group_id)){
-    //   $group_items = $this->get_items_for_group($group_id);
-    // }
     $table = 'reporting_selection_prefs';
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     $additions = array();
@@ -910,6 +896,38 @@ class Reporting_model extends CI_Model {
       }
     }
     return $results;
+  }
+
+  public function make_new_group($object_type, $eus_person_id, $group_name = false){
+    $DB_prefs = $this->load->database('website_prefs', TRUE);
+    $table_name = 'reporting_object_groups';
+    //check the name and make sure it's unique for this user_id
+    if(!$group_name){
+      $group_name = "New ".ucwords($object_type)." Group";
+    }
+    $where_array = array(
+      'person_id' => $eus_person_id,
+      'group_name' => $group_name
+    );
+    $check_query = $DB_prefs->where($where_array)->get($table_name);
+    if($check_query && $check_query->num_rows() > 0){
+      $d = new DateTime();
+      $group_name .= " [". $d->format('Y-m-d H:i:s') ."]";
+    }
+    //ok, group name is clear. make the group_name
+    $insert_data = array(
+      'person_id' => $eus_person_id,
+      'group_name' => $group_name,
+      'group_type' => $object_type
+    );
+    $DB_prefs->insert($table,$insert_data);
+    if($DB_prefs->affected_rows() > 0){
+      //insert went ok, return success
+      $group_id = $DB_prefs->insert_id();
+      $group_info = $this->get_group_info($group_id);
+      return $group_info;
+    }
+    return false;
   }
 
   public function change_group_name($group_id,$group_name){

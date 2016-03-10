@@ -57,8 +57,44 @@ class Reporting extends Baseline_controller {
     $this->load->view("object_types/object.html", $this->page_data);
   }
 
+  public function get_group_container($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false){
+    $group_info = $this->rep->get_group_info($group_id);
+    $options_list = $group_info['options_list'];
+    $item_list = $group_info['item_list'];
+    $time_range = !empty($time_range) ? $time_range : $options_list['time_range'];
+    $time_basis = $options_list['time_basis'];
+    if((!empty($start_date) && !empty($end_date)) && (strtotime($start_date) && strtotime($end_date))){
+      $time_range = 'custom';
+    }
+    $object_type = singular($object_type);
+    $accepted_object_types = array('instrument','proposal','user');
+    $this->page_data['placeholder_info'][$group_id] = array(
+      'group_id' => $group_id,
+      'object_type' => $object_type,
+      'options_list' => $options_list,
+      'group_name' => $group_info['group_name'],
+      'item_list' => $group_info['item_list'],
+      'time_basis' => $time_basis,
+      'time_range' => $time_range,
+      'times' => false
+    );
+
+    if(empty($item_list)){
+      $this->load->view('object_types/group.html',$this->page_data);
+    }
+    $this->page_data['placeholder_info'][$group_id]['times'] = $this->fix_time_range($time_range,$start_date,$end_date);
+
+    if(!empty($item_list)){
+
+    }
+  }
+
   private function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false){
     // echo "start_date => {$start_date}   end_date => {$end_date}";
+    if(!empty($start_date) && !empty($end_date)){
+      $times = $this->rep->canonicalize_date_range($start_date, $end_date);
+      return $times;
+    }
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
     if(!strtotime($time_range)){
       if($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)){
@@ -78,6 +114,7 @@ class Reporting extends Baseline_controller {
     return $times;
   }
 
+/*
   public function set_time_basis_cookie($time_basis, $object_type, $group_id = 0){
     if(!in_array($object_type, $this->accepted_object_types)){
       return $this->set_time_basis_cookie($time_basis, 'instrument', $group_id);
@@ -106,36 +143,36 @@ class Reporting extends Baseline_controller {
 
   }
 
-  // private function set_time_range_cookie($time_range, $object_type, $group_id = 0){
-  //   $time_range = str_replace(array('-','_','+'),' ',$time_range);
-  //   $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
-  //   $cookie_name = "myemsl_group_view_{$object_type}_time_range{$group_id_specifics}";
-  //   $valid_time_range = !empty($time_range) && date_create($time_range);
-  //   $existing_cookie = get_cookie($cookie_name);
-  //   $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
-  //   // $cookie_contents = array(
-  //   //   'name' => $cookie_name,
-  //   //   'value' => $stored_time_range,
-  //   //   'expire' => 604800,
-  //   //   'prefix' => '',
-  //   //   'path' => '/'
-  //   // );
-  //
-  //   //check time-range for validity
-  //   if($valid_time_range){
-  //     //let them change the stored value if they specify in the url
-  //     set_cookie($cookie_name,$stored_time_range);
-  //     $new_time_range = $time_range;
-  //   }elseif($existing_cookie == FALSE){
-  //     //no cookie and nothing specified in the url
-  //     $new_time_range = str_replace('-',' ',$stored_time_range);
-  //     set_cookie($cookie_name,$stored_time_range);
-  //   }else{
-  //     $new_time_range = str_replace('-',' ',$existing_cookie);
-  //   }
-  //   return $new_time_range;
-  // }
+  private function set_time_range_cookie($time_range, $object_type, $group_id = 0){
+    $time_range = str_replace(array('-','_','+'),' ',$time_range);
+    $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
+    $cookie_name = "myemsl_group_view_{$object_type}_time_range{$group_id_specifics}";
+    $valid_time_range = !empty($time_range) && date_create($time_range);
+    $existing_cookie = get_cookie($cookie_name);
+    $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
+    // $cookie_contents = array(
+    //   'name' => $cookie_name,
+    //   'value' => $stored_time_range,
+    //   'expire' => 604800,
+    //   'prefix' => '',
+    //   'path' => '/'
+    // );
 
+    //check time-range for validity
+    if($valid_time_range){
+      //let them change the stored value if they specify in the url
+      set_cookie($cookie_name,$stored_time_range);
+      $new_time_range = $time_range;
+    }elseif($existing_cookie == FALSE){
+      //no cookie and nothing specified in the url
+      $new_time_range = str_replace('-',' ',$stored_time_range);
+      set_cookie($cookie_name,$stored_time_range);
+    }else{
+      $new_time_range = str_replace('-',' ',$existing_cookie);
+    }
+    return $new_time_range;
+  }
+*/
 
   public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = 'submit_time'){
     $object_type = singular($object_type);
@@ -172,32 +209,35 @@ class Reporting extends Baseline_controller {
     if(empty($my_groups)){
       $examples = $this->add_objects_instructions($object_type);
       $this->page_data['examples'] = $examples;
-//       $this->page_data['js'] .= "
-// $(function(){
-//   $('#object_search_box').focus();
-// });
-// ";
+    //       $this->page_data['js'] .= "
+    // $(function(){
+    //   $('#object_search_box').focus();
+    // });
+    // ";
       $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
     }else{
       $this->page_data['my_groups'] = '';
       $object_list = array();
       foreach($my_groups as $group_id => $group_info){
+        $my_start_date = false;
+        $my_end_date = false;
         $options_list = $group_info['options_list'];
-        $start_date = isset($start_date) ? $start_date : $options_list['start_time'];
-        $start_date = strtotime($start_date) ? $start_date : false;
-        $end_date = isset($end_date) ? $end_date : $options_list['end_time'];
-        $end_date = strtotime($end_date) ? $end_date : false;
-
+        $my_start_date = strtotime($start_date) ? $start_date : $options_list['start_time'];
+        $my_start_date = $my_start_date != 0 ? $my_start_date : false;
+        $my_end_date = strtotime($end_date) ? $end_date : $options_list['end_time'];
+        $my_end_date = $my_end_date != 0 ? $my_end_date : false;
         $time_basis = $options_list['time_basis'];
-        $time_range = isset($time_range) ? $time_range : $options_list['time_range'];
-        // echo "time_range = {$time_range}";
-        if($time_range && $time_range != $options_list['time_range']){
+        $time_range = $time_range ? $time_range : $options_list['time_range'];
+        // echo "time_range = {$time_range}"
+        // echo "group {$group_id} time_range {$time_range} start => {$my_start_date} end => {$my_end_date}<br />";
+        if($time_range && $time_range != $options_list['time_range'] && $time_range != 'custom'){
           $this->rep->change_group_option($group_id,'time_range',$time_range);
         }
+        // echo "group {$group_id} time_range {$time_range}<br />";
         $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
         $object_list = array_merge($object_list,$group_info['item_list']);
 
-        $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
+        $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
         $latest_available_date = new DateTime($valid_date_range['latest']);
         $earliest_available_date = new DateTime($valid_date_range['earliest']);
 
@@ -273,10 +313,10 @@ class Reporting extends Baseline_controller {
       $examples = $this->add_objects_instructions($object_type);
       $this->page_data['examples'] = $examples;
       $this->page_data['js'] .= "
-$(function(){
-  $('#object_search_box').focus();
-});
-";
+    $(function(){
+      $('#object_search_box').focus();
+    });
+    ";
       $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
     }else{
       $this->page_data['my_objects'] = '';
@@ -333,6 +373,25 @@ $(function(){
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* API functionality for Ajax calls from UI                  */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+  public function make_new_group($object_type){
+    if($this->input->post()){
+      $group_name = $this->input->post('group_name');
+    }elseif($this->input->is_ajax_request() || $this->input->raw_input_stream){
+      $post_info = json_decode($this->input->raw_input_stream,true);
+      $post_info = $post_info[0];
+      $group_name = array_key_exists('group_name',$post_info) ? $post_info['group_name'] : false;
+    }
+    $group_info = $this->rep->make_new_group($object_type,$this->user_id,$group_name);
+    if($group_info && is_array($group_info)){
+      send_json_array($group_info);
+    }else{
+      $this->output->set_status_header(500, "Could not make a new group called '{$group_name}'");
+      return;
+    }
+  }
+
+
+
   public function change_group_name($group_id){
     $new_group_name = false;
     $group_info = $this->rep->get_group_info($group_id);
@@ -661,37 +720,42 @@ $(function(){
       //return an error
       return false;
     }
-    $object_list = $this->rep->get_items_for_group($group_id);
-    // var_dump($object_list);
+    $group_info = $this->rep->get_group_info($group_id);
+
+    $object_list = $group_info['item_list'];
     $retrieval_func = "summarize_uploads_by_{$object_type}_list";
-    $results = $this->rep->$retrieval_func($object_list[$object_type],$start_date,$end_date,true);
+    $results = $this->rep->$retrieval_func($object_list,$start_date,$end_date,true,$group_info['options_list']['time_basis']);
     $downselect = $results['day_graph']['by_date'];
     $return_array = array(
       'file_volumes' => array_values($downselect['file_volume_array']),
       'transaction_counts' => array_values($downselect['transaction_count_array'])
     );
+    $start_date_obj = new DateTime($start_date);
+    $end_date_obj = new DateTime($end_date);
+    $this->rep->change_group_option($group_id, 'start_time', $start_date_obj->format('Y-m-d'));
+    $this->rep->change_group_option($group_id, 'end_time', $end_date_obj->format('Y-m-d'));
     send_json_array($return_array);
   }
 
 
 
-  public function get_uploads_for_instrument($instrument_id,$start_date = false,$end_date = false){
-    $results = $this->rep->summarize_uploads_by_instrument($instrument_id,$start_date,$end_date, true);
-    $results_size = sizeof($results);
-    $pluralizer = $results_size != 1 ? "s" : "";
-    $status_message = '{$results_size} transaction{$pluralizer} returned';
-    send_json_array($results['day_graph']['by_date']['transaction_count_array']);
-  }
-
-  public function get_uploads_for_proposal($proposal_id,$start_date = false,$end_date = false){
-    $results = $this->rep->summarize_uploads_by_proposal($proposal_id,$start_date,$end_date);
-    send_json_array($results);
-  }
-
-  public function get_uploads_for_user($eus_person_id, $start_date = false, $end_date = false){
-    $results = $this->rep->summarize_uploads_by_user($eus_person_id,$start_date,$end_date);
-    send_json_array($results);
-  }
+  // public function get_uploads_for_instrument($instrument_id,$start_date = false,$end_date = false){
+  //   $results = $this->rep->summarize_uploads_by_instrument($instrument_id,$start_date,$end_date, true);
+  //   $results_size = sizeof($results);
+  //   $pluralizer = $results_size != 1 ? "s" : "";
+  //   $status_message = '{$results_size} transaction{$pluralizer} returned';
+  //   send_json_array($results['day_graph']['by_date']['transaction_count_array']);
+  // }
+  //
+  // public function get_uploads_for_proposal($proposal_id,$start_date = false,$end_date = false){
+  //   $results = $this->rep->summarize_uploads_by_proposal($proposal_id,$start_date,$end_date);
+  //   send_json_array($results);
+  // }
+  //
+  // public function get_uploads_for_user($eus_person_id, $start_date = false, $end_date = false){
+  //   $results = $this->rep->summarize_uploads_by_user($eus_person_id,$start_date,$end_date);
+  //   send_json_array($results);
+  // }
 
   public function get_proposals($proposal_name_fragment, $active = 'active'){
     $results = $this->eus->get_proposals_by_name($proposal_name_fragment,$active);
@@ -755,12 +819,28 @@ $(function(){
     $new_set = array();
     if($this->rep->update_object_preferences($object_type,$object_list,$group_id)){
       $this->get_object_group_lookup($object_type, $group_id, $filter);
-      // $new_set = $this->rep->get_selected_objects($this->user_id,$object_type,$group_id);
-      // if(empty($new_set)){
-      //
-      // }
     }
     //send_json_array($new_set);
+  }
+
+  public function remove_group($group_id = false){
+    if(!$group_id){
+      $this->output->set_status_header(400, "No Group ID specified");
+      return;
+    }
+    $group_info = $this->rep->get_group_info($group_id);
+    if(!$group_info){
+      $this->output->set_status_header(404, "Group ID {$group_id} was not found");
+      return;
+    }
+    if($this->user_id != $group_info['person_id']){
+      $this->output->set_status_header(401, "User {$this->eus_person_id} is not the owner of Group ID {$group_id}");
+      return;
+    }
+    $results = $this->rep->remove_group_object($group_id, true);
+
+    $this->output->set_status_header(200);
+    return;
   }
 
   public function add_objects_instructions($object_type){

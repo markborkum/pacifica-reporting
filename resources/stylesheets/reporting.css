@@ -146,7 +146,7 @@ header.secondary .tab_selector{
 
 .group_search_bar_container input[type="text"]{
   border: 3px solid #aaa;
-  border-radius: 8px;
+  border-radius: 6px;
   height: 31px;
   width: 100%;
   padding: 8px 0px 5px 20px;
@@ -164,7 +164,7 @@ header.secondary .tab_selector{
 
 .search_bar_container input[type="text"]{
   border: 3px solid #719500;
-  border-radius: 8px;
+  border-radius: 6px;
   height:30px;
   width: 85%;
   padding: 8px 0px 5px 20px;
@@ -195,6 +195,10 @@ header.secondary .tab_selector{
 /*
   search results styling
 */
+.search_results_display {
+  margin-top: 0.5em;
+}
+
 .search_results_display ul.search_results_list{
   list-style-type: none;
   margin-bottom:0;
@@ -253,6 +257,27 @@ header.secondary .tab_selector{
   margin-right: auto;*/
 }
 
+.edit_button {
+  font-size: 0.95em;
+  border-radius: 2px;
+  border: 1px solid #666;
+  background-color: #ddd;
+  font-weight: bold;
+  color: #555;
+}
+
+.edit_button:hover {
+  border-color: #999;
+  background-color: #999;
+}
+
+.edit_button:active {
+  color: #ccc;
+  border-color: #999;
+  background-color: #888;
+}
+
+
 .group_edit_section h4 {
   color:#222;
   font-size:1.1em;
@@ -262,12 +287,34 @@ header.secondary .tab_selector{
 }
 
 .group_name_edit_container {
-  margin-bottom:1em;gr
+  margin-bottom:1em;
 }
 
 .group_name_edit_container input[type="text"]{
   padding: 0;
   padding-left:10px;
+  /*border-radius: 6px 0px 0px 6px;*/
+}
+
+.right_side_button {
+  position:absolute;
+  top:0px;
+  height:31px;
+  border: 3px solid #aaa;
+  border-radius: 0px 6px 6px 0px;
+  margin-left:-3px;
+  width:140px;
+  text-align: center;
+}
+
+.flat_right_side {
+  border-top-right-radius: 0px !important;
+  border-bottom-right-radius: 0px !important;
+}
+
+.group_edit_confirm_buttons{
+  position:absolute;
+  right:3px;
 }
 
 
@@ -439,23 +486,6 @@ h1.underline{
   margin-left:5px;
 }
 
-.object_footer .edit_grouping_button {
-  font-size: 0.95em;
-  border-radius: 2px;
-  border: 1px solid #666;
-  background-color: #ddd;
-}
-
-.object_footer .edit_grouping_button:hover {
-  border: 1px solid #999;
-  background-color: #999;
-}
-
-.object_footer .edit_grouping_button:active {
-  color: #ccc;
-  border: 1px solid #999;
-  background-color: #888;
-}
 
 .reporting_object_container .group_edit_section {
   min-height: 100px;
@@ -466,6 +496,7 @@ h1.underline{
   border-right-width: 1px;
   border-right-style: solid;
   /*transition: all 0.400s ease-in-out;*/
+  position:relative;
   background-color:#fafafa;
 }
 
