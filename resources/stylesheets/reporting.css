@@ -252,9 +252,6 @@ header.secondary .tab_selector{
 
 .search_input_container, .group_name_edit_container {
   position: relative;
-  width: 85%;
-  /* margin-left: auto;
-  margin-right: auto;*/
 }
 
 .edit_button {
@@ -293,12 +290,14 @@ header.secondary .tab_selector{
 .group_name_edit_container input[type="text"]{
   padding: 0;
   padding-left:10px;
+  width:85%;
   /*border-radius: 6px 0px 0px 6px;*/
 }
 
 .right_side_button {
   position:absolute;
   top:0px;
+  right:0px;
   height:31px;
   border: 3px solid #aaa;
   border-radius: 0px 6px 6px 0px;
