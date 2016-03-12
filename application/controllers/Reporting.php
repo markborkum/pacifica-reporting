@@ -956,6 +956,17 @@ class Reporting extends Baseline_controller {
     echo "</pre>";
   }
 
+  public function test_get_files_from_group_list(){
+    $group_list = array(338690,394300,10081,391971,34124,1142,1004,1005,34072,
+	1000001, 34134,	34105,	34180,	34176,	1032,	34076,	1000010,
+	34110,	34132,	34078,	0,	34000,	1000011,	1176,	1002, 1003,
+	34135, 1145, 34075,34218,34121,34136,34181,431561);
+    $start_time = '2015-09-01 00:00:00';
+    $end_time = '2015-11-13 23:59:59';
+
+    $results = $this->rep->get_files_from_group_list($group_list, $start_time,$end_time);
+  }
+
 
   public function test_get_transaction_info(){
     $transaction_list = array(

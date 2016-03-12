@@ -70,11 +70,20 @@ class Reporting_model extends CI_Model {
 
   }
 
+  function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis){
+    if(!empty($results['files'])){
+      $results['file_info'] = $this->get_info_for_files($results['files']);
+      $results = $this->generate_file_summary_data($results);
+
+    }
+  }
+
 
   function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date, $time_basis){
     //use the transaction list to retrieve summary info
     if(!empty($results['transactions'])){
       $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
+      // var_dump($results);
       $results = $this->generate_summary_data($results);
       $results['day_graph'] = $this->generate_day_graph_summary($results['transactions'], $start_date, $end_date, $time_basis);
     }else{
@@ -215,7 +224,8 @@ class Reporting_model extends CI_Model {
       'time_range' => array('start_time' => $start_time, 'end_time' => $end_time)
     );
     //get transactions for time period & group_list
-    $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+    // $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+    $results['transactions'] = $this->get_files_from_group_list($group_list, $start_time, $end_time);
 
     $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
 
@@ -245,6 +255,7 @@ class Reporting_model extends CI_Model {
     $this->db->group_by('t.transaction');
     $this->db->order_by('t.transaction desc')->distinct();
     $transaction_query = $this->db->get();
+    // echo $this->db->last_query();
     if($transaction_query && $transaction_query->num_rows()>0){
       foreach($transaction_query->result() as $row){
         $stime = date_create($row->submit_time);
@@ -258,6 +269,51 @@ class Reporting_model extends CI_Model {
       }
     }
     return $transactions;
+  }
+
+  public function get_files_from_group_list($group_list, $start_time, $end_time){
+    $times = array(
+      'submit' => array(),
+      'create' => array(),
+      'modified' => array()
+    );
+
+    $this->db->select(array(
+      'f.item_id',
+      't.transaction',
+      'date_trunc(\'minute\',t.stime) as submit_time',
+      'date_trunc(\'minute\',f.ctime) as create_time',
+      'date_trunc(\'minute\',f.mtime) as modified_time',
+      'size as file_size_bytes'
+    ));
+    $where_string = "((t.stime >= '{$start_time}' AND t.stime < '{$end_time}')";
+    $where_string .= " OR ";
+    $where_string .= "(f.ctime >= '{$start_time}' AND f.ctime < '{$end_time}')";
+    $where_string .= " OR ";
+    $where_string .= "(f.mtime >= '{$start_time}' AND f.mtime < '{$end_time}'))";
+
+    $this->db->from('transactions as t')->join('files as f','f.transaction = t.transaction');
+    $this->db->join('group_items as gi','gi.item_id = f.item_id');
+    $this->db->where($where_string);
+    $this->db->where_in('gi.group_id',$group_list);
+    $this->db->order_by('t.transaction desc')->distinct();
+    $query = $this->db->get();
+    echo $this->db->last_query();
+    if($query && $query->num_rows()>0){
+      foreach($query->result() as $row){
+        $stime = date_create($row->submit_time);
+        $ctime = date_create($row->create_time);
+        $mtime = date_create($row->modified_time);
+        $files[$row->item_id] = array(
+          'submit_time' => $stime->format('Y-m-d H:i:s'),
+          'create_time' => $ctime->format('Y-m-d H:i:s'),
+          'modified_time' => $mtime->format('Y-m-d H:i:s'),
+          'transaction' => $row->transaction,
+          'file_size_bytes' => $row->file_size_bytes
+        );
+      }
+    }
+    return $files;
   }
 
 
@@ -461,6 +517,66 @@ class Reporting_model extends CI_Model {
   }
 
 
+  private function generate_file_summary_data($results){
+    $upload_stats = array();
+    if(!empty($results['files'])){
+      $transaction_records = array(
+        'most_files' => array('transaction_id' => false, 'file_count' => 0),
+        'largest_upload' => array('transaction_id' => false, 'file_size' => 0),
+        'most_prolific' => array('person_id' => FALSE, 'file_size' => 0)
+      );
+      $file_list = $results['files'];
+      $output_list = array();
+      foreach($file_list as $item_id => $info){
+        $tx_i = $results['transaction_info'][$info['transaction']];
+        $new_info = array(
+          'size_string' => format_bytes($info['size_bytes']),
+          'eus_instrument_id' => array_key_exists('eus_instrument_id',$tx_i) ? $tx_i['eus_instrument_id'] : 0,
+          'eus_person_id' => array_key_exists('eus_person_id', $tx_i) ? $tx_i['eus_person_id'] : "0"
+        );
+        $results['files'][$item_id] += $new_info;
+        $total_file_count_summary++;
+        $total_file_size_summary += $info['size_bytes'];
+
+        if(!array_key_exists($tx_i['eus_person_id'], $upload_stats['user'])){
+          $upload_stats['user'][$tx_i['eus_person_id']] = 1;
+        }else{
+          $upload_stats['user'][$tx_i['eus_person_id']] += 1;
+        }
+        if(array_key_exists('eus_instrument_id', $tx_i)){
+          if(!array_key_exists($tx_i['eus_instrument_id'], $upload_stats['instrument'])){
+            $upload_stats['instrument'][$tx_i['eus_instrument_id']] = 1;
+          }else{
+            $upload_stats['instrument'][$tx_i['eus_instrument_id']] += 1;
+          }
+        }
+        if(array_key_exists('eus_proposal_id', $tx_i)){
+          if(!array_key_exists($tx_i['eus_proposal_id'], $upload_stats['proposal'])){
+            $upload_stats['proposal'][$tx_i['eus_proposal_id']] = 1;
+          }else{
+            $upload_stats['proposal'][$tx_i['eus_proposal_id']] += 1;
+          }
+        }
+
+      }
+
+    }
+
+    // foreach($results['transaction_info'])
+
+    $results['summary_totals'] = array(
+      'upload_stats' => $upload_stats,
+      'total_file_count' => $total_file_count_summary,
+      'total_size_bytes' => $total_file_size_summary,
+      'total_size_string' => format_bytes($total_file_size_summary)
+    );
+
+    unset($results['transaction_info']);
+
+    return $results;
+  }
+
+
 
 
   /*
@@ -567,6 +683,7 @@ class Reporting_model extends CI_Model {
 
 
   private function available_instrument_data_spread($object_id_list){
+    $return_array = false;
     if(empty($object_id_list)) return false;
     $group_collection = array();
     foreach($object_id_list as $object_id){
@@ -575,32 +692,41 @@ class Reporting_model extends CI_Model {
     $group_list = array_keys($group_collection);
     $latest_time = false;
     $this->db->select(array(
-      'MAX(t.stime) as most_recent_upload',
-      'MIN(t.stime) as earliest_upload')
-    );
+      "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
+      "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
+      "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
+      "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
+      "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
+      "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+    ));
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('transactions t', 'f.transaction = t.transaction');
     $this->db->where_in('gi.group_id',$group_list)->limit(1);
     $query = $this->db->get();
-    if($query && $query->num_rows() > 0 || !empty($query->row()->most_recent_upload)){
-      if(strtotime($query->row()->most_recent_upload)){
-        $latest_time = new DateTime($query->row()->most_recent_upload);
-        $earliest_time = new DateTime($query->row()->earliest_upload);
-        return array(
-          'earliest' => $earliest_time->format('Y-m-d H:i'),
-          'latest' => $latest_time->format('Y-m-d H:i')
-        );
+    if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
+      $row = $query->row_array();
+      $earliest_time = new DateTime($row['earliest_upload']);
+      $latest_time = new DateTime($row['latest_upload']);
+      foreach($row as $field_name => $value){
+        $check_time = new DateTime($value);
+        if(stristr($field_name,'earliest') && $check_time){
+          $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
+        }elseif(stristr($field_name,'latest') && $check_time){
+          $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
+        }
       }
-      return false;
-      // echo $this->db->last_query();
-    }else{ // no records or null response
-      return false;
+      $return_array = array(
+        'earliest' => $earliest_time->format('Y-m-d H:i'),
+        'latest' => $latest_time->format('Y-m-d H:i')
+      );
     }
+    return $return_array;
   }
 
 
   private function available_proposal_data_spread($object_id_list){
+    $return_array = false;
     if(empty($object_id_list)) return false;
     $group_collection = array();
     foreach($object_id_list as $object_id){
@@ -609,55 +735,76 @@ class Reporting_model extends CI_Model {
     $group_list = array_keys($group_collection);
 
     $this->db->select(array(
-      'MAX(t.stime) as most_recent_upload',
-      'MIN(t.stime) as earliest_upload')
-    );
+      "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
+      "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
+      "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
+      "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
+      "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
+      "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+    ));
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('transactions t', 'f.transaction = t.transaction');
     $this->db->where_in('gi.group_id',$group_list)->limit(1);
     $query = $this->db->get();
-
-    if($query && $query->num_rows() > 0){
-      if(strtotime($query->row()->most_recent_upload)){
-        $latest_time = new DateTime($query->row()->most_recent_upload);
-        $earliest_time = new DateTime($query->row()->earliest_upload);
-        return array(
-          'earliest' => $earliest_time->format('Y-m-d H:i'),
-          'latest' => $latest_time->format('Y-m-d H:i')
-        );
+    if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
+      $row = $query->row_array();
+      $earliest_time = new DateTime($row['earliest_upload']);
+      $latest_time = new DateTime($row['latest_upload']);
+      foreach($row as $field_name => $value){
+        $check_time = new DateTime($value);
+        if(stristr($field_name,'earliest') && $check_time){
+          $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
+        }elseif(stristr($field_name,'latest') && $check_time){
+          $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
+        }
       }
-      return false;
-    }else{
-      return false;
+      $return_array = array(
+        'earliest' => $earliest_time->format('Y-m-d H:i'),
+        'latest' => $latest_time->format('Y-m-d H:i')
+      );
+      // echo $this->db->last_query();
     }
+    return $return_array;
   }
 
 
   private function available_user_data_spread($object_id_list){
+    $return_array = false;
     if(empty($object_id_list)) return false;
     $this->db->select(array(
-      'MAX(t.stime) as most_recent_upload',
-      'MIN(t.stime) as earliest_upload')
-    );
+      "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
+      "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
+      "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
+      "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
+      "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
+      "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+    ));
     $this->db->where('t.stime is not null');
     $this->db->where_in('submitter',$object_id_list);
-    $query = $this->db->get("transactions t",1);
+    $this->db->from('transactions t')->limit(1);
+    $this->db->join('files f','t.transaction = f.transaction');
+    $query = $this->db->get();
 
-    if($query && $query->num_rows() > 0){
-      //blank stime in trans table
-      if(strtotime($query->row()->most_recent_upload)){
-        $latest_time = new DateTime($query->row()->most_recent_upload);
-        $earliest_time = new DateTime($query->row()->earliest_upload);
-        return array(
-          'earliest' => $earliest_time->format('Y-m-d H:i'),
-          'latest' => $latest_time->format('Y-m-d H:i')
-        );
+    if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
+      $row = $query->row_array();
+      $earliest_time = new DateTime($row['earliest_upload']);
+      $latest_time = new DateTime($row['latest_upload']);
+      foreach($row as $field_name => $value){
+        $check_time = new DateTime($value);
+        if(stristr($field_name,'earliest') && $check_time){
+          $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
+        }elseif(stristr($field_name,'latest') && $check_time){
+          $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
+        }
       }
-      return false;
-    }else{
-      return false;
+      $return_array = array(
+        'earliest' => $earliest_time->format('Y-m-d H:i'),
+        'latest' => $latest_time->format('Y-m-d H:i')
+      );
+      // echo $this->db->last_query();
     }
+    return $return_array;
   }
 
 
@@ -792,6 +939,7 @@ class Reporting_model extends CI_Model {
 
 
   public function get_selected_groups($eus_person_id,$restrict_type = false){
+    $results = array();
     $DB_prefs = $this->load->database('website_prefs',TRUE);
     // $select_array = array(
     //   'g.group_id','g.group_name','g.group_type','g.person_id as user','p.item_id'

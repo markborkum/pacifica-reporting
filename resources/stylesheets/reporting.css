@@ -148,7 +148,7 @@ header.secondary .tab_selector{
   border: 3px solid #aaa;
   border-radius: 6px;
   height: 31px;
-  width: 100%;
+  width: 85%;
   padding: 8px 0px 5px 20px;
   transition: box-shadow 0.3s, border 0.3s;
   color: #222;
@@ -297,7 +297,7 @@ header.secondary .tab_selector{
 .right_side_button {
   position:absolute;
   top:0px;
-  right:0px;
+  right:3px;
   height:31px;
   border: 3px solid #aaa;
   border-radius: 0px 6px 6px 0px;
