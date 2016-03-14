@@ -87,8 +87,9 @@ var hc_timeline_options = {
     tickPixelInterval: 30
   },
   yAxis: [{ //transaction count axis
+    type: 'logarithmic',
     title: {
-      text: 'Number of Uploads',
+      text: 'Total File Count',
       style: {
         color: Highcharts.getOptions().colors[1]
       }
@@ -99,8 +100,9 @@ var hc_timeline_options = {
       }
     }
   },{ //volume axis
+    // type: 'logarithmic',
     title: {
-      text: 'File Volume (MB)',
+      text: 'Total File Size',
       style: {
         color: Highcharts.getOptions().colors[0]
       }
@@ -134,7 +136,7 @@ var get_transaction_info = function(el,transaction_list){
     var posting = $.post(url, JSON.stringify(transaction_list), function(data){
       details_container.html(data);
       disclosure_arrow.removeClass('dc_up').addClass('dc_down');
-      load_indicator.fadeOut();
+      load_indicator.fadeOut().spin(false);
       details_container.show();
     });
     posting.done(function(){
@@ -364,14 +366,17 @@ var load_results = function(object_type, object_id){
 
 
 var load_group_results = function(object_type, group_id, item_list){
-  $('#loading_status_' + group_id).spin();
+  $('#loading_status_' + group_id).spin().show();
+  var obj_footer = $('#object_footer_' + group_id);
+  obj_footer.disable();
   // var cookie_name = 'myemsl_group_view_' + object_type + '_time_basis_group_' + group_id;
   //var time_basis = $.cookie(cookie_name) != undefined ? '/' + $.cookie(cookie_name) : '' ;
   var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
   var getter = $.get(url);
   getter.done(function(data,status){
-    $('#loading_status_' + group_id).spin(false);
+    $('#loading_status_' + group_id).spin(false).hide();
     $('#object_body_container_' + group_id).replaceWith(data);
+    obj_footer.enable();
   });
 };
 

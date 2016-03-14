@@ -2,7 +2,6 @@
 <script type="text/javascript">
   $(function () {
     $('#message_container_<?= $group_id ?>').html('<?= $results_message ?>');
-    $('#transaction_count_<?= $group_id ?>').html('<?= $summary_totals["transaction_count"] ?>');
     $('#file_count_<?= $group_id ?>').html('<?= $summary_totals["total_file_count"] ?>');
     $('#file_volume_<?= $group_id ?>').html('<?= $summary_totals["total_size_string"] ?>');
     my_transactions_<?= $group_id ?> = <?= json_encode(array_keys($transactions)); ?>;
@@ -13,8 +12,8 @@
 
     <?php
     $proposal_data = array();
-    foreach($summary_totals['transaction_stats']['proposal'] as $proposal_id => $proposal_count){
-      $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['transaction_count'],2));
+    foreach($summary_totals['upload_stats']['proposal'] as $proposal_id => $proposal_count){
+      $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['total_file_count'],2));
       $proposal_name = $this->eus->get_proposal_name($proposal_id);
       $proposal_lookup[$proposal_id] = $proposal_name;
     }
@@ -73,9 +72,9 @@
 
     <?php
     $user_data = array();
-    foreach($summary_totals['transaction_stats']['user'] as $person_id => $trans_count){
+    foreach($summary_totals['upload_stats']['user'] as $person_id => $trans_count){
       $user_info = $this->eus->get_name_from_eus_id($person_id);
-      $user_data[] = array('name' => $user_info['display_name'], 'y' => round($trans_count / $summary_totals['transaction_count'],2));
+      $user_data[] = array('name' => $user_info['display_name'], 'y' => round($trans_count / $summary_totals['total_file_count'],2));
     }
     ?>
 
@@ -101,10 +100,10 @@
 
     <?php
     $instrument_data = array();
-    foreach($summary_totals['transaction_stats']['instrument'] as $instrument_id => $trans_count){
+    foreach($summary_totals['upload_stats']['instrument'] as $instrument_id => $trans_count){
       $instrument_info = $this->eus->get_instrument_name($instrument_id);
       $instrument_lookup[$instrument_id] = $instrument_info;
-      $instrument_data[] = array('name' => $instrument_id, 'y' => round($trans_count / $summary_totals['transaction_count'],2));
+      $instrument_data[] = array('name' => $instrument_id, 'y' => round($trans_count / $summary_totals['total_file_count'],2));
     }
     ?>
 

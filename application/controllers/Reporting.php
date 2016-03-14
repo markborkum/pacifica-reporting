@@ -689,8 +689,6 @@ class Reporting extends Baseline_controller {
     }elseif($this->input->is_ajax_request() || file_get_contents('php://input')){
       $HTTP_RAW_POST_DATA = file_get_contents('php://input');
       $transaction_list = json_decode($HTTP_RAW_POST_DATA,true);
-    }else{
-      $transaction_list = array(1895,1894,1893,1888);
     }
     $results = $this->rep->detailed_transaction_list($transaction_list);
     $this->page_data['transaction_info'] = $results;

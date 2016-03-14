@@ -11,11 +11,9 @@
 <div id="object_body_container_<?= $group_id ?>" class="object_body_container">
   <?php if(isset($summary_totals)): ?>
   <div id="totals_container_<?= $group_id ?>" class="totals_container" style='vertical-align: middle;'>
-    <?php $transaction_plural = $summary_totals['transaction_count'] != 1 ? "s" : ""; ?>
     <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
     <div id='upload_totals_header_<?= $group_id ?>' class='stats_header'>Upload Totals</div>
     <ul id='upload_totals_<?= $group_id ?>' class='stats_list'>
-      <li><span id='transaction_count_<?= $group_id ?>' class='transaction_count'><?= $summary_totals['transaction_count'] ?></span> Transaction<?= $transaction_plural ?></li>
       <li><span id='file_count_<?= $group_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $group_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
     <div id="contained_objects_header_<?= $group_id ?>" class="stats_header"><?= ucwords(plural($object_type)) ?> Referenced</div>
@@ -28,6 +26,7 @@
     <p><?= implode('<br />',$processed_obj_list_strings) ?></p>
   </div>
   <div id='stats_graph_container_<?= $group_id ?>' class='stats_graph_container' style='position:relative;width:75%;'>
+      <div class="loading_blocker" id="graph_loading_blocker_<?= $group_id ?>" style="display:none;"><div>Loading Updated Info...</div></div>
       <div id='proposal_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_left'></div>
       <div id='instrument_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_center'></div>
       <div id='user_stats_graph_<?= $group_id ?>' class='stats_graph stats_graph_3_across stats_graph_right'></div>
