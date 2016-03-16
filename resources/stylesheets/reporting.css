@@ -160,7 +160,26 @@ header.secondary .tab_selector{
   outline:none;
 }
 
+.group_search_bar_container_new {
+  padding:0;
+}
 
+#add_new_group_button{
+  position:absolute;
+  right:10px;
+}
+
+#cancel_add_new_group_button{
+  position:absolute;
+  right:120px;
+}
+
+.add_new_group_button_container{
+  position:relative;
+  width:100%;
+  height:30px;
+  margin-bottom:0.5em;
+}
 
 .search_bar_container input[type="text"]{
   border: 3px solid #719500;
@@ -275,7 +294,7 @@ header.secondary .tab_selector{
 }
 
 
-.group_edit_section h4 {
+.group_edit_section h4,.group_edit_section_new h4 {
   color:#222;
   font-size:1.1em;
   margin-top:0;
@@ -317,7 +336,7 @@ header.secondary .tab_selector{
 }
 
 
-#insert_new_group_container {
+#create_new_group_button {
   color:#5c5c5c;
   font-weight:bold;
   border: 2px solid #ccc;
@@ -326,26 +345,33 @@ header.secondary .tab_selector{
   padding:5px;
   position:relative;
   height: 2.75em;
-  /*transition: all 0.1s ease-in-out;*/
-}
-
-#insert_new_group_container:hover {
-  background-color: #aaa;
-  color: #efefef;
-}
-
-#insert_new_group_container:active {
-  background-color: #777;
-  color: #efefef;
-}
-
-#insert_new_group_container .new_group_instructions {
+  width:100%;
   text-align: center;
   vertical-align: bottom;
   font-size: 1.25em;
   margin-top: 3px;
   font-style: italic;
+  position:absolute;
+  /*transition: all 0.1s ease-in-out;*/
 }
+
+#create_new_group_button:hover {
+  background-color: #aaa;
+  color: #efefef;
+}
+
+#create_new_group_button:active {
+  background-color: #777;
+  color: #efefef;
+}
+
+/*#insert_new_group_container .new_group_instructions {
+  text-align: center;
+  vertical-align: bottom;
+  font-size: 1.25em;
+  margin-top: 3px;
+  font-style: italic;
+}*/
 
 
 
@@ -497,6 +523,18 @@ h1.underline{
   /*transition: all 0.400s ease-in-out;*/
   position:relative;
   background-color:#fafafa;
+}
+
+.group_edit_section_new{
+  background-color: #fafafa;
+  border: 2px solid #ccc;
+  border-radius:6px;
+  padding: 0em 1em;
+  position:relative;
+}
+
+#group_name_editor_new {
+  width:100%;
 }
 
 /*.reporting_object_container .group_edit_section.closed {
