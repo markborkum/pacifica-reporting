@@ -80,8 +80,12 @@ class Reporting extends Baseline_controller {
     );
 
     if(empty($item_list)){
+      $this->page_data['examples'] = $this->add_objects_instructions($object_type);
       $this->load->view('object_types/group.html',$this->page_data);
     }
+
+    $this->page_data['my_groups'] = array($group_id => $group_info);
+
     $this->page_data['placeholder_info'][$group_id]['times'] = $this->fix_time_range($time_range,$start_date,$end_date);
 
     if(!empty($item_list)){
@@ -114,65 +118,6 @@ class Reporting extends Baseline_controller {
     return $times;
   }
 
-/*
-  public function set_time_basis_cookie($time_basis, $object_type, $group_id = 0){
-    if(!in_array($object_type, $this->accepted_object_types)){
-      return $this->set_time_basis_cookie($time_basis, 'instrument', $group_id);
-    }
-    if(!in_array($time_basis,$this->accepted_time_basis_types)){
-      return $this->set_time_basis_cookie('submit_time', $object_type, $group_id);
-    }
-    $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
-    $cookie_name = "myemsl_group_view_{$object_type}_time_basis{$group_id_specifics}";
-    // echo "cookie_name => {$cookie_name}";
-    $existing_cookie = get_cookie($cookie_name);
-    //echo "existing cookie => {$existing_cookie}<br />";
-    // $cookie_contents = array(
-    //   'name' => $cookie_name,
-    //   'value' => $time_basis,
-    //   'expire' => 604800,
-    //   'prefix' => '',
-    //   'path' => '/'
-    // );
-    // var_dump($cookie_contents);
-    //echo "time_basis = '{$time_basis}'";
-    if(!$existing_cookie || $existing_cookie != $time_basis){
-      set_cookie($cookie_name, $time_basis);
-    }
-    return get_cookie($cookie_name);
-
-  }
-
-  private function set_time_range_cookie($time_range, $object_type, $group_id = 0){
-    $time_range = str_replace(array('-','_','+'),' ',$time_range);
-    $group_id_specifics = $group_id > 0 ? "_group_{$group_id}" : "";
-    $cookie_name = "myemsl_group_view_{$object_type}_time_range{$group_id_specifics}";
-    $valid_time_range = !empty($time_range) && date_create($time_range);
-    $existing_cookie = get_cookie($cookie_name);
-    $stored_time_range = $valid_time_range ? str_replace(array(' ','_','+'),'-',$time_range) : "3-months";
-    // $cookie_contents = array(
-    //   'name' => $cookie_name,
-    //   'value' => $stored_time_range,
-    //   'expire' => 604800,
-    //   'prefix' => '',
-    //   'path' => '/'
-    // );
-
-    //check time-range for validity
-    if($valid_time_range){
-      //let them change the stored value if they specify in the url
-      set_cookie($cookie_name,$stored_time_range);
-      $new_time_range = $time_range;
-    }elseif($existing_cookie == FALSE){
-      //no cookie and nothing specified in the url
-      $new_time_range = str_replace('-',' ',$stored_time_range);
-      set_cookie($cookie_name,$stored_time_range);
-    }else{
-      $new_time_range = str_replace('-',' ',$existing_cookie);
-    }
-    return $new_time_range;
-  }
-*/
 
   public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = 'submit_time'){
     $object_type = singular($object_type);
@@ -180,8 +125,6 @@ class Reporting extends Baseline_controller {
     if(!in_array($object_type,$accepted_object_types)){
       redirect('reporting/group_view/instrument');
     }
-    // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type);
-    // $time_range = $this->rep->change_group_option($group_id, 'time_range', $time_range);
     $this->page_data['page_header'] = "Aggregated MyEMSL Uploads by ".ucwords($object_type)." Grouping";
     $this->page_data['my_object_type'] = $object_type;
     $this->page_data['css_uris'] = array(
@@ -202,18 +145,11 @@ class Reporting extends Baseline_controller {
       base_url()."resources/scripts/highcharts/js/highcharts.js",
       base_url()."resources/scripts/reporting.js"
     );
-    //$this->page_data['time_basis'] = $time_basis;
-    // $my_object_list = $this->rep->get_selected_objects($this->user_id, $object_type);
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
 
     if(empty($my_groups)){
       $examples = $this->add_objects_instructions($object_type);
       $this->page_data['examples'] = $examples;
-    //       $this->page_data['js'] .= "
-    // $(function(){
-    //   $('#object_search_box').focus();
-    // });
-    // ";
       $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
     }else{
       $this->page_data['my_groups'] = '';
@@ -254,7 +190,9 @@ class Reporting extends Baseline_controller {
           $my_times['end_time_object'] = clone($valid_range['latest_available_object']);
         }
         $my_times = array_merge($my_times, $valid_range);
-
+        if(empty($group_info['item_list'])){
+          $this->page_data['examples'] = $this->add_objects_instructions($object_type);
+        }
         $this->page_data['placeholder_info'][$group_id] = array(
           'group_id' => $group_id,
           'object_type' => $object_type,

@@ -25,6 +25,14 @@ class Reporting_model extends CI_Model {
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  *    Publicly available API calls
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+
+  /**
+   * Retrieves the detailed upload info for a given set of transaction item_list
+   *
+   * @param array $transaction_list array of transaction id's to be retrieved
+   * @return array $results array of results from the db
+  */
   function detailed_transaction_list($transaction_list){
     // this gets us the basic user/instrument/proposal info
     $eus_info = $this->get_info_for_transactions(array_combine($transaction_list,$transaction_list));
@@ -1191,6 +1199,16 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
+  /**
+    * *make_new_group* adds an object grouping entity to the website_prefs/reporting_object_groups
+    * table
+    *
+    * @param $object_type string the type of object grouping to create (instrument/user/proposal)
+    * @param $eus_person_id int the EUS identifier of the group owner
+    * @param $group_name string the name of the group to be created (optional) (set false for default name)
+    *
+    * @return array|bool array of group information items or false on error
+  */
   public function make_new_group($object_type, $eus_person_id, $group_name = false){
     $DB_prefs = $this->load->database('website_prefs', TRUE);
     $table_name = 'reporting_object_groups';

@@ -15,18 +15,21 @@
       <div class="object_name">
         <div class="disclosure_triangle<?= $current_state ?>" id="disclosure_triangle_<?= $id ?>"></div>
         <span class="container_name"><?= $display_group_name ?> Grouping - <span class="displayed_group_name"><?= $group_info['group_name'] ?></span></span>
-        <span><a href="<?= base_url() ?>index.php/reporting/view/<?= $my_object_type ?>/<?= $id ?>/<?= $clean_time_range ?>" target="_blank">[Details]</a></span>
+        <!-- <span><a href="<?= base_url() ?>index.php/reporting/view/<?= $my_object_type ?>/<?= $id ?>/<?= $clean_time_range ?>" target="_blank">[Details]</a></span> -->
       </div>
       <div class="object_name_short"><span class="displayed_group_name"><?= $group_info['group_name'] ?></span></div>
       <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
     </div>
     <div class="object_closeable" id="object_closeable_<?= $id ?>">
       <div class="object_body" id="object_body_<?= $id ?>">
+      <?php if(!empty($group_info['item_list'])): ?>
         <div class="loading_blocker" id="loading_blocker_<?= $id ?>" style="display:none;"><div>Loading Updated Info...</div></div>
         <?php $this->load->view('object_types/group_body_placeholder.html',$placeholder_info[$id]); ?>
+      <?php endif; ?>
       </div>
-
-      <div class="group_edit_section closed" id="group_edit_section_<?= $id ?>" style="display:none;">
+      <?php $closed_tag = !empty($group_info['item_list']) ? " closed" : "" ?>
+      <?php $edit_display_tag = !empty($group_info['item_list']) ? ' style="display:none;"' : ""; ?>
+      <div class="group_edit_section<?= $closed_tag ?>" id="group_edit_section_<?= $id ?>"<?= $edit_display_tag ?>>
         <div class="group_search_bar_container" id="group_search_bar_container_<?= $id ?>">
           <form onsubmit="return false;" id="group_search_form_<?= $id ?>" class="group_search_form">
             <h4>Edit Group Name</h4>
@@ -47,6 +50,13 @@
               <input type="hidden" id="group_name_<?= $id ?>" name="group_name_<?= $id ?>" class="group_name" value="<?= $group_info['group_name'] ?>" />
               <input type="hidden" id="group_id_<?= $id ?>" name="group_id_<?= $id ?>" class="group_id" value="<?= $id ?>" />
               <input type="hidden" id="object_type_<?= $id ?>" name="object_type_<?= $id ?>" class="object_type" value="<?= $my_object_type ?>" />
+            </div>
+            <div id="search_instructions_container_<?= $id ?>" class="search_instructions_container">
+            <?php
+            if(empty($group_info['item_list'])){
+              $this->load->view('object_types/select_some_groups_insert.html', $this->page_data);
+            }
+            ?>
             </div>
           </form>
         </div>

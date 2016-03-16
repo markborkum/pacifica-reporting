@@ -375,7 +375,11 @@ var load_group_results = function(object_type, group_id, item_list){
   var getter = $.get(url);
   getter.done(function(data,status){
     $('#loading_status_' + group_id).spin(false).hide();
-    $('#object_body_container_' + group_id).replaceWith(data);
+    if($('#object_body_container_' + group_id).length == 0){
+      $('#object_body_' + group_id).append(data);
+    }else{
+      $('#object_body_container_' + group_id).replaceWith(data);
+    }
     obj_footer.enable();
   });
 };
@@ -422,6 +426,19 @@ var clear_results = function(){
 var setup_confirmation_dialog_boxes = function(e){
 };
 
+var make_new_group_entry = function(group_name, input_el){
+  var update_list = {
+    'group_name' : group_name
+  };
+  var url = base_url + 'index.php/reporting/make_new_group/' + object_type
+  var poster = $.post(url,JSON.stringify(update_list), function(data){
+    var get_group_url = base_url + 'index.php/reporting/get_group_container/' + object_type + '/' + data.group_id;
+    var getter = $.get(get_group_url, function(group_data){
+
+    });
+  })
+};
+
 var submit_group_name_change = function(group_name, group_id, input_el){
   var url = base_url + 'index.php/reporting/change_group_name/' + group_id + '/';
   var update_list = {group_name : group_name}
@@ -442,10 +459,12 @@ var submit_group_name_change = function(group_name, group_id, input_el){
 var get_group_objects = function(el,filter_text){
   filter_text = filter_text != null ? filter_text : "";
   var edit_el = el.parents('.reporting_object_container').find('.group_edit_section');
+  var instructions_container = edit_el.find('.search_instructions_container');
   var group_id = edit_el.find('.group_search_form input.group_id').val();
   var object_type = edit_el.find('.group_search_form input.object_type').val();
   var dl_url = base_url + 'index.php/reporting/get_object_group_lookup/' + object_type + '/' + group_id;
   var results_container = edit_el.find('.search_results_display');
+  instructions_container.slideUp();
   if(el.hasClass('edit_grouping_button')){
     // if(!edit_el.hasClass('closed')){
     if(edit_el.is(':visible')){
