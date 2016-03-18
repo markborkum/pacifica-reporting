@@ -1,4 +1,6 @@
 ## Pacifica Reporting Module
+[![Build Status](https://travis-ci.org/EMSL-MSC/pacifica-reporting.svg?branch=master)](https://travis-ci.org/EMSL-MSC/pacifica-reporting)
+
 ---
 ### Overview
 This tool provides aggregated data from the upload/ingest process, collected and
