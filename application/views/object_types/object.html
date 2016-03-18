@@ -26,7 +26,7 @@
         <option value="<?= $value ?>" title="<?= $info['title'] ?>"<?= $selected_basis ?>><?= $info['text'] ?></option>
         <?php endforeach; ?>
       </select>
-    </div>  
+    </div>
     <div id="time_range_container_<?= $id ?>" class="time_range_container pull-right">
       <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>&nbsp;<span></span> <b class="caret"></b>
     </div>
@@ -41,7 +41,7 @@ $(function() {
         var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
         var start_timestamp = start.toDate().getTime();
         var end_timestamp = end.toDate().getTime();
-
+        debugger;
         if(tl_obj){
           if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
             load_new_timeline_data(tl_obj, object_type,'<?= $id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));

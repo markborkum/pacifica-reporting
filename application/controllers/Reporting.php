@@ -10,7 +10,7 @@ class Reporting extends Baseline_controller {
   function __construct() {
     parent::__construct();
     $this->load->model('Reporting_model','rep');
-    $this->load->library('myemsl-eus-library/EUS','','eus');
+    $this->load->library('EUS','','eus');
     $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');

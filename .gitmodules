@@ -1,3 +1,0 @@
-[submodule "application/libraries/myemsl-eus-library"]
-	path = application/libraries/myemsl-eus-library
-	url = ssh://git@stash.pnnl.gov:7999/~d3k857/myemsl-eus-library.git
