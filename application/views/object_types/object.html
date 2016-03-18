@@ -41,7 +41,6 @@ $(function() {
         var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
         var start_timestamp = start.toDate().getTime();
         var end_timestamp = end.toDate().getTime();
-        debugger;
         if(tl_obj){
           if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
             load_new_timeline_data(tl_obj, object_type,'<?= $id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));

@@ -456,6 +456,24 @@ var submit_group_name_change = function(group_name, group_id, input_el){
   });
 };
 
+var update_group_time_range = function(group_id, start_time, end_time){
+  var url = base_url + 'index.php/reporting/change_group_option/' + group_id;
+  var start_time_obj = new moment(start_time);
+  var end_time_obj = new moment(end_time);
+
+  var update_list = {
+    'option_type' : 'start_time',
+    'option_value' : start_time_obj.format('YYYY-MM-DD HH:mm:ss')
+  };
+  var poster1 = $.post(url, JSON.stringify(update_list));
+
+  update_list = {
+    'option_type' : 'end_time',
+    'option_value' : end_time_obj.format('YYYY-MM-DD HH:mm:ss')
+  };
+  var poster2 = $.post(url, JSON.stringify(update_list));
+}
+
 var get_group_objects = function(el,filter_text){
   filter_text = filter_text != null ? filter_text : "";
   var edit_el = el.parents('.reporting_object_container').find('.group_edit_section');

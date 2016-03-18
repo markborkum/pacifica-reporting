@@ -10,59 +10,6 @@ class EUS {
 
   protected $CI;
   protected $myemsl_array;
-  //minor database view changes, and I don't need any of this
-  // protected $parameter_lookup = array(
-  //   'instrument' => array(
-  //     // 'id_field' => 'instrument_id',
-  //     'table' => 'v_instrument_groupings',
-  //     'where_clause' => array(
-  //       'instrument_grouping','instrument_name','cast(instrument_id as varchar)','name_short'
-  //     ),
-  //     'where_in_specifier' => 'instrument_id',
-  //     'select_array' => array(
-  //       'instrument_id as id',
-  //       'instrument_grouping as instrument_type',
-  //       'instrument_name',
-  //       "'[' || instrument_grouping || ' / ID:' || instrument_id || '] ' || instrument_name as display_name",
-  //       'name_short as abbreviation'
-  //     ),
-  //     'order_by' => 'instrument_grouping,instrument_name'
-  //   ),
-  //   'proposal' => array(
-  //     // 'id_field' => 'proposal_id',
-  //     'table' => 'proposals',
-  //     'where_clause' => array(
-  //       'proposal_id','title'
-  //     ),
-  //     'where_in_specifier' => 'proposal_id',
-  //     'select_array' => array(
-  //       'proposal_id as id',
-  //       'title as proposal_name',
-  //       "'[Proposal ' || proposal_id || '] ' || title as display_name",
-  //       'accepted_date',
-  //       'actual_start_date as start_date',
-  //       'actual_end_date as end_date'
-  //     ),
-  //     'order_by' => 'proposal_id'
-  //   ),
-  //   'user' => array(
-  //     // 'id_field' => 'person_id',
-  //     'table' => 'users',
-  //     'where_clause' => array(
-  //       'cast(person_id as varchar)','network_id','first_name','last_name','email_address'
-  //     ),
-  //     'where_in_specifier' => 'person_id',
-  //     'select_array' => array(
-  //       'person_id as id',
-  //       'first_name',
-  //       'last_name',
-  //       "'[EUS ID ' || person_id || '] ' || first_name || ' ' || last_name || ' &lt;' || email_address || '&gt;' as display_name",
-  //       'email_address'
-  //     ),
-  //     'order_by' => 'last_name,first_name,email_address'
-  //   )
-  // );
-
   function __construct(){
     $this->CI =& get_instance();
 
