@@ -1,4 +1,5 @@
 <?php
+ini_set('memory_limit','2048M');
 class Baseline_controller extends CI_Controller {
 
   function __construct() {
