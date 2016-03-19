@@ -10,4 +10,4 @@ reporting and aggregation purposes.
 
 ### Screenshots
 
-![Main Interface Screencap](resources/screenshots/MyEMSL_Reporting-Main_Page-2016-03-10.png)
+![Main Interface Screencap](application/resources/screenshots/MyEMSL_Reporting-Main_Page-2016-03-10.png)

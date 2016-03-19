@@ -6,6 +6,7 @@ class Reporting extends Baseline_controller {
   public $last_update_time;
   public $accepted_object_types;
   public $accepted_time_basis_types;
+  public $local_resources_folder;
 
   function __construct() {
     parent::__construct();
@@ -15,6 +16,7 @@ class Reporting extends Baseline_controller {
     $this->last_update_time = get_last_update(APPPATH);
     $this->accepted_object_types = array('instrument','user','proposal');
     $this->accepted_time_basis_types = array('submit_time','create_time','modified_time');
+    $this->local_resources_folder = $this->config->item('local_resources_folder');
   }
 
 
@@ -130,20 +132,20 @@ class Reporting extends Baseline_controller {
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
-      base_url()."resources/scripts/bootstrap/css/bootstrap.css",
-      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
-      base_url()."resources/stylesheets/reporting.css"
+      "/resources/scripts/bootstrap/css/bootstrap.css",
+      "/resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
+      APPPATH."resources/stylesheets/reporting.css"
     );
     $this->page_data['script_uris'] = array(
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
       "/resources/scripts/select2/select2.min.js",
-      base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
-      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
-      base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
-      base_url()."resources/scripts/highcharts/js/highcharts.js",
-      base_url()."resources/scripts/reporting.js"
+      "/resources/scripts/bootstrap/js/bootstrap.min.js",
+      "/resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
+      "/resources/scripts/jquery-typewatch/jquery.typewatch.js",
+      "/resources/scripts/highcharts/js/highcharts.js",
+      APPPATH."resources/scripts/reporting.js"
     );
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
 
@@ -229,19 +231,19 @@ class Reporting extends Baseline_controller {
     $this->page_data['css_uris'] = array(
       "/resources/stylesheets/status_style.css",
       "/resources/scripts/select2/select2.css",
-      base_url()."resources/scripts/bootstrap/css/bootstrap.css",
-      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
-      base_url()."resources/stylesheets/reporting.css"
+      "/resources/scripts/bootstrap/css/bootstrap.css",
+      "/resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
+      APPPATH."resources/stylesheets/reporting.css"
     );
     $this->page_data['script_uris'] = array(
       "/resources/scripts/spinner/spin.min.js",
       "/resources/scripts/spinner/jquery.spin.js",
       "/resources/scripts/moment.min.js",
-      base_url()."resources/scripts/bootstrap/js/bootstrap.min.js",
-      base_url()."resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
-      base_url()."resources/scripts/jquery-typewatch/jquery.typewatch.js",
-      base_url()."resources/scripts/highcharts/js/highcharts.js",
-      base_url()."resources/scripts/reporting.js"
+      "/resources/scripts/bootstrap/js/bootstrap.min.js",
+      "/resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
+      "/resources/scripts/jquery-typewatch/jquery.typewatch.js",
+      "/resources/scripts/highcharts/js/highcharts.js",
+      APPPATH."resources/scripts/reporting.js"
     );
     $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
     $time_range = str_replace(array('-','_','+'),' ',$time_range);

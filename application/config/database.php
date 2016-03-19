@@ -65,23 +65,23 @@ $db['default'] = array(
 
 
 
-$db['ws_info'] = array(
-  'hostname' => 'sqlite:'.APPPATH.'config/database/myemsl_status_site_info.sqlite:',
-  'username' => '',
-  'password' => '',
-  'database' => '',
-  'dbdriver' => 'pdo',
-  'dbprefix' => '',
-  'pconnect' => TRUE,
-  'db_debug' => TRUE,
-  'cache_on' => FALSE,
-  'cachedir' => '',
-  'char_set' => 'utf8',
-  'dbcollat' => 'utf8_general_ci',
-  'swap_pre' => '',
-  'autoinit' => TRUE,
-  'stricton' => FALSE
-);
+// $db['ws_info'] = array(
+//   'hostname' => 'sqlite:'.APPPATH.'config/database/myemsl_status_site_info.sqlite:',
+//   'username' => '',
+//   'password' => '',
+//   'database' => '',
+//   'dbdriver' => 'pdo',
+//   'dbprefix' => '',
+//   'pconnect' => TRUE,
+//   'db_debug' => TRUE,
+//   'cache_on' => FALSE,
+//   'cachedir' => '',
+//   'char_set' => 'utf8',
+//   'dbcollat' => 'utf8_general_ci',
+//   'swap_pre' => '',
+//   'autoinit' => TRUE,
+//   'stricton' => FALSE
+// );
 
 
 
@@ -113,19 +113,19 @@ $db['website_prefs'] = array(
 );
 
 
-$db['ers'] = array(
-  'hostname' => "eusi.emsl.pnl.gov",
-  'username' => "auberry_user",
-  'password' => "l0Ve2getEUSd3ta",
-  'database' => "Auberry",
-  'dbdriver' => "mysql",
-  'dbprefix' => "",
-  'active_r' => TRUE,
-  'pconnect' => FALSE,
-  'db_debug' => FALSE,
-  'cache_on' => FALSE,
-  'cachedir' => ""
-);
+// $db['ers'] = array(
+//   'hostname' => "eusi.emsl.pnl.gov",
+//   'username' => "auberry_user",
+//   'password' => "l0Ve2getEUSd3ta",
+//   'database' => "Auberry",
+//   'dbdriver' => "mysql",
+//   'dbprefix' => "",
+//   'active_r' => TRUE,
+//   'pconnect' => FALSE,
+//   'db_debug' => FALSE,
+//   'cache_on' => FALSE,
+//   'cachedir' => ""
+// );
 
 
 /* End of file database.php */
