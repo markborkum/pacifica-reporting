@@ -134,7 +134,7 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/select2/select2.css",
       "/resources/scripts/bootstrap/css/bootstrap.css",
       "/resources/scripts/bootstrap-daterangepicker/daterangepicker.css",
-      APPPATH."resources/stylesheets/reporting.css"
+      base_url()."application/resources/stylesheets/reporting.css"
     );
     $this->page_data['script_uris'] = array(
       "/resources/scripts/spinner/spin.min.js",
@@ -145,7 +145,7 @@ class Reporting extends Baseline_controller {
       "/resources/scripts/bootstrap-daterangepicker/daterangepicker.js",
       "/resources/scripts/jquery-typewatch/jquery.typewatch.js",
       "/resources/scripts/highcharts/js/highcharts.js",
-      APPPATH."resources/scripts/reporting.js"
+      base_url()."application/resources/scripts/reporting.js"
     );
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
 

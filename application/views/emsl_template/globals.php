@@ -9,7 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/resources/scripts/jquery-ui/jquery-ui.min.css" />
 
     <!-- local JS -->
-    <script type="text/javascript" src="<?= APPPATH ?>resources/scripts/utility_functions.js"></script>
+    <script type="text/javascript" src="/resources/scripts/utility_functions.js"></script>
 
 
     <!-- jquery plugins -->
