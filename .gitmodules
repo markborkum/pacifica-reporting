@@ -1,3 +1,6 @@
 [submodule "websystem"]
 	path = websystem
-	url = https://kauberry@github.com/bcit-ci/CodeIgniter.git
+	url = git@github.com:bcit-ci/CodeIgniter.git
+[submodule "resources"]
+	path = resources
+	url = git@github.com:EMSL-MSC/pacifica-webresources.git
