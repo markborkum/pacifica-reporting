@@ -24,15 +24,15 @@ mv websystem/index.php index.php
 rm -rf websystem resources
 
 %install
-mkdir -p %{buildroot}/var/www/myemsl/status
-rsync -r * %{buildroot}/var/www/myemsl/status/
+mkdir -p %{buildroot}/var/www/myemsl/reporting
+rsync -r * %{buildroot}/var/www/myemsl/reporting/
 
 %clean
 rm -rf %{buildroot}
 
 %files
 %defattr(-,root,root,-)
-/var/www/myemsl/status/*
+/var/www/myemsl/reporting
 
 %changelog
 * Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.0-1
