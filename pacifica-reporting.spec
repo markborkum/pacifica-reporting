@@ -25,7 +25,9 @@ rm -rf websystem resources
 
 %install
 mkdir -p %{buildroot}/var/www/myemsl/reporting
-rsync -r * %{buildroot}/var/www/myemsl/reporting/
+mkdir -p %{buildroot}/usr/lib/myemsl/apache/myemsl-ssl.d
+rsync legacy-httpd.conf %{buildroot}/usr/lib/myemsl/apache/myemsl-ssl.d/reporting.conf
+rsync -r application index.php system %{buildroot}/var/www/myemsl/reporting/
 
 %clean
 rm -rf %{buildroot}
@@ -33,6 +35,7 @@ rm -rf %{buildroot}
 %files
 %defattr(-,root,root,-)
 /var/www/myemsl/reporting
+/usr/lib/myemsl/apache/myemsl-ssl.d/reporting.conf
 
 %changelog
 * Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.0-1
