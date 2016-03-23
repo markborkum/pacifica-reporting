@@ -7,10 +7,20 @@ class Baseline_controller extends CI_Controller {
     parent::__construct();
     $this->load->helper(array('user','url','html','myemsl','file_info'));
     $this->user_id = get_user();
+    // $this->user_id = 43751;
+    if(!$this->user_id){
+      //something is wrong with the authentication system or the user's log in
+      $message = "Unable to retrieve username from [REMOTE_USER]";
+      show_error($message, 500, 'User Authorization Error or Server Misconfiguration in Auth System');
+    }
 
     $this->page_address = implode('/',$this->uri->rsegments);
 
     $user_info = get_user_details_myemsl($this->user_id);
+    if(!$user_info){
+      $message = "Could not find a user with an EUS Person ID of {$this->user_id}";
+      show_error($message, 401, 'User Authorization Error');
+    }
     $this->username = $user_info['first_name'] != null ? $user_info['first_name'] : "Anonymous Stranger";
     $this->fullname = "{$this->username} {$user_info['last_name']}";
     $this->site_color = $this->config->item('site_color');
