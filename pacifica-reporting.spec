@@ -38,7 +38,7 @@ rm -rf %{buildroot}
 /var/www/myemsl/reporting
 /usr/lib/myemsl/apache/myemsl-ssl.d/reporting.conf
 %defattr(-,apache,apache,-)
-/var/www/myemsl/status/application/logs
+/var/www/myemsl/reporting/application/logs
 
 %changelog
 * Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.0-1
