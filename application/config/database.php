@@ -46,7 +46,8 @@
 */
 
 $active_group = 'default';
-$active_record = TRUE;
+// $active_record = TRUE;
+$query_builder = TRUE;
 
 $myemsl_array = parse_ini_file("/etc/myemsl/general.ini", TRUE);
 
@@ -62,27 +63,6 @@ $db['default'] = array(
   'cache_on' => FALSE,
   'cachedir' => ""
 );
-
-
-
-// $db['ws_info'] = array(
-//   'hostname' => 'sqlite:'.APPPATH.'config/database/myemsl_status_site_info.sqlite:',
-//   'username' => '',
-//   'password' => '',
-//   'database' => '',
-//   'dbdriver' => 'pdo',
-//   'dbprefix' => '',
-//   'pconnect' => TRUE,
-//   'db_debug' => TRUE,
-//   'cache_on' => FALSE,
-//   'cachedir' => '',
-//   'char_set' => 'utf8',
-//   'dbcollat' => 'utf8_general_ci',
-//   'swap_pre' => '',
-//   'autoinit' => TRUE,
-//   'stricton' => FALSE
-// );
-
 
 
 $db['eus_for_myemsl'] = array(

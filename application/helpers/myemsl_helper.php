@@ -21,7 +21,7 @@ function get_user_details_myemsl($eus_id){
 
 function read_myemsl_config_file($file_specifier = 'general'){
   $CI =& get_instance();
-  $ini_path = $CI->config->item('myemsl_config_file_path');
+  $ini_path = $CI->config->item('application_config_file_path');
   $ini_items = parse_ini_file("{$ini_path}{$file_specifier}.ini", TRUE);
   return $ini_items;
 }

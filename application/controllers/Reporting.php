@@ -22,7 +22,7 @@ class Reporting extends Baseline_controller {
 
 
   public function index(){
-    redirect('reporting/view');
+    redirect('reporting/group_view');
   }
 
 

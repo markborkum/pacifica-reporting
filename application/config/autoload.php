@@ -97,7 +97,7 @@ $autoload['helper'] = array();
 | config files.  Otherwise, leave it blank.
 |
 */
-$autoload['config'] = array('myemsl');
+$autoload['config'] = array('pacifica');
 
 /*
 | -------------------------------------------------------------------

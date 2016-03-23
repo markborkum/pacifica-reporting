@@ -5,6 +5,7 @@ class Baseline_controller extends CI_Controller {
   function __construct() {
     date_default_timezone_set('America/Los_Angeles');
     parent::__construct();
+    $this->application_version = $this->config->item('application_version');
     $this->load->helper(array('user','url','html','myemsl','file_info'));
     $this->user_id = get_user();
     // $this->user_id = 43751;
