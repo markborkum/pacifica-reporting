@@ -188,7 +188,8 @@ var remove_containing_group = function(el){
         })
         getter.fail(function(jqXHR, textStatus, errorThrown){
           alert("An error occurred before the group could be deleted.<br />" + textStatus);
-        })
+        });
+        $(this).dialog("close");
       },
       "Cancel" : function() {
         $(this).dialog("close");
@@ -427,16 +428,17 @@ var setup_confirmation_dialog_boxes = function(e){
 };
 
 var make_new_group_entry = function(group_name, input_el){
-  var update_list = {
-    'group_name' : group_name
-  };
+  var update_list = { group_name : group_name };
   var url = base_url + 'index.php/reporting/make_new_group/' + object_type
   var poster = $.post(url,JSON.stringify(update_list), function(data){
     var get_group_url = base_url + 'index.php/reporting/get_group_container/' + object_type + '/' + data.group_id;
     var getter = $.get(get_group_url, function(group_data){
-
+      var my_container = input_el.parents('div.reporting_object_container');
+      my_container.replaceWith(group_data);
+      var my_container = input_el.parents('div.reporting_object_container');
+      my_container.find('.object_body').hide();
     });
-  })
+  },"json");
 };
 
 var submit_group_name_change = function(group_name, group_id, input_el){

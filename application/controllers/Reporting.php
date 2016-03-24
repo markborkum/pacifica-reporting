@@ -32,6 +32,7 @@ class Reporting extends Baseline_controller {
     $valid_date_range = $this->rep->earliest_latest_data($object_type,$object_id);
     $latest_available_date = new DateTime($valid_date_range['latest']);
     $earliest_available_date = new DateTime($valid_date_range['earliest']);
+    $object_list = array();
 
     $valid_range = array(
       'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
@@ -49,7 +50,6 @@ class Reporting extends Baseline_controller {
       'time_range' => $time_range,
       'times' => $times
     );
-    $object_list = array();
     $object_list[] = $object_id;
     $object_info = $this->eus->get_object_info($object_list,$object_type);
     $this->page_data['my_object_type'] = $object_type;
@@ -70,6 +70,20 @@ class Reporting extends Baseline_controller {
     }
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
+
+    $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
+    $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
+    $latest_available_date = new DateTime($valid_date_range['latest']);
+    $earliest_available_date = new DateTime($valid_date_range['earliest']);
+
+    $valid_range = array(
+      'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
+      'latest' => $latest_available_date->format('Y-m-d H:i:s'),
+      'earliest_available_object' => $earliest_available_date,
+      'latest_available_object' => $latest_available_date
+    );
+    $my_times = array_merge($my_times, $valid_range);
+
     $this->page_data['placeholder_info'][$group_id] = array(
       'group_id' => $group_id,
       'object_type' => $object_type,
@@ -78,21 +92,20 @@ class Reporting extends Baseline_controller {
       'item_list' => $group_info['item_list'],
       'time_basis' => $time_basis,
       'time_range' => $time_range,
-      'times' => false
+      'times' => $my_times
     );
-
+    if(!array_key_exists('my_groups',$this->page_data)){
+      $this->page_data['my_groups'] = array($group_id => $group_info);
+    }else{
+      $this->page_data['my_groups'][$group_id] = $group_info;
+    }
+    $this->page_data['my_object_type'] = $object_type;
     if(empty($item_list)){
       $this->page_data['examples'] = $this->add_objects_instructions($object_type);
-      $this->load->view('object_types/group.html',$this->page_data);
+    }else{
+      $this->page_data['placeholder_info'][$group_id]['times'] = $this->fix_time_range($time_range,$start_date,$end_date);
     }
-
-    $this->page_data['my_groups'] = array($group_id => $group_info);
-
-    $this->page_data['placeholder_info'][$group_id]['times'] = $this->fix_time_range($time_range,$start_date,$end_date);
-
-    if(!empty($item_list)){
-
-    }
+    $this->load->view('object_types/group.html',$this->page_data);
   }
 
   private function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false){
@@ -172,9 +185,9 @@ class Reporting extends Baseline_controller {
           $this->rep->change_group_option($group_id,'time_range',$time_range);
         }
         // echo "group {$group_id} time_range {$time_range}<br />";
-        $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
         $object_list = array_merge($object_list,$group_info['item_list']);
 
+        $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
         $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
         $latest_available_date = new DateTime($valid_date_range['latest']);
         $earliest_available_date = new DateTime($valid_date_range['earliest']);
@@ -318,7 +331,7 @@ class Reporting extends Baseline_controller {
       $group_name = $this->input->post('group_name');
     }elseif($this->input->is_ajax_request() || $this->input->raw_input_stream){
       $post_info = json_decode($this->input->raw_input_stream,true);
-      $post_info = $post_info[0];
+      // $post_info = $post_info[0];
       $group_name = array_key_exists('group_name',$post_info) ? $post_info['group_name'] : false;
     }
     $group_info = $this->rep->make_new_group($object_type,$this->user_id,$group_name);

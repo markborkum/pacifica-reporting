@@ -1231,7 +1231,7 @@ class Reporting_model extends CI_Model {
       'group_name' => $group_name,
       'group_type' => $object_type
     );
-    $DB_prefs->insert($table,$insert_data);
+    $DB_prefs->insert($table_name,$insert_data);
     if($DB_prefs->affected_rows() > 0){
       //insert went ok, return success
       $group_id = $DB_prefs->insert_id();
