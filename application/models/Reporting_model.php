@@ -857,6 +857,7 @@ class Reporting_model extends CI_Model {
     $this->db->join('transactions t', 'f.transaction = t.transaction');
     $this->db->where_in('gi.group_id',$group_list)->limit(1);
     $query = $this->db->get();
+    // echo $this->db->last_query();
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
       $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;

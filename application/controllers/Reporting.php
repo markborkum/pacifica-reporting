@@ -491,7 +491,6 @@ class Reporting extends Baseline_controller {
           'latest_available_object' => $latest_available_object,
           'message' => "<p>Using ".$end_date_object->format('Y-m-d')." as the new origin time</p>"
         );
-
       }else{
         //looks like the time range is borked, pick the default
         $time_range = '1 week';
@@ -616,6 +615,8 @@ class Reporting extends Baseline_controller {
         $times = time_range_to_date_pair($time_range, $available_time_range);
       }
     }
+    var_dump($times);
+
     extract($times);
 
     $transaction_retrieval_func = "summarize_uploads_by_{$object_type}_list";
@@ -893,6 +894,18 @@ class Reporting extends Baseline_controller {
 
   }
 
+  public function test_get_earliest_latest_list($object_type,$group_id){
+    $group_info = $this->rep->get_group_info($group_id);
+    echo "<pre>";
+    var_dump($group_info);
+    echo "</pre>";
+    $results = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
+    echo "<pre>";
+    var_dump($results);
+    echo "</pre>";
+
+  }
+
   public function test_get_group_info($group_id){
     $results = $this->rep->get_group_info($group_id);
     echo "<pre>";
@@ -930,7 +943,6 @@ class Reporting extends Baseline_controller {
     var_dump($results);
     echo "</pre>";
   }
-
 
 }
 
