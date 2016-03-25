@@ -589,7 +589,7 @@ $(function(){
       my_field.siblings('.group_edit_confirm_buttons').fadeOut('fast');
     }
   });
-  $('.time_basis_selector').select2();
+  // $('.time_basis_selector').select2();
   $('.select2-search').hide();
   $('.time_basis_selector').change(function(event){
     //update the time-basis cookie

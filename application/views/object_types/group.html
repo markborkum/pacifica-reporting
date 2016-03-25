@@ -43,9 +43,9 @@
             </div>
             <h4>Change <?= plural(ucwords($my_object_type)) ?> in this Group</h4>
             <div class="search_input_container">
-              <div class='magnifying_glass_icon' id='magnifying_glass_icon'>&nbsp;</div>
-              <div class='clear_field_icon' id='clear_field_icon' style="display:none;">&nbsp;</div>
-              <input class='object_search_box flat_right_side' id='object_search_box' type='text' placeholder="Search for a(n) <?= $my_object_type ?> to add to the report" />
+              <div class='magnifying_glass_icon' id='magnifying_glass_icon_<?= $id ?>'>&nbsp;</div>
+              <div class='clear_field_icon' id='clear_field_icon_<?= $id ?>' style="display:none;">&nbsp;</div>
+              <input class='object_sea class=""rch_box flat_right_side' id='object_search_box_<?= $id ?>' type='text' placeholder="Search for a(n) <?= $my_object_type ?> to add to the report" />
               <input type="button" class='edit_button right_side_button refresh_data_button' id="refresh_data_display_button_<?= $id ?>" name="refresh_data_display_button_<?= $id ?>" value="Refresh Data Pane" />
               <input type="hidden" id="group_name_<?= $id ?>" name="group_name_<?= $id ?>" class="group_name" value="<?= $group_info['group_name'] ?>" />
               <input type="hidden" id="group_id_<?= $id ?>" name="group_id_<?= $id ?>" class="group_id" value="<?= $id ?>" />
@@ -83,46 +83,63 @@
     <div id="confirm_removal_dialog_<?= $id ?>" class="confirm_removal_dialog" title="Remove this group?" style="display:none;">
       <p><span class="ui-icon ui-icon-alert" style="float:left; margin:0 7px 20px 0;"></span>This group will be permanently deleted and cannot be recovered. Are you sure?</p>
     </div>
-  </div>
-  <script type='text/javascript'>
-  //<![CDATA[
-  $(function() {
+    <script type='text/javascript'>
+    //<![CDATA[
+    $(function() {
+      $('#time_basis_selector_<?= $id ?>').select2();
+      $('.select2-search').hide();
 
+      $('#object_search_box_<?= $id ?>').keyup(function(){
+        var el = $(this);
+        var cfi = el.siblings('.clear_field_icon');
+        if(el.val().length !== 0){
+          cfi.fadeIn('fast');
+        }else{
+          cfi.fadeOut('fast');
+        }
+      });
+      $('#clear_field_icon_<?= $id ?>').click(function(){
+        var input_field = $(this).siblings('.object_search_box');
+        input_field.val("");
+        $(this).fadeOut('fast');
+        clear_results();
+      });
+      $('#object_search_box_<?= $id ?>').typeWatch(options);
 
       function cb(start, end) {
-          $('#time_range_container_<?= $id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
-          var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
-          var start_timestamp = start.toDate().getTime();
-          var end_timestamp = end.toDate().getTime();
+        $('#time_range_container_<?= $id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
+        var tl_obj = $('#object_timeline_<?= $id ?>').highcharts();
+        var start_timestamp = start.toDate().getTime();
+        var end_timestamp = end.toDate().getTime();
 
-          if(tl_obj){
-            if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
-              load_new_group_timeline_data(tl_obj, object_type,'<?= $id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));
-            }else{
-              tl_obj.xAxis[0].update({
-                min: start_timestamp,
-                max: end_timestamp
-              });
-            }
+        if(tl_obj){
+          if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
+            load_new_group_timeline_data(tl_obj, object_type,'<?= $id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));
+          }else{
+            tl_obj.xAxis[0].update({
+              min: start_timestamp,
+              max: end_timestamp
+            });
           }
+        }
       }
       cb(moment(correctTZ(new Date('<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>'))), moment(correctTZ(new Date('<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>'))));
 
       $('#time_range_container_<?= $id ?>').daterangepicker({
-          parentEl: '#object_footer_<?= $id ?>',
-          minDate: '<?= $placeholder_info[$id]['times']['earliest_available_object']->format('m/d/Y'); ?>',
-          maxDate: '<?= $placeholder_info[$id]['times']['latest_available_object']->format('m/d/Y'); ?>',
-          startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
-          endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
-          autoUpdateInput: true,
-          linkedCalendars:false,
-          ranges: {
-             'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-             'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-             'Last 3 Months': [moment().subtract(3, 'months'), moment()],
-             'Last 6 Months': [moment().subtract(6, 'months'), moment()],
-             'Last Year': [moment().subtract(12, 'months'), moment()],
-          }
+        parentEl: '#object_footer_<?= $id ?>',
+        minDate: '<?= $placeholder_info[$id]['times']['earliest_available_object']->format('m/d/Y'); ?>',
+        maxDate: '<?= $placeholder_info[$id]['times']['latest_available_object']->format('m/d/Y'); ?>',
+        startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
+        endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
+        autoUpdateInput: true,
+        linkedCalendars:false,
+        ranges: {
+          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
+          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
+          'Last 3 Months': [moment().subtract(3, 'months'), moment()],
+          'Last 6 Months': [moment().subtract(6, 'months'), moment()],
+          'Last Year': [moment().subtract(12, 'months'), moment()],
+        }
       }, cb);
 
       $('#time_range_container_<?= $id ?>').on('apply.daterangepicker', function(event, picker){
@@ -137,16 +154,17 @@
           var posterStart = $.post(url, JSON.stringify(update_list));
         }
 
-        if(picker.oldEndDate != picker endDate){
+        if(picker.oldEndDate != picker.endDate){
           update_list = {
             'option_type' : 'start_time',
             'option_value' : picker.endDate.format('YYYY-MM-DD HH:mm:ss')
           };
           var posterEnd = $.post(url, JSON.stringify(update_list));
         }
-      })
+      });
 
-  });
-  //]]>
-  </script>
+    });
+    //]]>
+    </script>
+  </div>
 <?php endforeach; ?>

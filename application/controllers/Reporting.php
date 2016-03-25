@@ -560,7 +560,6 @@ class Reporting extends Baseline_controller {
     $this->page_data["{$object_type}_id_list"] = $object_id_list;
     $this->page_data['object_type'] = $object_type;
     $this->page_data['group_id'] = $group_id;
-
     $available_time_range = $this->rep->earliest_latest_data_for_list($object_type,$object_id_list);
 
     $latest_data = is_array($available_time_range) && array_key_exists('latest',$available_time_range) ? $available_time_range['latest'] : false;
@@ -870,6 +869,7 @@ class Reporting extends Baseline_controller {
   }
 
   public function test_get_object_list($object_type,$filter = ""){
+    $filter = parse_search_term($filter);
     $results = $this->eus->get_object_list($object_type,$filter);
     echo "<pre>";
     var_dump($results);

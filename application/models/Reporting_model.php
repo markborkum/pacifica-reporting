@@ -859,8 +859,11 @@ class Reporting_model extends CI_Model {
     $query = $this->db->get();
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
-      $earliest_time = new DateTime($row['earliest_upload']);
-      $latest_time = new DateTime($row['latest_upload']);
+      $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;
+      $latest_time = !empty ($row['latest_upload']) ? new DateTime($row['latest_upload']) : false;
+      if(!$earliest_time && !$latest_time){
+        return false;
+      }
       foreach($row as $field_name => $value){
         $check_time = new DateTime($value);
         if(stristr($field_name,'earliest') && $check_time){
@@ -902,8 +905,11 @@ class Reporting_model extends CI_Model {
     $query = $this->db->get();
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
-      $earliest_time = new DateTime($row['earliest_upload']);
-      $latest_time = new DateTime($row['latest_upload']);
+      $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;
+      $latest_time = !empty ($row['latest_upload']) ? new DateTime($row['latest_upload']) : false;
+      if(!$earliest_time && !$latest_time){
+        return false;
+      }
       foreach($row as $field_name => $value){
         $check_time = new DateTime($value);
         if(stristr($field_name,'earliest') && $check_time){
@@ -941,8 +947,11 @@ class Reporting_model extends CI_Model {
 
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
-      $earliest_time = new DateTime($row['earliest_upload']);
-      $latest_time = new DateTime($row['latest_upload']);
+      $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;
+      $latest_time = !empty ($row['latest_upload']) ? new DateTime($row['latest_upload']) : false;
+      if(!$earliest_time && !$latest_time){
+        return false;
+      }
       foreach($row as $field_name => $value){
         $check_time = new DateTime($value);
         if(stristr($field_name,'earliest') && $check_time){
