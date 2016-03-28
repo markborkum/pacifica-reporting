@@ -208,6 +208,7 @@
         endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
         autoUpdateInput: true,
         linkedCalendars:false,
+        drops:'up',
         ranges: {
           'Last 7 Days': [moment().subtract(6, 'days'), moment()],
           'Last 30 Days': [moment().subtract(29, 'days'), moment()],
@@ -219,22 +220,22 @@
 
       $('#time_range_container_<?= $id ?>').on('apply.daterangepicker', function(event, picker){
         //look at the dates and upload the changes
-        var update_url = base_url + 'index.php/reporting';
+        var update_url = base_url + 'index.php/reporting/change_group_option/<?= $id ?>';
         var update_list = {};
         if(picker.oldStartDate != picker.startDate){
           update_list = {
             'option_type' : 'start_time',
             'option_value' : picker.startDate.format('YYYY-MM-DD HH:mm:ss')
           };
-          var posterStart = $.post(url, JSON.stringify(update_list));
+          var posterStart = $.post(update_url, JSON.stringify(update_list));
         }
 
         if(picker.oldEndDate != picker.endDate){
           update_list = {
-            'option_type' : 'start_time',
+            'option_type' : 'end_time',
             'option_value' : picker.endDate.format('YYYY-MM-DD HH:mm:ss')
           };
-          var posterEnd = $.post(url, JSON.stringify(update_list));
+          var posterEnd = $.post(update_url, JSON.stringify(update_list));
         }
       });
 

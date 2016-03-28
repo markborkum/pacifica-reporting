@@ -143,7 +143,7 @@ class Reporting_model extends CI_Model {
 
     // $results['transactions'] = $this->get_transactions_for_user_list($eus_person_id_list, $start_time, $end_time, false);
     // $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
-    $results['files'] = $this->get_files_for_user_list($eus_person_id_list, $start_time, $end_time, false);
+    $results['files'] = $this->get_files_for_user_list($eus_person_id_list, $start_time, $end_time, true, $time_basis);
     $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
 
 
@@ -197,7 +197,7 @@ class Reporting_model extends CI_Model {
     // $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
     //
     // $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
-    $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time);
+    $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
     $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
 
 
@@ -226,7 +226,7 @@ class Reporting_model extends CI_Model {
     );
     //get transactions for time period & group_list
     // $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
-    $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time);
+    $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
     $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
 
     return $results;
@@ -295,12 +295,25 @@ class Reporting_model extends CI_Model {
     return $transactions;
   }
 
-  public function get_files_from_group_list($group_list, $start_time, $end_time){
+  public function get_files_from_group_list($group_list, $start_time, $end_time, $time_basis){
     $times = array(
       'submit' => array(),
       'create' => array(),
       'modified' => array()
     );
+    switch($time_basis){
+      case 'create_time':
+        $time_field = 'f.ctime';
+        break;
+      case 'modified_time':
+        $time_field = 'f.mtime';
+        break;
+      case 'submit_time':
+        $time_field = 't.stime';
+        break;
+      default:
+        $time_field = 't.stime';
+    }
     $files = array();
     $this->db->select(array(
       'f.item_id',
@@ -310,20 +323,24 @@ class Reporting_model extends CI_Model {
       'date_trunc(\'minute\',f.mtime) as modified_time',
       'size as size_bytes'
     ));
-    $where_string = "(t.stime >= '{$start_time}'";
-    $where_string .= " OR ";
-    $where_string .= "f.ctime >= '{$start_time}'";
-    $where_string .= " OR ";
-    $where_string .= "f.mtime >= '{$start_time}')";
-    $where_string .= " AND ";
-    $where_string .= "(t.stime < '{$end_time}'";
-    $where_string .= " OR ";
-    $where_string .= "f.ctime < '{$end_time}'";
-    $where_string .= " OR ";
-    $where_string .= "f.mtime < '{$end_time}')";
+
+    $this->db->where("{$time_field} >=", $start_time);
+    if($end_time){
+      $this->db->where("{$time_field} <",$end_time);
+    }
+    // $where_string = "(t.stime >= '{$start_time}'";
+    // $where_string .= " OR ";
+    // $where_string .= "f.ctime >= '{$start_time}'";
+    // $where_string .= " OR ";
+    // $where_string .= "f.mtime >= '{$start_time}')";
+    // $where_string .= " AND ";
+    // $where_string .= "(t.stime < '{$end_time}'";
+    // $where_string .= " OR ";
+    // $where_string .= "f.ctime < '{$end_time}'";
+    // $where_string .= " OR ";
+    // $where_string .= "f.mtime < '{$end_time}')";
     $this->db->from('transactions as t')->join('files as f','f.transaction = t.transaction');
     $this->db->join('group_items as gi','gi.item_id = f.item_id');
-    $this->db->where($where_string);
     // $this->db->where("t.stime <", $end_time);
     $this->db->where_in('gi.group_id',$group_list);
     $this->db->order_by('t.transaction desc')->distinct();
@@ -400,24 +417,40 @@ class Reporting_model extends CI_Model {
   }
 
 
-  private function get_files_for_user_list($eus_user_id_list, $start_date, $end_date, $unfiltered = false){
+  private function get_files_for_user_list($eus_user_id_list, $start_date, $end_date, $unfiltered = false, $time_basis){
     extract($this->canonicalize_date_range($start_date, $end_date));
     // echo $start_time;
-    $files = array();
-    $where_string = "(t.stime >= '{$start_time_object->format('Y-m-d H:i:s')}'";
-    $where_string .= " OR ";
-    $where_string .= "f.ctime >= '{$start_time_object->format('Y-m-d H:i:s')}'";
-    $where_string .= " OR ";
-    $where_string .= "f.mtime >= '{$start_time_object->format('Y-m-d H:i:s')}')";
-    if($end_time){
-      $where_string .= " AND ";
-      $where_string .= "(t.stime < '{$end_time_object->format('Y-m-d H:i:s')}'";
-      $where_string .= " OR ";
-      $where_string .= "f.ctime < '{$end_time_object->format('Y-m-d H:i:s')}'";
-      $where_string .= " OR ";
-      $where_string .= "f.mtime < '{$end_time_object->format('Y-m-d H:i:s')}')";
+    switch($time_basis){
+      case 'create_time':
+        $time_field = 'f.ctime';
+        break;
+      case 'modified_time':
+        $time_field = 'f.mtime';
+        break;
+      case 'submit_time':
+        $time_field = 't.stime';
+        break;
+      default:
+        $time_field = 't.stime';
     }
-
+    $files = array();
+    // $where_string = "(t.stime >= '{$start_time_object->format('Y-m-d H:i:s')}'";
+    // $where_string .= " OR ";
+    // $where_string .= "f.ctime >= '{$start_time_object->format('Y-m-d H:i:s')}'";
+    // $where_string .= " OR ";
+    // $where_string .= "f.mtime >= '{$start_time_object->format('Y-m-d H:i:s')}')";
+    // if($end_time){
+    //   $where_string .= " AND ";
+    //   $where_string .= "(t.stime < '{$end_time_object->format('Y-m-d H:i:s')}'";
+    //   $where_string .= " OR ";
+    //   $where_string .= "f.ctime < '{$end_time_object->format('Y-m-d H:i:s')}'";
+    //   $where_string .= " OR ";
+    //   $where_string .= "f.mtime < '{$end_time_object->format('Y-m-d H:i:s')}')";
+    // }
+    $this->db->where("{$time_field} >= ", $start_time_object->format('Y-m-d H:i:s'));
+    if($end_time){
+      $this->db->where("{$time_field} < ", $end_time_object->format('Y-m-d H:i:s'));
+    }
     $this->db->select(array(
       'f.item_id',
       't.transaction',
@@ -426,7 +459,7 @@ class Reporting_model extends CI_Model {
       'date_trunc(\'minute\',f.mtime) as modified_time',
       'size as size_bytes'
     ));
-    $this->db->where($where_string);
+    // $this->db->where($where_string);
     $this->db->from('transactions as t');
     $this->db->join('ingest_state as ing', 't.transaction = ing.trans_id');
     $this->db->join('files as f','f.transaction = t.transaction');
@@ -827,52 +860,70 @@ class Reporting_model extends CI_Model {
   }
 
 
-  public function earliest_latest_data_for_list($object_type,$object_id_list){
+  public function earliest_latest_data_for_list($object_type,$object_id_list, $time_basis){
     $spread_function_name = "available_{$object_type}_data_spread";
-    $spread = $this->$spread_function_name($object_id_list);
+    switch($time_basis){
+      case 'create_time':
+        $time_field = 'f.ctime';
+        break;
+      case 'modified_time':
+        $time_field = 'f.mtime';
+        break;
+      case 'submit_time':
+        $time_field = 't.stime';
+        break;
+      default:
+        $time_field = 't.stime';
+    }
+    $spread = $this->$spread_function_name($object_id_list,$time_field);
     return $spread;
   }
 
 
 
-  private function available_instrument_data_spread($object_id_list){
+  private function available_instrument_data_spread($object_id_list, $time_field){
     $return_array = false;
     if(empty($object_id_list)) return false;
+
     $group_collection = array();
     foreach($object_id_list as $object_id){
       $group_collection += $this->get_instrument_group_list($object_id);
     }
     $group_list = array_keys($group_collection);
     $latest_time = false;
+    // $this->db->select(array(
+    //   "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
+    //   "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
+    //   "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
+    //   "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
+    //   "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
+    //   "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+    // ));
     $this->db->select(array(
-      "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
-      "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
-      "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
-      "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
-      "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
-      "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+      "MIN(DATE_TRUNC('day', $time_field)) as earliest",
+      "MAX(DATE_TRUNC('day', $time_field)) as latest"
     ));
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('transactions t', 'f.transaction = t.transaction');
     $this->db->where_in('gi.group_id',$group_list)->limit(1);
     $query = $this->db->get();
-    // echo $this->db->last_query();
+
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
-      $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;
-      $latest_time = !empty ($row['latest_upload']) ? new DateTime($row['latest_upload']) : false;
+      $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : false;
+      $latest_time = !empty ($row['latest']) ? new DateTime($row['latest']) : false;
       if(!$earliest_time && !$latest_time){
         return false;
       }
-      foreach($row as $field_name => $value){
-        $check_time = new DateTime($value);
-        if(stristr($field_name,'earliest') && $check_time){
-          $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
-        }elseif(stristr($field_name,'latest') && $check_time){
-          $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
-        }
-      }
+      // foreach($row as $field_name => $value){
+      //   $check_time = new DateTime($value);
+      //   if(stristr($field_name,'earliest') && $check_time){
+      //     $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
+      //   }elseif(stristr($field_name,'latest') && $check_time){
+      //     $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
+      //   }
+      // }
       $return_array = array(
         'earliest' => $earliest_time->format('Y-m-d H:i'),
         'latest' => $latest_time->format('Y-m-d H:i')
@@ -882,7 +933,7 @@ class Reporting_model extends CI_Model {
   }
 
 
-  private function available_proposal_data_spread($object_id_list){
+  private function available_proposal_data_spread($object_id_list, $time_field){
     $return_array = false;
     if(empty($object_id_list)) return false;
     $group_collection = array();
@@ -891,14 +942,19 @@ class Reporting_model extends CI_Model {
     }
     $group_list = array_keys($group_collection);
 
+    // $this->db->select(array(
+    //   "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
+    //   "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
+    //   "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
+    //   "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
+    //   "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
+    //   "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+    // ));
     $this->db->select(array(
-      "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
-      "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
-      "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
-      "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
-      "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
-      "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+      "MIN(DATE_TRUNC('day', $time_field)) as earliest",
+      "MAX(DATE_TRUNC('day', $time_field)) as latest"
     ));
+
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('transactions t', 'f.transaction = t.transaction');
@@ -906,19 +962,19 @@ class Reporting_model extends CI_Model {
     $query = $this->db->get();
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
-      $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;
-      $latest_time = !empty ($row['latest_upload']) ? new DateTime($row['latest_upload']) : false;
+      $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : false;
+      $latest_time = !empty ($row['latest']) ? new DateTime($row['latest']) : false;
       if(!$earliest_time && !$latest_time){
         return false;
       }
-      foreach($row as $field_name => $value){
-        $check_time = new DateTime($value);
-        if(stristr($field_name,'earliest') && $check_time){
-          $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
-        }elseif(stristr($field_name,'latest') && $check_time){
-          $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
-        }
-      }
+      // foreach($row as $field_name => $value){
+      //   $check_time = new DateTime($value);
+      //   if(stristr($field_name,'earliest') && $check_time){
+      //     $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
+      //   }elseif(stristr($field_name,'latest') && $check_time){
+      //     $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
+      //   }
+      // }
       $return_array = array(
         'earliest' => $earliest_time->format('Y-m-d H:i'),
         'latest' => $latest_time->format('Y-m-d H:i')
@@ -929,17 +985,22 @@ class Reporting_model extends CI_Model {
   }
 
 
-  private function available_user_data_spread($object_id_list){
+  private function available_user_data_spread($object_id_list,$time_field){
     $return_array = false;
     if(empty($object_id_list)) return false;
+    // $this->db->select(array(
+    //   "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
+    //   "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
+    //   "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
+    //   "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
+    //   "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
+    //   "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+    // ));
     $this->db->select(array(
-      "MIN(DATE_TRUNC('day', t.stime)) as earliest_upload",
-      "MIN(DATE_TRUNC('day', f.ctime)) as earliest_create",
-      "MIN(DATE_TRUNC('day', f.mtime)) as earliest_modified",
-      "MAX(DATE_TRUNC('day', t.stime)) as latest_upload",
-      "MAX(DATE_TRUNC('day', f.ctime)) as latest_create",
-      "MAX(DATE_TRUNC('day', f.mtime)) as latest_modified"
+      "MIN(DATE_TRUNC('day', $time_field)) as earliest",
+      "MAX(DATE_TRUNC('day', $time_field)) as latest"
     ));
+
     $this->db->where('t.stime is not null');
     $this->db->where_in('submitter',$object_id_list);
     $this->db->from('transactions t')->limit(1);
@@ -948,19 +1009,19 @@ class Reporting_model extends CI_Model {
 
     if($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)){
       $row = $query->row_array();
-      $earliest_time = !empty($row['earliest_upload']) ? new DateTime($row['earliest_upload']) : false;
-      $latest_time = !empty ($row['latest_upload']) ? new DateTime($row['latest_upload']) : false;
+      $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : false;
+      $latest_time = !empty ($row['latest']) ? new DateTime($row['latest']) : false;
       if(!$earliest_time && !$latest_time){
         return false;
       }
-      foreach($row as $field_name => $value){
-        $check_time = new DateTime($value);
-        if(stristr($field_name,'earliest') && $check_time){
-          $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
-        }elseif(stristr($field_name,'latest') && $check_time){
-          $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
-        }
-      }
+      // foreach($row as $field_name => $value){
+      //   $check_time = new DateTime($value);
+      //   if(stristr($field_name,'earliest') && $check_time){
+      //     $earliest_time = $check_time->getTimestamp() < $earliest_time->getTimestamp() ? $check_time : $earliest_time;
+      //   }elseif(stristr($field_name,'latest') && $check_time){
+      //     $latest_time = $check_time->getTimestamp() > $latest_time->getTimestamp() ? $check_time : $latest_time;
+      //   }
+      // }
       $return_array = array(
         'earliest' => $earliest_time->format('Y-m-d H:i'),
         'latest' => $latest_time->format('Y-m-d H:i')
@@ -979,7 +1040,8 @@ class Reporting_model extends CI_Model {
     $start_date = $this->convert_short_date($start_date);
     $end_date = $this->convert_short_date($end_date, 'end');
     $start_time = strtotime($start_date) ? date_create($start_date)->setTime(0,0,0) : date_create('1983-01-01 00:00:00');
-    $end_time = strtotime($end_date) ? date_create($end_date)->setTime(23,59,59) : false;
+    $end_time = strtotime($end_date) ? date_create($end_date) : new DateTime;
+    $end_time->setTime(23,59,59);
 
     if($end_time < $start_time && !empty($end_time)){
       //flipped??
@@ -991,7 +1053,7 @@ class Reporting_model extends CI_Model {
     return array(
       'start_time_object' => $start_time, 'end_time_object' => $end_time,
       'start_time' => $start_time->format('Y-m-d H:i:s'),
-      'end_time' => $end_time->format('Y-m-d H:i:s')
+      'end_time' => $end_time ? $end_time->format('Y-m-d H:i:s') : false
     );
   }
 

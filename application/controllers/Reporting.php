@@ -59,7 +59,7 @@ class Reporting extends Baseline_controller {
     $this->load->view("object_types/object.html", $this->page_data);
   }
 
-  public function get_group_container($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false){
+  public function get_group_container($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false, $time_basis = false){
     $group_info = $this->rep->get_group_info($group_id);
     $options_list = $group_info['options_list'];
     $item_list = $group_info['item_list'];
@@ -187,7 +187,7 @@ class Reporting extends Baseline_controller {
         // echo "group {$group_id} time_range {$time_range}<br />";
         $object_list = array_merge($object_list,$group_info['item_list']);
 
-        $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
+        $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list'],$time_basis);
         $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
         $latest_available_date = new DateTime($valid_date_range['latest']);
         $earliest_available_date = new DateTime($valid_date_range['earliest']);
@@ -404,9 +404,9 @@ class Reporting extends Baseline_controller {
       $option_type = $this->input->post('option_type');
       $option_value = $this->input->post('option_value');
     }elseif($this->input->is_ajax_request() || $this->input->raw_input_stream){
-      // $HTTP_RAW_POST_DATA = file_get_contents('php://input');
-      $post_info = json_decode($this->input->raw_input_stream,true);
-      $post_info = $post_info[0];
+      $HTTP_RAW_POST_DATA = file_get_contents('php://input');
+      $post_info = json_decode($HTTP_RAW_POST_DATA,true);
+      // $post_info = $post_info[0];
       $option_type = array_key_exists('option_type',$post_info) ? $post_info['option_type'] : false;
       $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : false;
     }
@@ -559,7 +559,7 @@ class Reporting extends Baseline_controller {
     $this->page_data["{$object_type}_id_list"] = $object_id_list;
     $this->page_data['object_type'] = $object_type;
     $this->page_data['group_id'] = $group_id;
-    $available_time_range = $this->rep->earliest_latest_data_for_list($object_type,$object_id_list);
+    $available_time_range = $this->rep->earliest_latest_data_for_list($object_type,$object_id_list, $time_basis);
 
     $latest_data = is_array($available_time_range) && array_key_exists('latest',$available_time_range) ? $available_time_range['latest'] : false;
     if(!$latest_data){
@@ -615,7 +615,7 @@ class Reporting extends Baseline_controller {
         $times = time_range_to_date_pair($time_range, $available_time_range);
       }
     }
-    var_dump($times);
+    // var_dump($times);
 
     extract($times);
 
@@ -848,7 +848,7 @@ class Reporting extends Baseline_controller {
 
   public function test_get_uploads_for_instrument($eus_instrument_id_list,$start_date = false,$end_date = false){
     $eus_instrument_id_list = explode('-',$eus_instrument_id_list);
-    $results = $this->rep->summarize_uploads_by_instrument_list($eus_instrument_id_list,$start_date,$end_date,true);
+    $results = $this->rep->summarize_uploads_by_instrument_list($eus_instrument_id_list,$start_date,$end_date,true,'modified_time');
     echo "<pre>";
     var_dump($results);
     echo "</pre>";
@@ -894,12 +894,12 @@ class Reporting extends Baseline_controller {
 
   }
 
-  public function test_get_earliest_latest_list($object_type,$group_id){
+  public function test_get_earliest_latest_list($object_type,$group_id, $time_basis){
     $group_info = $this->rep->get_group_info($group_id);
     echo "<pre>";
     var_dump($group_info);
     echo "</pre>";
-    $results = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
+    $results = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list'],$time_basis);
     echo "<pre>";
     var_dump($results);
     echo "</pre>";

@@ -88,6 +88,7 @@ var hc_timeline_options = {
   },
   yAxis: [{ //transaction count axis
     type: 'logarithmic',
+    min:1,
     title: {
       text: 'Total File Count',
       style: {
@@ -101,6 +102,7 @@ var hc_timeline_options = {
     }
   },{ //volume axis
     // type: 'logarithmic',
+    min:0,
     title: {
       text: 'Total File Size',
       style: {
@@ -200,7 +202,7 @@ var remove_containing_group = function(el){
 
 var submit_group_option_change = function(el, option_type, new_value){
   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
-  var update_list = JSON.stringify([{ 'group_id' : group_id, 'option_type' : option_type,'option_value' : new_value }]);
+  var update_list = JSON.stringify({ 'group_id' : group_id, 'option_type' : option_type,'option_value' : new_value });
   var url = base_url + 'index.php/reporting/change_group_option/' + group_id;
   var poster = $.post(url, update_list, function(data){
     load_group_results(object_type,group_id);
