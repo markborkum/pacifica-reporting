@@ -222,12 +222,12 @@ class Reporting extends Baseline_controller {
       $object_info = $this->eus->get_object_info($object_list,$object_type);
 
       // var_dump($object_info);
-      $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}'";
       $time_range = str_replace(array('-','_','+'),' ',$time_range);
       $this->page_data['my_objects'] = $object_info;
       $this->page_data['my_groups'] = $my_groups;
       $this->page_data['content_view'] = "object_types/group.html";
     }
+    $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}';";
     // var_dump($this->page_data['placeholder_info']);
     $this->load->view('reporting_view.html',$this->page_data);
   }
