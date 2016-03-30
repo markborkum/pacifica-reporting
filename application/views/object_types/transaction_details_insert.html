@@ -26,7 +26,7 @@
       $friendly_file_size = format_bytes($item['total_file_size']);
       ?>
       <tr>
-        <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>"><?= $id ?></a></td>
+        <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>" target="_blank"><?= $id ?></a></td>
         <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
         <td><?= $ul_mod_string ?></td>
         <td><?= array_key_exists('eus_proposal_id',$item) && !empty($item['eus_proposal_id']) ? $item['eus_proposal_id'] : "N/A" ?></td>

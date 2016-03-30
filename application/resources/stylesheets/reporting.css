@@ -824,10 +824,18 @@ span.container_name {
     width:65% !important;
     height:300px !important;
   }
+  .stats_graph_center, .stats_graph_right {
+    position:relative;
+    right:auto;
+  }
+  .time_basis_selector_container{
+    width:35%;
+    left:30%;
+  }
   .time_range_container {
     position:relative;
     text-align:left;
-    top:auto;
+    top:-20px;
     right:auto;
     padding-left:0.5em;
   }
@@ -863,6 +871,10 @@ span.container_name {
     position:relative !important;
     width:100% !important;
     height:300px !important;
+  }
+  .stats_graph_center, .stats_graph_right {
+    position:relative;
+    right:auto;
   }
   .totals_container {
     width:55% !important;

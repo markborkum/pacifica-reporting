@@ -69,7 +69,7 @@
           <input type="button" class="edit_grouping_button edit_button" id="edit_grouping_button_<?= $id ?>" name="edit_grouping_button_<?= $id ?>" value="Edit Group" />
         </div>
         <div id="message_container_footer_<?= $id ?>" class="message_container_footer"></div>
-        <div id="time_basis_selector_container_<?= $id ?>" class="time_basis_selector_container" style="width:25%;">
+        <div id="time_basis_selector_container_<?= $id ?>" class="time_basis_selector_container">
           <select id="time_basis_selector_<?= $id ?>" name="time_basis_selector_<?= $id ?>" class="time_basis_selector" style="width:100%;">
             <?php foreach($time_basis_types as $value => $info): ?>
               <?php $selected_basis = $value == $group_info['options_list']['time_basis'] ? " selected='selected'" : ""; ?>

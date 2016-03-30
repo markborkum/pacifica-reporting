@@ -130,7 +130,8 @@ class Reporting_model extends CI_Model {
     return $results;
   }
 
-  function summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false){
+  function summarize_uploads_by_user_list($eus_person_id_list, $start_date,
+    $end_date, $make_day_graph, $time_basis = false){
     //canonicalize start and end times (yields $start_time & $end_time)
     // echo "start_date => {$start_date}   end_date => {$end_date}";
     extract($this->canonicalize_date_range($start_date, $end_date));
