@@ -41,5 +41,5 @@ rm -rf %{buildroot}
 /var/www/myemsl/reporting/application/logs
 
 %changelog
-* Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.0-1
+* Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.2-1
 - Initial RHEL release.
