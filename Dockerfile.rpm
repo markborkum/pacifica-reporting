@@ -7,7 +7,7 @@ run yum -y install http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-
 run mkdir /app
 copy . /app/
 workdir /app
-run export V=pacifica-reporting-0.99.0 && \
+run export V=pacifica-reporting-0.99.2 && \
     ln -s . $V && \
     tar -czf $V.tar.gz $V/application $V/index.php $V/pacifica-reporting.spec \
              $V/resources $V/system $V/websystem $V/legacy-httpd.conf && \
