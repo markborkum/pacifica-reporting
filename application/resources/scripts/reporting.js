@@ -438,9 +438,9 @@ var make_new_group_entry = function(group_name, input_el){
     var getter = $.get(get_group_url, function(group_data){
       var my_container = input_el.parents('div.reporting_object_container');
       my_container.before(group_data);
-      debugger;
-      var obj_body_container = my_container.prev('.reporting_object_container').find('.object_body');
-      obj_body_container.append("<div class='info_message'>Add some members to this group and then click 'Refresh Data Pane'</div>");
+      // debugger;
+      //var obj_body_container = my_container.prev('.reporting_object_container').find('.object_body');
+      // obj_body_container.append("<div class='info_message'>Add some members to this group and then click 'Refresh Data Pane'</div>");
       $('#group_edit_section_new').fadeOut();
       $('#create_new_group_button').fadeIn()
     });

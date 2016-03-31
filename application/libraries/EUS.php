@@ -289,28 +289,16 @@ class EUS {
 
 
   function get_object_info($object_id_list,$object_type){
-    $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
-    // $parameter_lookup = array(
-      // 'instrument' => array('table' => 'v_instrument_groupings', 'where_in_specifier' => 'instrument_id', 'select_array' =>
-        // array('instrument_id as id','instrument_grouping as instrument_type', 'instrument_name','name_short as abbreviation')
-      // ),
-      // 'proposal' => array('table' => PROPOSALS_TABLE, 'where_in_specifier' => 'proposal_id', 'select_array' =>
-        // array('proposal_id as id','title as proposal_name', 'accepted_date', 'actual_start_date as start_date', 'actual_end_date as end_date')
-      // ),
-      // 'user' => array('table' => USERS_TABLE, 'where_in_specifier' => 'person_id', 'select_array' =>
-        // array('person_id as id','first_name','last_name','email_address')
-      // )
-    // );
-    // $lookup_info = $this->parameter_lookup[$object_type];
-
-    // $DB_ers->select($lookup_info['select_array']);
-    $DB_ers->where_in('id',$object_id_list);
-    $query = $DB_ers->get("v_{$object_type}_search");
-
     $results = array();
-    if($query && $query->num_rows()>0){
-      foreach($query->result_array() as $row){
-        $results[$row['id']] = $row;
+    if(!empty($object_id_list)){
+      $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
+      $DB_ers->where_in('id',$object_id_list);
+      $query = $DB_ers->get("v_{$object_type}_search");
+
+      if($query && $query->num_rows()>0){
+        foreach($query->result_array() as $row){
+          $results[$row['id']] = $row;
+        }
       }
     }
     return $results;

@@ -71,7 +71,7 @@ class Reporting extends Baseline_controller {
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
 
-    $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list']);
+    $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list'],$time_basis);
     $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
     $latest_available_date = new DateTime($valid_date_range['latest']);
     $earliest_available_date = new DateTime($valid_date_range['earliest']);
@@ -161,14 +161,13 @@ class Reporting extends Baseline_controller {
       base_url()."application/resources/scripts/reporting.js"
     );
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
-
+    $object_list = array();
     if(empty($my_groups)){
       $examples = $this->add_objects_instructions($object_type);
       $this->page_data['examples'] = $examples;
       $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
     }else{
       $this->page_data['my_groups'] = '';
-      $object_list = array();
       foreach($my_groups as $group_id => $group_info){
         $my_start_date = false;
         $my_end_date = false;

@@ -6,7 +6,7 @@
     <!-- Base jquery -->
     <script src="/resources/scripts/jquery/jquery-1.11.2.js" type="text/javascript"></script>
     <script src="/resources/scripts/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
-    <link rel="stylesheet" type="text/css" href="/resources/scripts/jquery-ui/jquery-ui.min.css" />
+    <link rel="stylesheet" type="text/css" href="/resources/scripts/jquery-ui/jquery-ui.css" />
 
     <!-- local JS -->
     <script type="text/javascript" src="/resources/scripts/utility_functions.js"></script>
