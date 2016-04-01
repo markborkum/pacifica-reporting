@@ -1,5 +1,6 @@
 BEGIN;
 
+DROP VIEW IF EXISTS "eus"."v_instrument_search";
 DROP VIEW IF EXISTS "eus"."v_instrument_groupings";
 CREATE VIEW "eus"."v_instrument_groupings" AS  SELECT
 	CASE WHEN STRPOS(i.instrument_name,':') > 0
@@ -15,7 +16,7 @@ CREATE VIEW "eus"."v_instrument_groupings" AS  SELECT
 		THEN TRIM(LEADING ' :' FROM SUBSTR(i.name_short, STRPOS(i.name_short, ':')))
     ELSE i.name_short
 	END AS name_short
- FROM instruments i
+ FROM eus.instruments i
   WHERE (i.active_sw = 'Y'::bpchar)
   ORDER BY
 		CASE WHEN STRPOS(i.instrument_name,':') > 0
@@ -27,7 +28,6 @@ CREATE VIEW "eus"."v_instrument_groupings" AS  SELECT
 				ELSE i.instrument_name
 		END;
 
-DROP VIEW IF EXISTS "eus"."v_instrument_search";
 CREATE VIEW "eus"."v_instrument_search" AS  SELECT
 	ig.instrument_id AS id,
   '[' || COALESCE(ig.instrument_grouping,'None') || ' / ID:' || ig.instrument_id || '] ' || ig.instrument_name AS display_name,
