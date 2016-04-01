@@ -1,54 +1,101 @@
+BEGIN;
+
 DROP VIEW IF EXISTS "eus"."v_instrument_groupings";
-CREATE VIEW "eus"."v_instrument_groupings" AS SELECT
-        CASE
-            WHEN "position"(i.instrument_name::text, ':'::text) > 0 THEN rtrim("substring"(i.instrument_name::text, 1, "position"(i.instrument_name::text, ':'::text)), ':'::text)
-            ELSE 'Miscellaneous'::text
-        END AS instrument_grouping,
-        CASE
-            WHEN "position"(i.instrument_name::text, ':'::text) > 0 THEN ltrim("substring"(i.instrument_name::text, "position"(i.instrument_name::text, ':'::text)), ' :'::text)::character varying
-            ELSE i.instrument_name
-        END AS instrument_name,
-    i.instrument_id,
-        CASE
-            WHEN "position"(i.name_short::text, ':'::text) > 0 THEN ltrim("substring"(i.name_short::text, "position"(i.name_short::text, ':'::text)), ' :'::text)::character varying
-            ELSE i.name_short
-        END AS name_short
-   FROM eus.instruments i
-  WHERE i.active_sw = 'Y'::bpchar
+CREATE VIEW "eus"."v_instrument_groupings" AS  SELECT
+	CASE WHEN STRPOS(i.instrument_name,':') > 0
+		THEN TRIM(TRAILING ':' FROM SUBSTR(i.instrument_name,1,STRPOS(i.instrument_name,':')))
+		ELSE 'Miscellaneous'
+	END as instrument_grouping,
+  CASE WHEN STRPOS(i.instrument_name, ':') > 0
+			THEN TRIM(LEADING ' :' FROM SUBSTR(i.instrument_name, STRPOS(i.instrument_name, ':')))
+      ELSE i.instrument_name
+  END AS instrument_name,
+  i.instrument_id,
+  CASE WHEN STRPOS(i.name_short, ':') > 0
+		THEN TRIM(LEADING ' :' FROM SUBSTR(i.name_short, STRPOS(i.name_short, ':')))
+    ELSE i.name_short
+	END AS name_short
+ FROM instruments i
+  WHERE (i.active_sw = 'Y'::bpchar)
   ORDER BY
-        CASE
-            WHEN "position"(i.instrument_name::text, ':'::text) > 0 THEN rtrim("substring"(i.instrument_name::text, 1, "position"(i.instrument_name::text, ':'::text)), ':'::text)
-            ELSE 'Miscellaneous'::text
-        END,
-        CASE
-            WHEN "position"(i.instrument_name::text, ':'::text) > 0 THEN ltrim("substring"(i.instrument_name::text, "position"(i.instrument_name::text, ':'::text)), ' :'::text)::character varying
-            ELSE i.instrument_name
-        END;
+		CASE WHEN STRPOS(i.instrument_name,':') > 0
+			THEN TRIM(TRAILING ':' FROM SUBSTR(i.instrument_name,1,STRPOS(i.instrument_name,':')))
+			ELSE 'Miscellaneous'
+		END,
+		CASE WHEN STRPOS(i.instrument_name, ':') > 0
+				THEN TRIM(LEADING ' :' FROM SUBSTR(i.instrument_name, STRPOS(i.instrument_name, ':')))
+				ELSE i.instrument_name
+		END;
 
 DROP VIEW IF EXISTS "eus"."v_instrument_search";
-CREATE VIEW "eus"."v_instrument_search" AS SELECT ig.instrument_id AS id,
-    (((('['::text || ig.instrument_grouping) || ' / ID:'::text) || ig.instrument_id) || '] '::text) || ig.instrument_name::text AS display_name,
-    lower((((((ig.instrument_grouping || '|'::text) || ig.instrument_id) || '|'::text) || ig.instrument_name::text) || '|'::text) || ig.name_short::text) AS search_field,
-    (ig.instrument_grouping || '|'::text) || ig.instrument_name::text AS order_field,
-    ig.instrument_grouping AS category,
-    ig.name_short AS abbreviation
-   FROM eus.v_instrument_groupings ig;
+CREATE VIEW "eus"."v_instrument_search" AS  SELECT
+	ig.instrument_id AS id,
+  '[' || COALESCE(ig.instrument_grouping,'None') || ' / ID:' || ig.instrument_id || '] ' || ig.instrument_name AS display_name,
+  lower(COALESCE(ig.instrument_grouping,'None') || '|' || ig.instrument_id || '|' || ig.instrument_name || '|' || ig.name_short) AS search_field,
+  COALESCE(ig.instrument_grouping,'None') || '|' || ig.instrument_name AS order_field,
+  COALESCE(ig.instrument_grouping,'None') AS category,
+  COALESCE(ig.name_short,ig.instrument_name) AS abbreviation
+ FROM "eus"."v_instrument_groupings" ig;
 
 DROP VIEW IF EXISTS "eus"."v_proposal_search";
-CREATE VIEW "eus"."v_proposal_search" AS SELECT p.proposal_id AS id,
-    (('[Proposal '::text || p.proposal_id::text) || '] '::text) || p.title::text AS display_name,
-    lower((p.proposal_id::text || '|'::text) || p.title::text) AS search_field,
-    p.title AS order_field,
-    COALESCE(date_part('year'::text, p.actual_end_date)::text, 'Unknown'::text) AS category,
-    ('[Proposal #'::text || p.proposal_id::text) || ']'::text AS abbreviation
-   FROM eus.proposals p;
+CREATE VIEW "eus"."v_proposal_search" AS SELECT
+	p.proposal_id AS id,
+  '[Proposal ' || p.proposal_id || '] ' || COALESCE(p.title, '<Title Unspecified>') AS display_name,
+    lower(p.proposal_id ||
+		CASE WHEN p.title IS NOT NULL
+			THEN '|' || p.title
+			ELSE ''
+		END) AS search_field,
+    COALESCE(p.title, '<Proposal Title Unspecified>') AS order_field,
+    COALESCE((date_part('year', p.actual_end_date))::text, 'Unknown') AS category,
+    'Proposal #' || p.proposal_id AS abbreviation
+   FROM "eus"."proposals" p;
 
 DROP VIEW IF EXISTS "eus"."v_user_search";
-CREATE VIEW "eus"."v_user_search" AS SELECT u.person_id AS id,
-    ((((((('[EUS ID '::text || u.person_id) || '] '::text) || u.first_name::text) || ' '::text) || u.last_name::text) || ' &lt;'::text) || u.email_address::text) || '&gt;'::text AS display_name,
-    lower((((((u.person_id || '|'::text) || u.first_name::text) || '|'::text) || u.last_name::text) || '|'::text) || u.email_address::text) AS search_field,
-    (((u.last_name::text || ' | '::text) || u.first_name::text) || ' | '::text) || u.email_address::text AS order_field,
-    "left"(upper(u.last_name::text), 1) AS category,
-    (u.first_name::text || ' '::text) || u.last_name::text AS abbreviation
-   FROM eus.users u;
+CREATE VIEW "eus"."v_user_search" as SELECT
+	u.person_id AS id,
+	'[EUS ID ' || u.person_id || '] ' ||
+	CASE WHEN u.first_name IS NOT NULL
+		THEN u.first_name || ' '
+		ELSE ''
+	END ||
+	CASE WHEN u.last_name IS NOT NULL
+		THEN (u.last_name) || ' '
+		ELSE ''
+	END ||
+  '&lt;' || u.email_address || '&gt;' AS display_name,
+	lower(u.person_id || '|' ||
+	CASE WHEN u.first_name IS NOT NULL
+		THEN u.first_name || ' '
+		ELSE ''
+	END ||
+	CASE WHEN u.last_name IS NOT NULL
+		THEN u.last_name || ' '
+		ELSE ''
+	END || u.email_address) AS search_field,
+	CASE WHEN u.last_name IS NOT NULL
+		THEN u.last_name || ' '
+		ELSE ''
+	END ||
+	CASE WHEN u.first_name IS NOT NULL
+		THEN u.first_name || ' '
+		ELSE ''
+	END ||
+	u.email_address AS order_field,
+	COALESCE(left(upper(u.last_name),1),left(upper(u.email_address),1)) AS category,
+	CASE WHEN u.first_name IS NULL AND u.last_name IS NULL
+		THEN u.email_address
+		ELSE
+			CASE WHEN u.first_name IS NOT NULL
+				THEN u.first_name || ' '
+				ELSE ''
+			END ||
+			CASE WHEN u.last_name IS NOT NULL
+				THEN u.last_name
+				ELSE ''
+			END
+		END AS abbreviation
+FROM
+	"eus"."users" u;
 
+COMMIT;
