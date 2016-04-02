@@ -23,6 +23,7 @@
     $('#create_new_group_button').click(function(event){
       var el = $(event.target);
       el.fadeOut();
+      el.parents('.reporting_object_container').prev('.info_container').fadeOut();
       container.fadeIn();
     });
     cancel_button.click(function(event){

@@ -83,6 +83,7 @@ class Reporting_model extends CI_Model {
   function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis){
     $transactions = array();
     // var_dump($results);
+    $results['day_graph'] = array();
     if(!empty($results['files'])){
       foreach($results['files'] as $item_id => $item_info){
         $transactions[$item_info['transaction']] = $item_info['transaction'];
@@ -94,6 +95,25 @@ class Reporting_model extends CI_Model {
     }
     return $results;
   }
+
+
+    // function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis){
+    //   $transactions = array();
+    //   // var_dump($results);
+    //   $results['day_graph'] = array('by_date' => array());
+    //   $results['transactions'] = $transactions;
+    //   if(!empty($transactions)){
+    //     $results['transaction_info'] = $this->get_info_for_transactions($transactions);
+    //     if(!empty($results['files'])){
+    //       foreach($results['files'] as $item_id => $item_info){
+    //         $transactions[$item_info['transaction']] = $item_info['transaction'];
+    //       }
+    //       $results = $this->generate_file_summary_data($results);
+    //       $results['day_graph'] = $this->generate_day_graph_summary_files($results['files'],$start_date,$end_date,$time_basis);
+    //     }
+    //   }
+    //   return $results;
+    // }
 
 
   function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date, $time_basis){

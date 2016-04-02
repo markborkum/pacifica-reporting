@@ -163,9 +163,9 @@ class Reporting extends Baseline_controller {
     $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
     $object_list = array();
     if(empty($my_groups)){
-      $examples = $this->add_objects_instructions($object_type);
-      $this->page_data['examples'] = $examples;
-      $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
+      // $examples = $this->add_objects_instructions($object_type);
+      // $this->page_data['examples'] = $examples;
+      $this->page_data['content_view'] = 'object_types/select_some_groups_insert.html';
     }else{
       $this->page_data['my_groups'] = '';
       foreach($my_groups as $group_id => $group_info){
