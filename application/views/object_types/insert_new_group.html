@@ -19,12 +19,15 @@
     var container = $('#group_edit_section_new');
     var create_button = $('#add_new_group_button');
     var cancel_button = $('#cancel_add_new_group_button');
+    var name_box = $('#group_name_editor_new');
 
     $('#create_new_group_button').click(function(event){
       var el = $(event.target);
       el.fadeOut();
-      el.parents('.reporting_object_container').prev('.info_container').fadeOut();
+      $('#main_add_info_container').fadeOut();
+      // el.parents('.reporting_object_container').prev('.info_container').fadeOut();
       container.fadeIn();
+      name_box.focus();
     });
     cancel_button.click(function(event){
       container.fadeOut();
@@ -41,6 +44,9 @@
       var el = $(event.target);
       if(el.val().length > 0){
         create_button.enable();
+        if(event.keyCode == 13){
+          create_button.click();
+        }
       }else{
         create_button.disable();
       }
