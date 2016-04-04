@@ -121,9 +121,6 @@ var hc_timeline_options = {
   }]
 };
 
-// var datepicker = $.fn.datepicker.noConflict();
-// $.fn.bootstrapDP = datepicker;
-
 var get_transaction_info = function(el,transaction_list){
   var el = $(el);
   var parent_container = el.parents('.object_body');
@@ -172,33 +169,7 @@ var submit_group_change_worker = function(el, object_type, object_id, action){
     }
 
   });
-}
-
-var remove_containing_group = function(el){
-  var my_container = el.parents('.reporting_object_container');
-  var group_id = parseInt(my_container.find('.group_search_form .group_id').val(),10);
-  var url = base_url + 'index.php/reporting/remove_group/' + group_id;
-  var my_confirm_object = my_container.find('.confirm_removal_dialog');
-  my_confirm_object.dialog({
-    resizable:false,
-    height:140,
-    modal:true,
-    buttons: {
-      "Delete Group" : function(){
-        var getter = $.get(url, function(data){
-          my_container.remove();
-        })
-        getter.fail(function(jqXHR, textStatus, errorThrown){
-          alert("An error occurred before the group could be deleted.<br />" + textStatus);
-        });
-        $(this).dialog("close");
-      },
-      "Cancel" : function() {
-        $(this).dialog("close");
-      }
-    }
-  })
-}
+};
 
 var submit_group_option_change = function(el, option_type, new_value){
   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
@@ -372,8 +343,6 @@ var load_group_results = function(object_type, group_id, item_list){
   $('#loading_status_' + group_id).spin().show();
   var obj_footer = $('#object_footer_' + group_id);
   obj_footer.disable();
-  // var cookie_name = 'myemsl_group_view_' + object_type + '_time_basis_group_' + group_id;
-  //var time_basis = $.cookie(cookie_name) != undefined ? '/' + $.cookie(cookie_name) : '' ;
   var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
   var getter = $.get(url);
   getter.done(function(data,status){
@@ -394,7 +363,6 @@ var get_search_results = function(el, filter_text){
     var url = base_url + 'index.php/reporting/get_object_lookup/' + object_type + '/' + filter_text;
     $.get(url, function(data){
       $('#search_results_display').html(data);
-      //$('#search_results_display').slideDown();
     });
   }else{
     clear_results();
@@ -414,7 +382,6 @@ var setup_search_checkboxes = function(){
 
 var options = {
   callback: function (value) {
-    // $('#search_done_button').enable();
     get_group_objects($(this),value);
   },
   wait: 500,
@@ -438,9 +405,6 @@ var make_new_group_entry = function(group_name, input_el){
     var getter = $.get(get_group_url, function(group_data){
       var my_container = input_el.parents('div.reporting_object_container');
       my_container.before(group_data);
-      // debugger;
-      //var obj_body_container = my_container.prev('.reporting_object_container').find('.object_body');
-      // obj_body_container.append("<div class='info_message'>Add some members to this group and then click 'Refresh Data Pane'</div>");
       $('#group_edit_section_new').fadeOut();
       $('#create_new_group_button').fadeIn()
     });
@@ -451,15 +415,8 @@ var submit_group_name_change = function(group_name, group_id, input_el){
   var url = base_url + 'index.php/reporting/change_group_name/' + group_id + '/';
   var update_list = {group_name : group_name}
   var posting = $.post(url, JSON.stringify(update_list), function(data){
-    var new_input_field = $('<input/>',{
-      type:'text',
-      class:'group_name_editor',
-      id:'group_name_editor_' + data.group_id,
-      name:'group_name_editor_' + data.group_id,
-      placeholder: data.group_name
-    });
+    input_el.attr('placeholder', data.group_name).val("");
     input_el.siblings('.group_edit_confirm_buttons').hide();
-    input_el.replaceWith(new_input_field);
     $('span.displayed_group_name').html(data.group_name);
   });
 };
@@ -550,92 +507,8 @@ $(function(){
     }
   });
 
-  // $('.time_range_container').bootstrapDP({ format: 'mm/dd/yyyy' })
-  // $('.input-daterange').bootstrapDP();
-  // $('.object_search_box').keyup(function(){
-  //   var el = $(this);
-  //   var cfi = el.siblings('.clear_field_icon');
-  //   if(el.val().length !== 0){
-  //     cfi.fadeIn('fast');
-  //   }else{
-  //     cfi.fadeOut('fast');
-  //   }
-  // });
-  // $('.clear_field_icon').click(function(){
-  //   var input_field = $(this).siblings('.object_search_box');
-  //   input_field.val("");
-  //   $(this).fadeOut('fast');
-  //   clear_results();
-  // });
-  // $('.object_search_box').typeWatch(options);
 
-  // $('.edit_grouping_button').click(function(event){
-  //   var el = $(event.target);
-  //   get_group_objects(el)
-  // });
-  // $('.group_name_editor').keyup(function(event){
-  //   var el = $(event.target);
-  //   var button_container = el.siblings('.group_edit_confirm_buttons');
-  //   if(button_container.is(":hidden") && el.val().length > 0){
-  //     button_container.fadeIn();
-  //   }else if(el.val().length == 0){
-  //     button_container.hide();
-  //   }
-  // });
-  //
-  // $('.group_edit_confirm_buttons .change_icon_accept_reject').click(function(event){
-  //   var el = $(event.target);
-  //   var my_field = el.parents('.group_name_edit_container').find('input[type="text"]');
-  //   var my_group_id = parseInt(el.parents('.group_search_bar_container').find('input.group_id').val(),10);
-  //   if(el.hasClass('accept')){
-  //     submit_group_name_change(my_field.val(), my_group_id, my_field);
-  //   }
-  //   if(el.hasClass('reject')){
-  //     my_field.val('');
-  //     my_field.siblings('.group_edit_confirm_buttons').fadeOut('fast');
-  //   }
-  // });
-  // $('.time_basis_selector').select2();
   $('.select2-search').hide();
-  // $('.time_basis_selector').change(function(event){
-  //   //update the time-basis cookie
-  //   var form_items = $(event.target)
-  //     .parents('.reporting_object_container')
-  //     .find('.search_input_container');
-  //   var my_group_id = form_items.find('.group_id').val();
-  //   var my_object_type = form_items.find('.object_type').val();
-  //   var new_value = $(this).select2('val');
-  //   submit_group_option_change(form_items,'time_basis',new_value);
-  //
-  //   //reload the object guts
-  // });
 
-  // $('.remove_group_button').click(function(event){
-  //   var el = $(event.target);
-  //   remove_containing_group(el);
-  // });
-  //
-  // $('.refresh_data_button').click(function(event){
-  //   var el = $(event.target);
-  //   var my_container = el.parents('.reporting_object_container');
-  //   var group_id = parseInt(my_container.find('.search_input_container > .group_id').val(),10);
-  //   load_group_results(object_type,group_id);
-  // });
-
-  // $('.disclosure_triangle').click(function(event){
-  //   var el = $(event.target);
-  //   var current_state = el.hasClass('opened') ? 'open' : 'closed';
-  //   var closeable = el.parents('.reporting_object_container').find('.object_closeable');
-  //   var header_block = el.parents('.object_header');
-  //   if(current_state == 'open'){
-  //     closeable.slideUp(250);
-  //     el.removeClass('opened').addClass('closed');
-  //     header_block.addClass('closed');
-  //   }else{
-  //     closeable.slideDown(250);
-  //     el.removeClass('closed').addClass('opened');
-  //     header_block.removeClass('closed');
-  //   }
-  // });
 
 });
