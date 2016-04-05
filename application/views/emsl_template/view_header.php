@@ -44,7 +44,7 @@
           <div class="site_slogan">Environmental Molecular Sciences Laboratory</div>
           <div id="tab_selector_container" class="tab_selector">
             <nav>
-              <ul id="page_menu">
+              <ul id="page_menu" class="page_menu">
                 <?php $menu_types = $this->accepted_object_types; ?>
                 <?php while($menu_types): ?>
                   <?php $object_type = strtolower(array_shift($menu_types)); ?>
@@ -63,9 +63,9 @@
             </nav>
           </div>
         </div>
-        <div id="header_container" style="position:relative;">
+        <div id="header_container" class="header_container" style="position:relative;">
           <h1 class="underline"><?= $page_header ?></h1>
-          <div id="login_id_container">
+          <div id="login_id_container" class="login_id_container">
             <em><?= $this->nav_info['current_page_info']['logged_in_user'] ?></em>
           </div>
         </div>

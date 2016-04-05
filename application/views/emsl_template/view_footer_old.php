@@ -1,5 +1,5 @@
 <footer>
-<section id="contact_info">
+<section id="contact_info" class="contact_info">
     <p>Environmental Molecular Sciences Laboratory</p>
     <p>Phone: <span class="tel"><a href="tel:+15093716003">509.371.6003</a></span></p>
     <p><a class="email" href="mailto:emsl@pnnl.gov">emsl@pnnl.gov</a></p>

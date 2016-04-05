@@ -23,18 +23,18 @@
 				</div>
 				<div class="site_slogan">Environmental Molecular Sciences Laboratory</div>
 			</div>
-			<div id="header_container" style="position:relative;">
+			<div id="header_container" class="header_container" style="position:relative;">
 				<h1 class="underline">Error Reporting</h1>
 			</div>
 		</header>
 		<div id="container">
-	    <div id="main">
+	    <div id="main" class="main">
 				<h3><?php echo $heading; ?></h3>
 				<?php echo $message; ?>
 	    </div>
 	  </div>
 		<footer class="short">
-			<section id="contact_info">
+			<section id="contact_info" class="contact_info">
 				<a class="email" href="mailto:emsl@pnnl.gov">EMSL, The Environmental Molecular Sciences Laboratory</a>
 			</section>
 		</footer>

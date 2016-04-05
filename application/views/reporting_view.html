@@ -7,7 +7,7 @@
 ?>
 
   <div id="container">
-    <div id="main">
+    <div id="main" class="main">
       <div class="search_bar_container" id="search_bar_container"<?= $display_search ?>>
         <form onsubmit="return false;">
           <div style="position:relative;">
@@ -18,7 +18,7 @@
           </div>
         </form>
       </div>
-      <div id="search_results_display" style="display:none;">&nbsp;</div>
+      <div id="search_results_display" class="search_results_display" style="display:none;">&nbsp;</div>
       <?php $this->load->view($content_view); ?>
       <?php if($this->router->fetch_method() == 'group_view'): ?>
       <?php $this->load->view('object_types/insert_new_group.html') ?>
