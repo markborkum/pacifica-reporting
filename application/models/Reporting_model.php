@@ -512,7 +512,8 @@ class Reporting_model extends CI_Model {
     //get proposals
     $transaction_list = array_keys($transaction_info);
     $this->db->select(array('f.transaction','g.name as proposal_id'));
-    $this->db->where_in('f.transaction',$transaction_list)->where('g.type','proposal');
+    $this->db->where("f.transaction IN (".implode(',',$transaction_list).") AND g.type = 'proposal'");
+    // $this->db->where_in('f.transaction',$transaction_list)->where('g.type','proposal');
     $this->db->from('group_items gi');
     $this->db->join('files f','gi.item_id = f.item_id');
     $this->db->join('groups g','g.group_id = gi.group_id');
@@ -1390,6 +1391,41 @@ class Reporting_model extends CI_Model {
       }
       $group_info['options_list'] = $options + $option_defaults;
     }
+    $earliest_latest = $this->earliest_latest_data_for_list(
+      $group_info['group_type'],
+      $group_info['item_list'],
+      $group_info['options_list']['time_basis']);
+
+    if($earliest_latest){
+      extract($earliest_latest);
+      $earliest_obj = new DateTime($earliest);
+      $latest_obj = new DateTime($latest);
+
+      $start_time_obj = strtotime($group_info['options_list']['start_time']) ? new DateTime($group_info['options_list']['start_time']) : clone $earliest_obj;
+      $end_time_obj = strtotime($group_info['options_list']['end_time']) ? new DateTime($group_info['options_list']['end_time']) : clone $latest_obj;
+
+      if($end_time_obj > $latest_obj){
+        $end_time_obj = clone $latest_obj;
+        $this->change_group_option($group_id, 'end_time', $end_time_obj->format('Y-m-d'));
+        if($start_time_obj < $earliest_obj || $start_time_obj > $latest_obj){
+          $start_time_obj = clone($latest_obj);
+          $start_time_obj->modify('-1 month');
+          $this->change_group_option($group_id, 'start_time', $start_time_obj->format('Y-m-d'));
+        }
+      }elseif($start_time_obj < $earliest_obj){
+        $start_time_obj = clone $earliest_obj;
+        $this->change_group_option($group_id, 'start_time', $start_time_obj->format('Y-m-d'));
+        if($end_time_obj < $start_time_obj || $end_time_obj > $latest_obj){
+          $end_time_obj = clone($start_time_obj);
+          $end_time_obj->modify('+1 month');
+          $this->change_group_option($group_id, 'end_time', $end_time_obj->format('Y-m-d'));
+        }
+      }
+      $group_info['options_list']['start_time'] = $start_time_obj->format('Y-m-d');
+      $group_info['options_list']['end_time'] = $end_time_obj->format('Y-m-d');
+    }
+
+
     return $group_info;
   }
 

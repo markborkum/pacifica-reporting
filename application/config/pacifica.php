@@ -6,4 +6,4 @@ $config['template'] = "emsl";
 $config['site_color'] = 'orange';
 $config['jquery_script'] = "jquery-1.11.2.js";
 
-$config['application_version'] = "0.99.4";
+$config['application_version'] = "0.99.5";

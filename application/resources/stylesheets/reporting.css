@@ -7,7 +7,7 @@
   margin-top: 1em;
 }
 
-.short{
+footer.short{
   height:40px;
 }
 
@@ -38,12 +38,12 @@ header.secondary .tab_selector{
   background: #53682b url(/resources/images/menu-angle.png) scroll no-repeat 0 0;
 }
 
-.page_menu{
+#page_menu{
   font-size: 12px;
   font-weight:normal;
 }
 
-.last_update_timestamp{
+#last_update_timestamp{
   float: right;
   margin-right: 20px;
   position:relative;
@@ -75,6 +75,7 @@ header.secondary .tab_selector{
   padding: 2px !important;
 }*/
 .input-sm {
+  font-size: 1em;
   height:30px;
   padding: 5px 10px;
   font-size:12px;
@@ -125,7 +126,7 @@ header.secondary .tab_selector{
   box-sizing: border-box;
 }
 
-.search_bar_container{
+#search_bar_container{
   color: #fefefe;
   padding: 0.5em;
   background-color: #53692b;
@@ -197,7 +198,7 @@ header.secondary .tab_selector{
   outline:none;
 }
 
-.search_results_display{
+#search_results_display{
   margin: 0 auto 1em auto;
   width: 90%;
   border: 3px solid #53692b;
@@ -243,7 +244,6 @@ header.secondary .tab_selector{
 .search_results_display input[type="checkbox"]{
   cursor: pointer;
   -webkit-appearance: none;
-  -moz-appearance: none;
   appearance: none;
   background: #fff;
   border-radius: 2px;
@@ -294,7 +294,7 @@ header.secondary .tab_selector{
 }
 
 
-.group_edit_section > h4,.group_edit_section_new > h4 {
+.group_edit_section h4,.group_edit_section_new h4 {
   color:#222;
   font-size:1.1em;
   margin-top:0;
@@ -336,13 +336,14 @@ header.secondary .tab_selector{
 }
 
 
-.new_group_instructions {
+#create_new_group_button {
   color:#5c5c5c;
   font-weight:bold;
   border: 2px solid #ccc;
   background-color:#eee;
   border-radius: 5px;
   padding:5px;
+  position:relative;
   height: 2.75em;
   width:100%;
   text-align: center;
@@ -444,7 +445,7 @@ h1.underline{
   font-weight:bold;
   background-color:#999;
   color:#fff;
-  border-radius: 5px 5px 0 0;
+  border-radius: 5px 5px 0px 0px;
   transition: all 0.25s ease-in-out;
 }
 
@@ -512,13 +513,13 @@ h1.underline{
 
 
 .reporting_object_container .group_edit_section {
-  min-height: 100px;
+  /*min-height: 100px;
   border-left-color: #ccc;
   border-left-width: 1px;
   border-left-style: solid;
   border-right-color: #ccc;
   border-right-width: 1px;
-  border-right-style: solid;
+  border-right-style: solid;*/
   /*transition: all 0.400s ease-in-out;*/
   position:relative;
   background-color:#fafafa;
@@ -773,14 +774,14 @@ span.container_name {
   background-position: 0px 0px;
   right:28px;
 }
-.group_edit_confirm_buttons .accept:hover { background-position: 0px -24px; }
-.group_edit_confirm_buttons .accept:active { background-position: 0px -48px; }
-.group_edit_confirm_buttons .reject {
+.change_icon_accept_reject.accept:hover { background-position: 0px -24px; }
+.change_icon_accept_reject.accept:active { background-position: 0px -48px; }
+.change_icon_accept_reject.reject {
   background-position: -24px 0px;
   right:3px;
 }
-.group_edit_confirm_buttons .reject:hover { background-position: -24px -24px; }
-.group_edit_confirm_buttons .reject:active { background-position: -24px -48px; }
+.change_icon_accept_reject.reject:hover { background-position: -24px -24px; }
+.change_icon_accept_reject.reject:active { background-position: -24px -48px; }
 
 
 
@@ -804,7 +805,7 @@ span.container_name {
        only screen and (min-resolution: 2.25dppx) {
     .disclosure_arrows {background-image:url(/resources/images/disclosure_symbols@3x.png);}
     .remove_icon {background-image:url(/resources/images/remove_icons@3x.png);}
-    .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@3x.png);}
+    .magnifying_glass_icon {  background-image:url(/resources/images/mag_glass@2x.png);}
     .clear_field_icon {  background-image:url(/resources/images/clear_boxes@3x.png); }
     .disclosure_triangle {   background-image:url(/resources/images/disclosure_triangle_right@3x.png); }
     .change_icon_accept_reject { background-image:url(/resources/images/checkbox_sprites@3x.png); }
@@ -883,7 +884,7 @@ span.container_name {
     border-bottom: 4px solid #666;
     margin-bottom:2em;
   }
-  .login_id_container{
+  #login_id_container{
     position:relative;
     bottom:auto;
     right:auto;
