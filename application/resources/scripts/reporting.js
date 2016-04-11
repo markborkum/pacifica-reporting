@@ -6,14 +6,14 @@ var hc_pie_options = {
     plotBorderWidth: null,
     plotShadow: false,
     spacing: [10,0,0,0],
-    style: {
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      fontSize: '10px'
-    },
     type: 'pie'
   },
   title: {
-    style: {'fontSize':'13px', 'fontWeight':'bold'},
+    style: {
+      fontSize:'13px',
+      fontWeight:'bold',
+      fontFamily: '"Open Sans", Helvetica, Arial, sans-serif'
+    },
     x:-30
   },
   legend: {
@@ -49,7 +49,7 @@ var hc_timeline_options = {
     },
     height: 250,
     style: {
-      fontFamily: '"Helvetica Neue", Helvetica, Arial, sans-serif',
+      fontFamily: '"Open Sans","Helvetica Neue", Helvetica, Arial, sans-serif',
       fontSize: '12px'
     },
     zoomType: 'x',
@@ -120,6 +120,9 @@ var hc_timeline_options = {
     opposite:true
   }]
 };
+
+// var datepicker = $.fn.datepicker.noConflict();
+// $.fn.bootstrapDP = datepicker;
 
 var get_transaction_info = function(el,transaction_list){
   var el = $(el);
