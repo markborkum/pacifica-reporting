@@ -49,7 +49,9 @@ $active_group = 'default';
 // $active_record = TRUE;
 $query_builder = TRUE;
 
-$myemsl_array = parse_ini_file("/etc/myemsl/general.ini", TRUE);
+$ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
+
+$myemsl_array = parse_ini_file("/etc/myemsl/{$ini_file_name}", TRUE);
 
 $db['default'] = array(
   'hostname' => $myemsl_array['metadata']['host'],

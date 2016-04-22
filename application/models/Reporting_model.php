@@ -510,34 +510,41 @@ class Reporting_model extends CI_Model {
 
   public function get_info_for_transactions($transaction_info){
     //get proposals
-    $transaction_list = array_keys($transaction_info);
-    $this->db->select(array('f.transaction','g.name as proposal_id'));
-    $this->db->where("f.transaction IN (".implode(',',$transaction_list).") AND g.type = 'proposal'");
-    // $this->db->where_in('f.transaction',$transaction_list)->where('g.type','proposal');
-    $this->db->from('group_items gi');
-    $this->db->join('files f','gi.item_id = f.item_id');
-    $this->db->join('groups g','g.group_id = gi.group_id');
-    $proposal_query = $this->db->get();
-    $trans_prop_lookup = array();
-    if($proposal_query && $proposal_query->num_rows() > 0){
-      foreach($proposal_query->result() as $row){
+    $chunked_transaction_list = array_chunk(array_keys($transaction_info),1000);
 
-        $trans_prop_lookup[$row->transaction]['eus_proposal_id'] = $row->proposal_id;
+    foreach($chunked_transaction_list as $transaction_list){
+      $this->db->select(array('f.transaction','g.name as proposal_id'));
+      $this->db->where("f.transaction IN (".implode(',',$transaction_list).") AND g.type = 'proposal'");
+      // $this->db->where_in('f.transaction',$transaction_list)->where('g.type','proposal');
+      $this->db->from('group_items gi');
+      $this->db->join('files f','gi.item_id = f.item_id');
+      $this->db->join('groups g','g.group_id = gi.group_id');
+      $proposal_query = $this->db->get();
+      $trans_prop_lookup = array();
+      if($proposal_query && $proposal_query->num_rows() > 0){
+        foreach($proposal_query->result() as $row){
+
+          $trans_prop_lookup[$row->transaction]['eus_proposal_id'] = $row->proposal_id;
+        }
       }
     }
 
     //get instruments
-    $this->db->select(array('f.transaction','g.name as group_name','g.type as group_type'));
-    $this->db->where("(g.type = 'omics.dms.instrument_id' or g.type ilike 'instrument.%')");
-    $this->db->where_in('f.transaction',$transaction_list);
-    $this->db->from('group_items gi');
-    $this->db->join('files f','gi.item_id = f.item_id');
-    $this->db->join('groups g','g.group_id = gi.group_id');
-    $inst_query = $this->db->get();
-    if($inst_query && $inst_query->num_rows() > 0){
-      foreach($inst_query->result() as $row){
-        $instrument_id = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.','',$row->group_type);
-        $trans_prop_lookup[$row->transaction]['eus_instrument_id'] = $instrument_id + 0;
+    foreach($chunked_transaction_list as $transaction_list){
+      $this->db->select(array('f.transaction','g.name as group_name','g.type as group_type'));
+      $this->db->where("(g.type = 'omics.dms.instrument_id' or g.type ilike 'instrument.%')");
+      $this->db->where_in('f.transaction',$transaction_list);
+      $this->db->from('group_items gi');
+      $this->db->join('files f','gi.item_id = f.item_id');
+      $this->db->join('groups g','g.group_id = gi.group_id');
+      $inst_query = $this->db->get();
+      echo $this->db->last_query();
+      return $trans_prop_lookup;
+      if($inst_query && $inst_query->num_rows() > 0){
+        foreach($inst_query->result() as $row){
+          $instrument_id = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.','',$row->group_type);
+          $trans_prop_lookup[$row->transaction]['eus_instrument_id'] = $instrument_id + 0;
+        }
       }
     }
 
