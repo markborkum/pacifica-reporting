@@ -19,12 +19,9 @@ class Reporting extends Baseline_controller {
     $this->local_resources_folder = $this->config->item('local_resources_folder');
   }
 
-
-
   public function index(){
     redirect('reporting/group_view');
   }
-
 
   public function get_object_container($object_type, $object_id, $time_range, $start_date = false, $end_date = false){
     $time_range = str_replace(array('-','_','+'),' ',$time_range);
@@ -133,7 +130,6 @@ class Reporting extends Baseline_controller {
     return $times;
   }
 
-
   public function group_view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = 'submit_time'){
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
@@ -231,7 +227,6 @@ class Reporting extends Baseline_controller {
     $this->load->view('reporting_view.html',$this->page_data);
   }
 
-
   public function view($object_type, $group_id, $time_range = '1-month', $start_date = false, $end_date = false){
     $object_type = singular($object_type);
     $accepted_object_types = array('instrument','proposal','user');
@@ -321,7 +316,6 @@ class Reporting extends Baseline_controller {
     $this->load->view('reporting_view.html',$this->page_data);
   }
 
-
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* API functionality for Ajax calls from UI                  */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -341,8 +335,6 @@ class Reporting extends Baseline_controller {
       return;
     }
   }
-
-
 
   public function change_group_name($group_id){
     $new_group_name = false;
@@ -536,7 +528,6 @@ class Reporting extends Baseline_controller {
     $this->get_reporting_info_list_base($object_type, $group_id,$time_range,$start_date,$end_date,false,false,$time_basis);
   }
 
-
   private function get_reporting_info_list_base($object_type,$group_id,$time_range,$start_date = false, $end_date = false, $with_timeline = true, $full_object = false, $time_basis){
     // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type, $group_id);
     $group_info = $this->rep->get_group_info($group_id);
@@ -632,9 +623,6 @@ class Reporting extends Baseline_controller {
     }
   }
 
-
-
-
   public function get_transaction_list_details(){
     if($this->input->post()){
       $transaction_list = $this->input->post();
@@ -687,26 +675,6 @@ class Reporting extends Baseline_controller {
     send_json_array($return_array);
   }
 
-
-
-  // public function get_uploads_for_instrument($instrument_id,$start_date = false,$end_date = false){
-  //   $results = $this->rep->summarize_uploads_by_instrument($instrument_id,$start_date,$end_date, true);
-  //   $results_size = sizeof($results);
-  //   $pluralizer = $results_size != 1 ? "s" : "";
-  //   $status_message = '{$results_size} transaction{$pluralizer} returned';
-  //   send_json_array($results['day_graph']['by_date']['transaction_count_array']);
-  // }
-  //
-  // public function get_uploads_for_proposal($proposal_id,$start_date = false,$end_date = false){
-  //   $results = $this->rep->summarize_uploads_by_proposal($proposal_id,$start_date,$end_date);
-  //   send_json_array($results);
-  // }
-  //
-  // public function get_uploads_for_user($eus_person_id, $start_date = false, $end_date = false){
-  //   $results = $this->rep->summarize_uploads_by_user($eus_person_id,$start_date,$end_date);
-  //   send_json_array($results);
-  // }
-
   public function get_proposals($proposal_name_fragment, $active = 'active'){
     $results = $this->eus->get_proposals_by_name($proposal_name_fragment,$active);
     send_json_array($results);
@@ -754,7 +722,6 @@ class Reporting extends Baseline_controller {
       print "<div class='info_message' style='margin-bottom:1.5em;'>No Results Returned for '{$filter_string}'</div>";
     }
   }
-
 
   public function update_object_preferences($object_type, $group_id = false){
     if($this->input->post()){
@@ -813,134 +780,6 @@ class Reporting extends Baseline_controller {
       "'36846' returns a user having the ID of '36846' in the EUS database"
     );
     return $object_examples[$object_type];
-  }
-
-
-
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-/* Testing functionality                                     */
-/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-  public function test_get_proposals($proposal_name_fragment, $active = 'active'){
-    $results = $this->eus->get_proposals_by_name($proposal_name_fragment,$active);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-  }
-
-  public function test_get_uploads_for_user($eus_person_id,$start_date = false,$end_date = false){
-    $results = $this->rep->summarize_uploads_by_user($eus_person_id,$start_date,$end_date);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-
-  }
-
-  public function test_get_uploads_for_user_list($eus_person_id_list,$start_date = false,$end_date = false){
-    $eus_person_id_list = explode('-',$eus_person_id_list);
-    $results = $this->rep->summarize_uploads_by_user_list($eus_person_id_list,$start_date,$end_date,true);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-
-  }
-
-
-  public function test_get_uploads_for_instrument($eus_instrument_id_list,$start_date = false,$end_date = false){
-    $eus_instrument_id_list = explode('-',$eus_instrument_id_list);
-    $results = $this->rep->summarize_uploads_by_instrument_list($eus_instrument_id_list,$start_date,$end_date,true,'modified_time');
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-
-  }
-
-
-  public function test_get_selected_objects($eus_person_id){
-    $results = $this->rep->get_selected_objects($eus_person_id);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-  }
-  public function test_get_selected_groups($eus_person_id){
-    $results = $this->rep->get_selected_groups($eus_person_id);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-  }
-
-  public function test_get_object_list($object_type,$filter = ""){
-    $filter = parse_search_term($filter);
-    $results = $this->eus->get_object_list($object_type,$filter);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-  }
-
-  public function test_get_latest($object_type,$object_id){
-    $results = $this->rep->latest_available_data($object_type,$object_id);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-
-  }
-
-  public function test_get_earliest_latest($object_type,$object_id){
-    $object_id_list = explode('-',$object_id_list);
-    $results = $this->rep->earliest_latest_data($object_type,$object_id_list);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-
-  }
-
-  public function test_get_earliest_latest_list($object_type,$group_id, $time_basis){
-    $group_info = $this->rep->get_group_info($group_id);
-    echo "<pre>";
-    var_dump($group_info);
-    echo "</pre>";
-    $results = $this->rep->earliest_latest_data_for_list($object_type,$group_info['item_list'],$time_basis);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-
-  }
-
-  public function test_get_group_info($group_id){
-    $results = $this->rep->get_group_info($group_id);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-  }
-
-  public function test_get_items_for_group($group_id){
-    $results = $this->rep->get_items_for_group($group_id);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
-  }
-
-  public function test_get_files_from_group_list(){
-    $group_list = array(338690,394300,10081,391971,34124,1142,1004,1005,34072,
-	1000001, 34134,	34105,	34180,	34176,	1032,	34076,	1000010,
-	34110,	34132,	34078,	0,	34000,	1000011,	1176,	1002, 1003,
-	34135, 1145, 34075,34218,34121,34136,34181,431561);
-    $start_time = '2015-09-01 00:00:00';
-    $end_time = '2015-11-13 23:59:59';
-
-    $results = $this->rep->get_files_from_group_list($group_list, $start_time,$end_time);
-  }
-
-
-  public function test_get_transaction_info(){
-    $transaction_list = array(
-      1895,1894,1893,1888//,1887,1886,1885,1884,1880,
-      // 1879,1878,1877,1876,1875,1874,1873,1872,1871,
-      // 1870,1869,1868,1867,1866,1865,1864,1862,1861
-    );
-    $results = $this->rep->detailed_transaction_list($transaction_list);
-    echo "<pre>";
-    var_dump($results);
-    echo "</pre>";
   }
 
 }
