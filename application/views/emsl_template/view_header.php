@@ -3,6 +3,7 @@
   $page_header = isset($page_header) ? $page_header : "Untitled Page";
   $title = isset($title) ? $title : $page_header;
   $rss_link = isset($rss_link) ? $rss_link : "";
+  $index_page = $this->config->item('index_page');
 ?>
 <html>
   <head>
@@ -31,7 +32,7 @@
 
 <?php endif; ?>
     <script type="text/javascript">
-      var base_url = "<?= base_url() ?>";
+      var base_url = "<?= rtrim(base_url().$index_page,'/').'/' ?>";
     </script>
   </head>
   <body>

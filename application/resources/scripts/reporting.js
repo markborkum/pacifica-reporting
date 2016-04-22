@@ -132,7 +132,7 @@ var get_transaction_info = function(el,transaction_list){
   var disclosure_arrow = notifier_container.find('.disclosure_arrows');
   var load_indicator = parent_container.find('.transaction_details_loader');
   if(details_container.html().length == 0){ //empty details, needs loading
-    var url = base_url + 'index.php/reporting/get_transaction_list_details';
+    var url = base_url + 'group/get_transaction_list_details';
     load_indicator.spin({scale:0.5, left:'20%', width:4, lines:11})
     load_indicator.fadeIn();
     var posting = $.post(url, JSON.stringify(transaction_list), function(data){
@@ -165,7 +165,7 @@ var submit_group_change_worker = function(el, object_type, object_id, action){
         'current_search_string' : current_search_string
       }
     ]);
-  var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type + '/' + group_id;
+  var url = base_url + 'reporting/update_object_preferences/' + object_type + '/' + group_id;
   var poster = $.post(url,update_list, function(data){
     if(data){
       el.parents('.search_results_display').html(data);
@@ -177,7 +177,7 @@ var submit_group_change_worker = function(el, object_type, object_id, action){
 var submit_group_option_change = function(el, option_type, new_value){
   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
   var update_list = JSON.stringify({ 'group_id' : group_id, 'option_type' : option_type,'option_value' : new_value });
-  var url = base_url + 'index.php/reporting/change_group_option/' + group_id;
+  var url = base_url + 'ajax/change_group_option/' + group_id;
   var poster = $.post(url, update_list, function(data){
     load_group_results(object_type,group_id);
   },'json');
@@ -185,56 +185,56 @@ var submit_group_option_change = function(el, option_type, new_value){
 
 
 
-var submit_object_change_worker = function(el, object_type, object_id, action){
-  var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
-  var current_search_string = el.parents('.group_edit_section').find('.object_search_box').val();
-  var update_list = JSON.stringify(
-    [
-      { 'object_id' : object_id,
-        'group_id' : group_id,
-        'action' : action,
-        'current_search_string' : current_search_string
-      }
-    ]);
-  var url = base_url + 'index.php/reporting/update_object_preferences/' + object_type + '/' + group_id;
-
-  $.post(url, update_list, function(data){
-    //need to update the DOM to add/remove the appropriate object
-    if(action == 'remove'){
-      my_el.parents('.reporting_object_container').remove();
-      var my_list_item = el.parents('li').detach();
-      remove_empty_uls();
-    }else if(action == 'add'){
-      if($('.reporting_object_container').length == 0){
-        $('#search_results_display').after('<div class="reporting_object_container"></div>');
-      }
-      $('.info_container').fadeOut();
-      var first_container = $('.reporting_object_container')[0];
-      var container_url = base_url + 'index.php/reporting/get_object_container/';
-      container_url += object_type + '/' + object_id + '/' + time_range;
-      var posting = $.get(container_url, function(data){
-        //add in the new container
-        $(first_container).before(data);
-        if(el.is('input[type="checkbox"]')){
-          var list_item = el.parents('li').detach();
-          if($('#' + object_type + "_my_" + object_type + "s_search_results").length == 0){
-            var new_element = $('<ul id="' + object_type + '_my_' + object_type + 's_search_results" class="search_results_list"></ul>');
-            $('#search_results_display > ul').before(new_element);
-            new_element = $('#' + object_type + '_my_' + object_type + 's_search_results');
-            new_element.append('<div class="search_results_header">my ' + object_type + 's</div>');
-          }
-          // debugger;
-          $('#' + object_type + "_my_" + object_type + "s_search_results").append(list_item);
-          remove_empty_uls();
-        }
-
-      })
-      .fail(function(){
-        location.reload();
-      });
-    }
-  });
-}
+// var submit_object_change_worker = function(el, object_type, object_id, action){
+//   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
+//   var current_search_string = el.parents('.group_edit_section').find('.object_search_box').val();
+//   var update_list = JSON.stringify(
+//     [
+//       { 'object_id' : object_id,
+//         'group_id' : group_id,
+//         'action' : action,
+//         'current_search_string' : current_search_string
+//       }
+//     ]);
+//   var url = base_url + 'reporting/update_object_preferences/' + object_type + '/' + group_id;
+//
+//   $.post(url, update_list, function(data){
+//     //need to update the DOM to add/remove the appropriate object
+//     if(action == 'remove'){
+//       my_el.parents('.reporting_object_container').remove();
+//       var my_list_item = el.parents('li').detach();
+//       remove_empty_uls();
+//     }else if(action == 'add'){
+//       if($('.reporting_object_container').length == 0){
+//         $('#search_results_display').after('<div class="reporting_object_container"></div>');
+//       }
+//       $('.info_container').fadeOut();
+//       var first_container = $('.reporting_object_container')[0];
+//       var container_url = base_url + 'reporting/get_object_container/';
+//       container_url += object_type + '/' + object_id + '/' + time_range;
+//       var posting = $.get(container_url, function(data){
+//         //add in the new container
+//         $(first_container).before(data);
+//         if(el.is('input[type="checkbox"]')){
+//           var list_item = el.parents('li').detach();
+//           if($('#' + object_type + "_my_" + object_type + "s_search_results").length == 0){
+//             var new_element = $('<ul id="' + object_type + '_my_' + object_type + 's_search_results" class="search_results_list"></ul>');
+//             $('#search_results_display > ul').before(new_element);
+//             new_element = $('#' + object_type + '_my_' + object_type + 's_search_results');
+//             new_element.append('<div class="search_results_header">my ' + object_type + 's</div>');
+//           }
+//           // debugger;
+//           $('#' + object_type + "_my_" + object_type + "s_search_results").append(list_item);
+//           remove_empty_uls();
+//         }
+//
+//       })
+//       .fail(function(){
+//         location.reload();
+//       });
+//     }
+//   });
+// }
 
 var humanFileSize = function(size) {
     if (size == 0) { return "0"; }
@@ -257,7 +257,7 @@ var timeline_load_new_data_check = function(timeline_obj, new_start, new_end){
 };
 
 var load_new_timeline_data = function(timeline_obj, object_type, object_id, start_date, end_date){
-  var url = base_url + "index.php/reporting/get_timeline_data/" + object_type + "/" + object_id + "/";
+  var url = base_url + "item/get_timeline_data/" + object_type + "/" + object_id + "/";
   url += start_date + "/" + end_date;
   var fv_data = timeline_obj.series[0];
   var tx_data = timeline_obj.series[1];
@@ -270,7 +270,7 @@ var load_new_timeline_data = function(timeline_obj, object_type, object_id, star
 };
 
 var load_new_group_timeline_data = function(timeline_obj, object_type, group_id, start_date, end_date){
-  var url = base_url + "index.php/reporting/get_group_timeline_data/" + object_type + "/" + group_id + "/";
+  var url = base_url + "group/get_group_timeline_data/" + object_type + "/" + group_id + "/";
   url += start_date + "/" + end_date;
   var fv_data = timeline_obj.series[0];
   var tx_data = timeline_obj.series[1];
@@ -287,39 +287,39 @@ var submit_group_change = function(el, object_type, object_id, action){
   submit_group_change_worker(el, object_type, object_id, action)
 }
 
-var submit_object_change = function(el, object_type, object_id, action){
-  //action is add or remove
-  if(el.is('input[type="checkbox"]')){
-    my_el = $('#remove_icon_' + object_id);
-    remove_empty_uls();
-  }else{
-    my_el = el;
-    el = $('#' + object_type + '_id_' + object_id);
-  }
-  if(action == 'remove'){
-    var d_box = $(my_el).siblings('.remove_confirmation_dialog');
-    var message = $(my_el).siblings('.remove_dialog_message').text();
-    var object_id = $(my_el).siblings('.container_id').text();
-    d_box.html(message);
-    d_box.dialog({
-      resizable:false,
-      modal:true,
-      title: 'Remove ' + object_type + ' ID ' + object_id,
-      width:250,
-      buttons: {
-        "Yes" : function(){
-          submit_object_change_worker(el, object_type,object_id,action);
-          $(this).dialog('close');
-        },
-        "No" : function(){
-          $(this).dialog('close');
-        }
-      }
-    });
-  }else{
-    submit_object_change_worker(el, object_type,object_id,action);
-  }
-}
+// var submit_object_change = function(el, object_type, object_id, action){
+//   //action is add or remove
+//   if(el.is('input[type="checkbox"]')){
+//     my_el = $('#remove_icon_' + object_id);
+//     remove_empty_uls();
+//   }else{
+//     my_el = el;
+//     el = $('#' + object_type + '_id_' + object_id);
+//   }
+//   if(action == 'remove'){
+//     var d_box = $(my_el).siblings('.remove_confirmation_dialog');
+//     var message = $(my_el).siblings('.remove_dialog_message').text();
+//     var object_id = $(my_el).siblings('.container_id').text();
+//     d_box.html(message);
+//     d_box.dialog({
+//       resizable:false,
+//       modal:true,
+//       title: 'Remove ' + object_type + ' ID ' + object_id,
+//       width:250,
+//       buttons: {
+//         "Yes" : function(){
+//           submit_object_change_worker(el, object_type,object_id,action);
+//           $(this).dialog('close');
+//         },
+//         "No" : function(){
+//           $(this).dialog('close');
+//         }
+//       }
+//     });
+//   }else{
+//     submit_object_change_worker(el, object_type,object_id,action);
+//   }
+// }
 
 var remove_empty_uls = function(){
   $('#search_results_display').find('ul').each(function(index,item){
@@ -332,7 +332,7 @@ var remove_empty_uls = function(){
 
 var load_results = function(object_type, object_id){
   $('#loading_status_' + object_id).spin();
-  var url = base_url + 'index.php/reporting/get_reporting_info/' + object_type + '/' + object_id + '/' + time_range;
+  var url = base_url + 'item/get_reporting_info/' + object_type + '/' + object_id + '/' + time_range;
   var getter = $.get(url);
   getter.done(function(data,status){
     $('#loading_status_' + object_id).spin(false);
@@ -346,7 +346,7 @@ var load_group_results = function(object_type, group_id, item_list){
   $('#loading_status_' + group_id).spin().show();
   var obj_footer = $('#object_footer_' + group_id);
   obj_footer.disable();
-  var url = base_url + 'index.php/reporting/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
+  var url = base_url + 'group/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_range;
   var getter = $.get(url);
   getter.done(function(data,status){
     $('#loading_status_' + group_id).spin(false).hide();
@@ -363,7 +363,7 @@ var load_group_results = function(object_type, group_id, item_list){
 
 var get_search_results = function(el, filter_text){
   if(filter_text.length > 0){
-    var url = base_url + 'index.php/reporting/get_object_lookup/' + object_type + '/' + filter_text;
+    var url = base_url + 'item/get_object_lookup/' + object_type + '/' + filter_text;
     $.get(url, function(data){
       $('#search_results_display').html(data);
     });
@@ -402,9 +402,9 @@ var setup_confirmation_dialog_boxes = function(e){
 
 var make_new_group_entry = function(group_name, input_el){
   var update_list = { group_name : group_name };
-  var url = base_url + 'index.php/reporting/make_new_group/' + object_type
+  var url = base_url + 'ajax/make_new_group/' + object_type
   var poster = $.post(url,JSON.stringify(update_list), function(data){
-    var get_group_url = base_url + 'index.php/reporting/get_group_container/' + object_type + '/' + data.group_id;
+    var get_group_url = base_url + 'ajax/get_group_container/' + object_type + '/' + data.group_id;
     var getter = $.get(get_group_url, function(group_data){
       var my_container = input_el.parents('div.reporting_object_container');
       my_container.before(group_data);
@@ -415,7 +415,7 @@ var make_new_group_entry = function(group_name, input_el){
 };
 
 var submit_group_name_change = function(group_name, group_id, input_el){
-  var url = base_url + 'index.php/reporting/change_group_name/' + group_id + '/';
+  var url = base_url + 'ajax/change_group_name/' + group_id + '/';
   var update_list = {group_name : group_name}
   var posting = $.post(url, JSON.stringify(update_list), function(data){
     input_el.attr('placeholder', data.group_name).val("");
@@ -425,7 +425,7 @@ var submit_group_name_change = function(group_name, group_id, input_el){
 };
 
 var update_group_time_range = function(group_id, start_time, end_time){
-  var url = base_url + 'index.php/reporting/change_group_option/' + group_id;
+  var url = base_url + 'reporting/change_group_option/' + group_id;
   var start_time_obj = new moment(start_time);
   var end_time_obj = new moment(end_time);
 
@@ -448,7 +448,7 @@ var get_group_objects = function(el,filter_text){
   var instructions_container = edit_el.find('.search_instructions_container');
   var group_id = edit_el.find('.group_search_form input.group_id').val();
   var object_type = edit_el.find('.group_search_form input.object_type').val();
-  var dl_url = base_url + 'index.php/reporting/get_object_group_lookup/' + object_type + '/' + group_id;
+  var dl_url = base_url + 'reporting/get_object_group_lookup/' + object_type + '/' + group_id;
   var results_container = edit_el.find('.search_results_display');
   instructions_container.slideUp();
   if(el.hasClass('edit_grouping_button')){
