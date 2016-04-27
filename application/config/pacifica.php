@@ -7,3 +7,5 @@ $config['site_color'] = 'orange';
 $config['jquery_script'] = "jquery-1.11.2.js";
 
 $config['application_version'] = "0.99.6";
+
+$config['debug_enabled'] = true;
