@@ -9,6 +9,13 @@
   }
 ?>
 <div id="object_body_container_<?= $group_id ?>" class="object_body_container">
+    <script>
+    //<![CDATA[
+    var earliest_loaded_<?= $group_id ?> = '<?= $time_range['start_time'] ?>';
+    var latest_loaded_<?= $group_id ?> = '<?= $time_range['end_time'] ?>';
+    //]]>
+    </script>
+
   <?php if(isset($summary_totals)): ?>
   <div id="totals_container_<?= $group_id ?>" class="totals_container" style='vertical-align: middle;'>
     <?php $file_plural = $summary_totals['total_file_count'] != 1 ? "s" : ""; ?>
@@ -51,12 +58,6 @@
   </div>
   <div id="transaction_details_container_<?= $group_id ?>" class="transaction_details_container" style="display:none;"></div>
   <div id="dialog-confirm"></div>
-  <script>
-  //<![CDATA[
-  var earliest_loaded = '<?= $time_range['start_time'] ?>';
-  var latest_loaded = '<?= $time_range['end_time'] ?>';
-  //]]>
-  </script>
 
   <?php else: ?>
   <div class='info_message'><?= $results_message ?></div>

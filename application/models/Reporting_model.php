@@ -59,7 +59,7 @@ class Reporting_model extends CI_Model
     public function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis)
     {
         $transactions = array();
-        $results['day_graph'] = array();
+        $results['day_graph'] = array('by_date' => array());
         if (!empty($results['files'])) {
             foreach ($results['files'] as $item_id => $item_info) {
                 $transactions[$item_info['transaction']] = $item_info['transaction'];
@@ -86,20 +86,20 @@ class Reporting_model extends CI_Model
         return $results;
     }
 
-    public function summarize_uploads_by_user($eus_person_id, $start_date, $end_date, $make_day_graph)
-    {
-        extract($this->canonicalize_date_range($start_date, $end_date));
-
-        $results = array(
-            'transactions' => array(),
-            'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
-        );
-
-        $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_time, $end_time, false);
-        $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
-
-        return $results;
-    }
+    // public function summarize_uploads_by_user($eus_person_id, $start_date, $end_date, $make_day_graph)
+    // {
+    //     extract($this->canonicalize_date_range($start_date, $end_date));
+    //
+    //     $results = array(
+    //         'transactions' => array(),
+    //         'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
+    //     );
+    //
+    //     $results['transactions'] = $this->get_transactions_for_user($eus_person_id, $start_time, $end_time, false);
+    //     $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
+    //
+    //     return $results;
+    // }
 
     public function summarize_uploads_by_user_list($eus_person_id_list, $start_date,
     $end_date, $make_day_graph, $time_basis = false)
@@ -117,24 +117,24 @@ class Reporting_model extends CI_Model
         return $results;
     }
 
-    public function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date, $make_day_graph)
-    {
-        extract($this->canonicalize_date_range($start_date, $end_date));
-
-        $results = array(
-            'transactions' => array(),
-            'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
-        );
-
-        $group_collection = $this->get_proposal_group_list($eus_proposal_id);
-        $group_list = array_keys($group_collection);
-
-        $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
-
-        $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
-
-        return $results;
-    }
+    // public function summarize_uploads_by_proposal($eus_proposal_id, $start_date, $end_date, $make_day_graph)
+    // {
+    //     extract($this->canonicalize_date_range($start_date, $end_date));
+    //
+    //     $results = array(
+    //         'transactions' => array(),
+    //         'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
+    //     );
+    //
+    //     $group_collection = $this->get_proposal_group_list($eus_proposal_id);
+    //     $group_list = array_keys($group_collection);
+    //
+    //     $results['transactions'] = $this->get_transactions_from_group_list($group_list, $start_time, $end_time);
+    //
+    //     $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
+    //
+    //     return $results;
+    // }
 
     public function summarize_uploads_by_proposal_list($eus_proposal_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false)
     {
@@ -181,25 +181,25 @@ class Reporting_model extends CI_Model
         return $results;
     }
 
-    public function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date, $make_day_graph)
-    {
-        extract($this->canonicalize_date_range($start_date, $end_date));
-
-        $group_collection = $this->get_instrument_group_list($eus_instrument_id);
-        $group_list = array_keys($group_collection);
-        if (empty($group_list)) {
-            //no results returned for group list => bail out
-        }
-        $results = array(
-            'transactions' => array(),
-            'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
-        );
-        $results['transactions'] = $this->get_files_from_group_list($group_list, $start_time, $end_time);
-
-        $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
-
-        return $results;
-    }
+    // public function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date, $make_day_graph)
+    // {
+    //     extract($this->canonicalize_date_range($start_date, $end_date));
+    //
+    //     $group_collection = $this->get_instrument_group_list($eus_instrument_id);
+    //     $group_list = array_keys($group_collection);
+    //     if (empty($group_list)) {
+    //         //no results returned for group list => bail out
+    //     }
+    //     $results = array(
+    //         'transactions' => array(),
+    //         'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
+    //     );
+    //     $results['transactions'] = $this->get_files_from_group_list($group_list, $start_time, $end_time);
+    //
+    //     $results = $this->transactions_to_results($results, $make_day_graph, $start_time, $end_time, 'submit_time');
+    //
+    //     return $results;
+    // }
 
     private function get_transactions_from_group_list($group_list, $start_time, $end_time)
     {
@@ -239,23 +239,23 @@ class Reporting_model extends CI_Model
     public function get_files_from_group_list($group_list, $start_time, $end_time, $time_basis)
     {
         $times = array(
-      'submit' => array(),
-      'create' => array(),
-      'modified' => array(),
-    );
+            'submit' => array(),
+            'create' => array(),
+            'modified' => array(),
+        );
         switch ($time_basis) {
-      case 'create_time':
-        $time_field = 'f.ctime';
-        break;
-      case 'modified_time':
-        $time_field = 'f.mtime';
-        break;
-      case 'submit_time':
-        $time_field = 't.stime';
-        break;
-      default:
-        $time_field = 't.stime';
-    }
+          case 'create_time':
+            $time_field = 'f.ctime';
+            break;
+          case 'modified_time':
+            $time_field = 'f.mtime';
+            break;
+          case 'submit_time':
+            $time_field = 't.stime';
+            break;
+          default:
+            $time_field = 't.stime';
+        }
         $files = array();
         $this->db->select(array(
       'f.item_id',
@@ -276,21 +276,21 @@ class Reporting_model extends CI_Model
         $this->db->where_in('gi.group_id', $group_list);
         $this->db->order_by('t.transaction desc')->distinct();
         $query = $this->db->get();
+        // echo $this->db->last_query();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
                 $stime = date_create($row->submit_time);
                 $ctime = date_create($row->create_time);
                 $mtime = date_create($row->modified_time);
                 $files[$row->item_id] = array(
-          'submit_time' => $stime->format('Y-m-d H:i:s'),
-          'create_time' => $ctime->format('Y-m-d H:i:s'),
-          'modified_time' => $mtime->format('Y-m-d H:i:s'),
-          'transaction' => $row->transaction,
-          'size_bytes' => $row->size_bytes,
-        );
+                    'submit_time' => $stime->format('Y-m-d H:i:s'),
+                    'create_time' => $ctime->format('Y-m-d H:i:s'),
+                    'modified_time' => $mtime->format('Y-m-d H:i:s'),
+                    'transaction' => $row->transaction,
+                    'size_bytes' => $row->size_bytes,
+                );
             }
         }
-
         return $files;
     }
 
@@ -627,8 +627,8 @@ class Reporting_model extends CI_Model
         $summary_list = array('by_date' => array(), 'by_hour_list' => array());
 
         foreach ($transaction_list as $trans_id => $info) {
-            if (strtotime($info[$time_basis])) {  //is the submission time valid?
-        $ds = date_create($info[$time_basis]);
+            if (strtotime($info[$time_basis])) {
+                $ds = date_create($info[$time_basis]);
                 $date_key = clone $ds;
                 $date_key = $date_key->setTime(0, 0, 0)->format('Y-m-d');
                 $time_key = clone $ds;
@@ -673,6 +673,7 @@ class Reporting_model extends CI_Model
 
     private function generate_day_graph_summary_files($file_list, $start_date = false, $end_date = false, $time_basis = 'submit_time')
     {
+        echo "start_date = {$start_date}";
         if (is_string($start_date)) {
             $start_date = is_string($start_date) ? date_create($start_date) : false;
         }
@@ -727,6 +728,7 @@ class Reporting_model extends CI_Model
         return $summary_list;
     }
 
+/*
     public function latest_available_data($object_type, $object_id)
     {
         $latest_function_name = "latest_available_{$object_type}_data";
@@ -735,7 +737,7 @@ class Reporting_model extends CI_Model
 
         return $latest_time;
     }
-
+*/
     public function earliest_latest_data($object_type, $object_id)
     {
         $spread_function_name = "available_{$object_type}_data_spread";
@@ -745,25 +747,63 @@ class Reporting_model extends CI_Model
         return $spread;
     }
 
-    public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
+    public function earliest_latest_data_for_list($object_type, $group_id_list, $time_basis)
     {
-        $spread_function_name = "available_{$object_type}_data_spread";
-        switch ($time_basis) {
-      case 'create_time':
-        $time_field = 'f.ctime';
-        break;
-      case 'modified_time':
-        $time_field = 'f.mtime';
-        break;
-      case 'submit_time':
-        $time_field = 't.stime';
-        break;
-      default:
-        $time_field = 't.stime';
-    }
-        $spread = $this->$spread_function_name($object_id_list, $time_field);
+        // $spread_function_name = "available_{$object_type}_data_spread";
+        // switch ($time_basis) {
+        //   case 'create_time':
+        //     $time_field = 'f.ctime';
+        //     break;
+        //   case 'modified_time':
+        //     $time_field = 'f.mtime';
+        //     break;
+        //   case 'submit_time':
+        //     $time_field = 't.stime';
+        //     break;
+        //   default:
+        //     $time_field = 't.stime';
+        // }
+        // $spread = $this->$spread_function_name($object_id_list, $time_field);
+        $today = new DateTime();
+        $data_available = $this->is_data_available($group_id_list);
+        foreach($data_available as $group_id => $available){
+            if($available){
+                $spread = array(
+                    'earliest' => '1999-01-01 00:00',
+                    'latest' => $today->format('Y-m-d H:i')
+                );
+                break;
+            }else{
+                $spread = array(
+                    'earliest' => false,
+                    'latest' => false
+                );
 
+            }
+        }
         return $spread;
+    }
+
+    public function is_data_available($object_id_list){
+        $db_results = array();
+        $results = array();
+        $group_collection = array();
+        foreach ($object_id_list as $object_id) {
+            $group_collection += $this->get_instrument_group_list($object_id);
+        }
+        $group_list = array_keys($group_collection);
+        $this->db->select('distinct on (group_id) *')->where_in('group_id',$group_list);
+        $query = $this->db->get('group_items');
+        if($query && $query->num_rows() > 0){
+            foreach($query->result() as $row){
+                $object_identifier = $group_collection[$row->group_id];
+                $db_results[$object_identifier] = $row->item_id;
+            }
+        }
+        foreach($object_id_list as $object_id){
+            $results[$object_id] = array_key_exists($object_id,$db_results) ? True : False;
+        }
+        return $results;
     }
 
     private function available_instrument_data_spread_old($object_id_list, $time_field)

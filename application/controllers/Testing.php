@@ -152,4 +152,14 @@ class Testing extends Baseline_controller
         var_dump($results);
         echo '</pre>';
     }
+
+    public function test_is_data_available(){
+        $selector = array(2551071,2550881,2550882);
+        $results = $this->rep->is_data_available($selector);
+        echo '<pre>';
+        var_dump($results);
+        echo '</pre>';
+    }
+
+
 }

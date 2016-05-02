@@ -26,7 +26,7 @@ class Group extends Baseline_controller
 
     public function view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
     {
-        $this->output->enable_profiler(TRUE);
+        // $this->output->enable_profiler(TRUE);
         $this->benchmark->mark('controller_view_start');
         $object_type = singular($object_type);
         $time_basis = !empty($time_basis) ? $time_basis : 'modification_time';
@@ -75,11 +75,11 @@ class Group extends Baseline_controller
                 }
 
                 $object_list = array_merge($object_list, $group_info['item_list']);
-                echo "group_info<br />";
-                var_dump($group_info);
+                // echo "group_info<br />";
+                // var_dump($group_info);
                 $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
-                echo "date range<br />";
-                var_dump($valid_date_range);
+                // echo "date range<br />";
+                // var_dump($valid_date_range);
                 $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
                 $latest_available_date = new DateTime($valid_date_range['latest']);
                 $earliest_available_date = new DateTime($valid_date_range['earliest']);
@@ -164,20 +164,20 @@ class Group extends Baseline_controller
         $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
     }
 
-    public function get_reporting_info_list($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false, $with_timeline = true, $time_basis = false)
+    public function get_reporting_info_list($object_type, $group_id, $time_basis = false, $time_range = false, $start_date = false, $end_date = false, $with_timeline = true)
     {
-        $this->get_reporting_info_list_base($object_type, $group_id, $time_range, $start_date, $end_date, true, false, $time_basis);
+        $this->get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date, $end_date, true, false);
     }
 
-    public function get_reporting_info_list_no_timeline($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
+    public function get_reporting_info_list_no_timeline($object_type, $group_id, $time_basis = false, $time_range = false, $start_date = false, $end_date = false)
     {
-        $this->get_reporting_info_list_base($object_type, $group_id, $time_range, $start_date, $end_date, false, false, $time_basis);
+        $this->get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date, $end_date, false, false);
     }
 
-    private function get_reporting_info_list_base($object_type, $group_id, $time_range, $start_date = false, $end_date = false, $with_timeline = true, $full_object = false, $time_basis)
+    private function get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date = false, $end_date = false, $with_timeline = true, $full_object = false)
     {
-        // $time_basis = $this->set_time_basis_cookie($time_basis, $object_type, $group_id);
-    $group_info = $this->rep->get_group_info($group_id);
+        $this->output->enable_profiler(TRUE);
+        $group_info = $this->rep->get_group_info($group_id);
         $item_list = $group_info['item_list'];
         $options_list = $group_info['options_list'];
         if ($time_range && $time_range != $options_list['time_range']) {
@@ -185,7 +185,7 @@ class Group extends Baseline_controller
         } else {
             $time_range = $options_list['time_range'];
         }
-        $time_basis = $options_list['time_basis'];
+        $time_basis = !$time_basis ? $options_list['time_basis'] : $time_basis;
         $start_date = !$start_date || !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
         $end_date = !$end_date || !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;
 
@@ -209,8 +209,8 @@ class Group extends Baseline_controller
         $valid_tr = strtotime($time_range);
         $valid_st = strtotime($start_date);
         $valid_et = strtotime($end_date);
-        if (!$valid_tr) {
-            if ($time_range == 'custom' && $valid_st && $valid_et) {
+        if (!$valid_tr || ($valid_st && $valid_et)) {
+            if ($time_range == 'custom' || ($valid_st && $valid_et)) {
                 $earliest_available_object = new DateTime($available_time_range['earliest']);
                 $latest_available_object = new DateTime($available_time_range['latest']);
                 $start_date_object = new DateTime($start_date);
@@ -235,6 +235,7 @@ class Group extends Baseline_controller
                     'latest_available_object' => $latest_available_object,
                     'message' => '<p>Using '.$end_date_object->format('Y-m-d').' as the new origin time</p>',
                 );
+                // var_dump($times);
             } else {
                 $time_range = '1 week';
                 $times = time_range_to_date_pair($time_range, $available_time_range);
