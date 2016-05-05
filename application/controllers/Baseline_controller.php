@@ -1,6 +1,9 @@
 <?php
 
 ini_set('memory_limit', '2048M');
+ini_set('set_time_limit', 120);
+ini_set('max_execution_time', 120);
+
 class Baseline_controller extends CI_Controller
 {
     public function __construct()
