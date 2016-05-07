@@ -68,6 +68,7 @@ class Reporting_model extends CI_Model
             $results['transaction_info'] = $this->get_info_for_transactions($transactions);
             $results = $this->generate_file_summary_data($results);
             $results['day_graph'] = $this->generate_day_graph_summary_files($results['files'], $start_date, $end_date, $time_basis);
+            unset($results['files']);
         }
 
         return $results;
@@ -460,40 +461,79 @@ class Reporting_model extends CI_Model
 
     public function get_info_for_transactions($transaction_info)
     {
-        $chunked_transaction_list = array_chunk(array_keys($transaction_info), 1000);
+        //$chunked_transaction_list = array_chunk(array_keys($transaction_info), 2000);
+        $ranged_transactions = split_array_into_ranges($transaction_info);
+        $this->db->select(array('f.transaction', 'g.name as proposal_id'));
+        $this->db->or_group_start();
+        foreach ($ranged_transactions as $block) {
+            if(sizeof($block) == 1){
+                $this->db->or_where('f.transaction',$block[0]);
+            }else{
+                $this->db->or_group_start();
+                $this->db->where('f.transaction >=',$block[0]);
+                $this->db->where('f.transaction <=',$block[1]);
+                $this->db->group_end();
+            }
+        }
+        $this->db->group_end();
+        $this->db->where('g.type','proposal');
+        // $this->db->from('group_items gi');
+        // $this->db->join('files f', 'gi.item_id = f.item_id');
+        // $this->db->join('groups g', 'g.group_id = gi.group_id');
+        $this->db->from('item_time_cache_by_transaction f');
+        $this->db->join('groups g', 'g.group_id = f.group_id');
 
-        foreach ($chunked_transaction_list as $transaction_list) {
-            $this->db->select(array('f.transaction', 'g.name as proposal_id'));
-            $this->db->where('f.transaction IN ('.implode(',', $transaction_list).") AND g.type = 'proposal'");
-            $this->db->from('group_items gi');
-            $this->db->join('files f', 'gi.item_id = f.item_id');
-            $this->db->join('groups g', 'g.group_id = gi.group_id');
-            $proposal_query = $this->db->get();
-            $trans_prop_lookup = array();
-            if ($proposal_query && $proposal_query->num_rows() > 0) {
-                foreach ($proposal_query->result() as $row) {
-                    $trans_prop_lookup[$row->transaction]['eus_proposal_id'] = $row->proposal_id;
-                }
+        $proposal_query = $this->db->get();
+        // echo $this->db->last_query();
+        $trans_prop_lookup = array();
+        if ($proposal_query && $proposal_query->num_rows() > 0) {
+            foreach ($proposal_query->result() as $row) {
+                $trans_prop_lookup[$row->transaction]['eus_proposal_id'] = $row->proposal_id;
             }
         }
 
-        foreach ($chunked_transaction_list as $transaction_list) {
-            $this->db->select(array('f.transaction', 'g.name as group_name', 'g.type as group_type'));
-            $this->db->where("(g.type = 'omics.dms.instrument_id' or g.type ilike 'instrument.%')");
-            $this->db->where_in('f.transaction', $transaction_list);
-            $this->db->from('group_items gi');
-            $this->db->join('files f', 'gi.item_id = f.item_id');
-            $this->db->join('groups g', 'g.group_id = gi.group_id');
-            $inst_query = $this->db->get();
-            if ($inst_query && $inst_query->num_rows() > 0) {
-                foreach ($inst_query->result() as $row) {
-                    $instrument_id = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.', '', $row->group_type);
-                    $trans_prop_lookup[$row->transaction]['eus_instrument_id'] = $instrument_id + 0;
-                }
+        $this->db->select(array('f.transaction', 'g.name as group_name', 'g.type as group_type'));
+        // foreach ($chunked_transaction_list as $transaction_list) {
+        //     $this->db->where_in('f.transaction', $transaction_list);
+        // }
+        $this->db->or_group_start();
+        foreach ($ranged_transactions as $block) {
+            if(sizeof($block) == 1){
+                $this->db->or_where('f.transaction',$block[0]);
+            }else{
+                $this->db->or_group_start();
+                $this->db->where('f.transaction >=',$block[0]);
+                $this->db->where('f.transaction <=',$block[1]);
+                $this->db->group_end();
+            }
+        }
+        $this->db->group_end();
+        $this->db->where("(g.type = 'omics.dms.instrument_id' or g.type ilike 'instrument.%')");
+        $this->db->from('item_time_cache_by_transaction f');
+        $this->db->join('groups g', 'g.group_id = f.group_id');
+        $inst_query = $this->db->get();
+        if ($inst_query && $inst_query->num_rows() > 0) {
+            foreach ($inst_query->result() as $row) {
+                $instrument_id = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.', '', $row->group_type);
+                $trans_prop_lookup[$row->transaction]['eus_instrument_id'] = $instrument_id + 0;
             }
         }
 
-        $this->db->select(array('person_id', 'trans_id as transaction'))->where_in('trans_id', $transaction_list)->order_by('step desc');
+
+        $this->db->select(array('person_id', 'trans_id as transaction'));
+        $this->db->order_by('step desc');
+        $this->db->or_group_start();
+        foreach ($ranged_transactions as $block) {
+            if(sizeof($block) == 1){
+                $this->db->or_where('trans_id',$block[0]);
+            }else{
+                $this->db->or_group_start();
+                $this->db->where('trans_id >=',$block[0]);
+                $this->db->where('trans_id <=',$block[1]);
+                $this->db->group_end();
+            }
+        }
+        $this->db->group_end();
         $user_query = $this->db->get('ingest_state');
 
         if ($user_query && $user_query->num_rows() > 0) {
@@ -617,7 +657,9 @@ class Reporting_model extends CI_Model
             $file_list = $results['files'];
             $output_list = array();
             foreach ($file_list as $item_id => $info) {
+                // if(array_key_exists($info['transaction'],$results['transaction_info'])){
                 $tx_i = $results['transaction_info'][$info['transaction']];
+                // }
                 if(!array_key_exists('eus_person_id',$tx_i)){
                     $tx_i['eus_person_id'] = '0';
                 }
@@ -660,7 +702,7 @@ class Reporting_model extends CI_Model
             'total_size_string' => format_bytes($total_file_size_summary),
         );
         unset($results['transaction_info']);
-
+        // var_dump($results);
         return $results;
     }
 
