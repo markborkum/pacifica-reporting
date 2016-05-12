@@ -178,7 +178,7 @@ class Group extends Baseline_controller
 
     private function get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date = false, $end_date = false, $with_timeline = true, $full_object = false)
     {
-        $this->output->enable_profiler(TRUE);
+        // $this->output->enable_profiler(TRUE);
         $this->benchmark->mark('get_group_info_start');
         $group_info = $this->gm->get_group_info($group_id);
         $this->benchmark->mark('get_group_info_end');

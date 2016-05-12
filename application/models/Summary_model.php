@@ -97,10 +97,98 @@ class Summary_model extends CI_Model
         $start_date_obj = new DateTime($start_date);
         $end_date_obj = new DateTime($end_date);
 
+        $available_dates = $this->generate_available_dates($start_date_obj, $end_date_obj);
+        $this->results['day_graph']['by_date']['available_dates'] = $available_dates;
+
+
         $group_list = array_keys($group_collection);
         if (empty($group_list)) {
             //no results returned for group list => bail out
         }
+        $temp_totals = $this->get_summary_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis);
+        $temp_results = $this->get_per_day_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis);
+        $this->results['day_graph']['by_date'] = $this->temp_stats_to_output($temp_results['aggregate'], $available_dates);
+        $this->results['summary_totals'] = $temp_results['totals'];
+        $this->results['summary_totals']['upload_stats'] = $temp_totals['results'];
+
+        // $this->benchmark->mark('summarizer-get_files_from_group_list_start');
+        // $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
+        // $this->benchmark->mark('summarizer-get_files_from_group_list_end');
+        //
+        // $this->benchmark->mark('summarizer-files_to_results_start');
+        // $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
+        // // var_dump($results);
+        // $this->benchmark->mark('summarizer-files_to_results_end');
+        // var_dump($results);
+        return $this->results;
+    }
+
+    private function get_summary_totals_from_group_list($group_list,$start_date,$end_date,$time_basis){
+        $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
+        $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
+        $time_basis = str_replace("_time","_date",$time_basis);
+        $subquery_where_array = array(
+            "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
+            "{$time_basis} <=" => $end_date_object->format('Y-m-d'),
+            "group_type" => 'instrument'
+        );
+        $this->db->where_in('group_id',$group_list)->where($subquery_where_array)->distinct();
+        $this->db->select('transaction')->from(ITEM_CACHE);
+        $subquery = $this->db->get_compiled_select();
+
+        $select_array = array(
+            "g.name as group_name","MIN(g.type) as group_type","i.group_type as category","COUNT(i.item_id) as item_count"
+        );
+
+        $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
+        $this->db->where("\"transaction\" in ({$subquery})")->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
+        $query = $this->db->get();
+
+        $results = array(
+            'proposal' => array(),
+            'instrument' => array(),
+            'user' => array()
+        );
+        if($query && $query->num_rows() > 0){
+            foreach($query->result() as $row){
+                if($row->category == 'instrument'){
+                    $row->group_name = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.', '', $row->group_type);
+                }
+                $results[$row->category][$row->group_name] = $row->item_count;
+            }
+        }
+
+        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where("\"transaction\" in ({$subquery})");
+        $txn_query = $this->db->from('transactions t')->get();
+        $transaction_list = array();
+        if($txn_query && $txn_query->num_rows() > 0){
+            foreach($txn_query->result() as $row){
+                $transaction_list[$row->txn] = $row->sub;
+            }
+        }
+
+        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type','instrument');
+        $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
+
+
+        if($user_query && $user_query->num_rows() > 0){
+            foreach($user_query->result() as $row){
+                $user = $transaction_list[$row->txn];
+                if(!array_key_exists($user,$results['user'])){
+                    $results['user'][$user] = 0;
+                }
+                $results['user'][$user] += $row->item_count;
+            }
+        }
+
+
+
+        return array('results' => $results, 'transaction_submitter_list' => $transaction_list);
+    }
+
+    private function get_per_day_totals_from_group_list($group_list,$start_date,$end_date,$time_basis){
+        $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
+        $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
         $time_basis = str_replace("_time","_date",$time_basis);
 
         $select_array = array(
@@ -109,8 +197,8 @@ class Summary_model extends CI_Model
             $time_basis
         );
         $where_array = array(
-            "{$time_basis} >=" => $start_date_obj->format('Y-m-d'),
-            "{$time_basis} <=" => $end_date_obj->format('Y-m-d'),
+            "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
+            "{$time_basis} <=" => $end_date_object->format('Y-m-d'),
             "group_type" => 'instrument'
         );
 
@@ -118,60 +206,64 @@ class Summary_model extends CI_Model
         $this->db->from(ITEM_CACHE)->where_in('group_id',$group_list);
         $this->db->where($where_array)->group_by($time_basis);
         $query = $this->db->order_by($time_basis)->get();
-
-        $temp_results = array();
+        $temp_results = array(
+            'aggregate' => array(),
+            'totals' => array(
+                'total_file_count' => 0,
+                'total_size_bytes' => 0,
+                'total_size_string' => ""
+            )
+        );
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
-                $temp_results[$row->{$time_basis}] = array(
-                    $time_basis => new DateTime($row->{$time_basis}),
-                    'file_count' => $row->file_count,
-                    'file_volume' => $row->file_volume
+                $temp_results['aggregate'][$row->{$time_basis}] = array(
+                    'file_count' => $row->file_count + 0,
+                    'file_volume' => $row->file_volume + 0
                 );
+                $temp_results['totals']['total_file_count'] += $row->file_count;
+                $temp_results['totals']['total_size_bytes'] += $row->file_volume;
             }
+            $temp_results['totals']['total_size_string'] = format_bytes($temp_results['totals']['total_size_bytes']);
         }
-        ksort($temp_results);
+        return $temp_results;
+    }
 
-        $first_entry = array_slice($temp_results, 0,1);
-        $last_entry = array_slice($temp_results, -1,1);
-        $first_entry = array_pop($first_entry);
-        $last_entry = array_pop($last_entry);
-
-        $first_entry_object = clone $first_entry[$time_basis];
-        $last_entry_object = clone $last_entry[$time_basis];
-
-        $current_date = clone $first_entry_object;
-        while($current_date->getTimestamp() <= $last_entry_object->getTimestamp()){
-
-
-            $current_date->modify("+1 day");
-        }
-
-
-        exit();
-        $next_date = false;
-        foreach($temp_results as $date_key => $item){
-            if($next_date == false || $next_date->format('Y-m-d') == $item[$time_basis]->format('Y-m-d')){
-                $this->results['day_graph']['by_date']['available_dates'][$date_key] = $item[$time_basis]->format('D M j');
-                $next_date = clone $item[$time_basis];
+    private function temp_stats_to_output($temp_results,$available_dates){
+        foreach($available_dates as $date_key => $date_string){
+            $date_timestamp = intval(strtotime($date_key)) * 1000;
+            if(array_key_exists($date_key,$temp_results)){
+                $file_count[$date_key] = $temp_results[$date_key]['file_count'];
+                $file_volume[$date_key] = $temp_results[$date_key]['file_volume'];
+                $transaction_count_array[$date_key] = array($date_timestamp,$temp_results[$date_key]['file_count']);
+                $file_volume_array[$date_key] = array($date_timestamp,$temp_results[$date_key]['file_volume']);
             }else{
-                // $
+                $file_count[$date_key] = 0;
+                $file_volume[$date_key] = 0;
+                $transaction_count_array[$date_key] = array($date_timestamp,intval(0));
+                $file_volume_array[$date_key] = array($date_timestamp,intval(0));
             }
-
-            $next_date->modify('+1 day');
         }
+        $return_array = array(
+            'available_dates' => $available_dates,
+            'file_count' => $file_count,
+            'file_volume' => $file_volume,
+            'transaction_count_array' => $transaction_count_array,
+            'file_volume_array' => $file_volume_array
+        );
+        return $return_array;
+    }
 
-
-        exit();
-
-        $this->benchmark->mark('summarizer-get_files_from_group_list_start');
-        $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
-        $this->benchmark->mark('summarizer-get_files_from_group_list_end');
-
-        $this->benchmark->mark('summarizer-files_to_results_start');
-        $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
-        var_dump($results);
-        $this->benchmark->mark('summarizer-files_to_results_end');
-
+    private function generate_available_dates($start_date, $end_date){
+        $results = array();
+        $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
+        $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
+        $current_date = clone $start_date_object;
+        while($current_date->getTimestamp() <= $end_date_object->getTimestamp()){
+            $date_key = $current_date->format('Y-m-d');
+            $date_code = $current_date->format('D M j');
+            $results[$date_key] = $date_code;
+            $current_date->modify('+1 day');
+        }
         return $results;
     }
 
@@ -239,7 +331,7 @@ class Summary_model extends CI_Model
 
         $this->db->where("{$time_field} >=", $start_time);
         if ($end_time) {
-            $this->db->where("{$time_field} <", $end_time);
+            $this->db->where("{$time_field} <=", $end_time);
         }
 
         $this->db->from('item_time_cache_by_transaction');
@@ -277,6 +369,7 @@ class Summary_model extends CI_Model
                 $transactions[$item_info['transaction']] = $item_info['transaction'];
             }
             $results['transactions'] = $transactions;
+            // var_dump($transactions);
             $this->benchmark->mark('files_to_results--get_txn_info_start');
             $results['transaction_info'] = $this->gm->get_info_for_transactions($transactions);
             $this->benchmark->mark('files_to_results--get_txn_info_end');
