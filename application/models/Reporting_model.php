@@ -55,7 +55,7 @@ class Reporting_model extends CI_Model
 
         return $results;
     }
-
+/*
     public function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis)
     {
         $transactions = array();
@@ -65,27 +65,33 @@ class Reporting_model extends CI_Model
                 $transactions[$item_info['transaction']] = $item_info['transaction'];
             }
             $results['transactions'] = $transactions;
+            $this->benchmark->mark('files_to_results--get_txn_info_start');
             $results['transaction_info'] = $this->get_info_for_transactions($transactions);
+            $this->benchmark->mark('files_to_results--get_txn_info_end');
+            $this->benchmark->mark('files_to_results--gen_file_summary_data_start');
             $results = $this->generate_file_summary_data($results);
+            $this->benchmark->mark('files_to_results--gen_file_summary_data_end');
+            $this->benchmark->mark('files_to_results--gen_day_graph_summary_start');
             $results['day_graph'] = $this->generate_day_graph_summary_files($results['files'], $start_date, $end_date, $time_basis);
+            $this->benchmark->mark('files_to_results--gen_day_graph_summary_end');
             unset($results['files']);
         }
 
         return $results;
     }
-
-    public function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date, $time_basis)
-    {
-        if (!empty($results['transactions'])) {
-            $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
-            $results = $this->generate_summary_data($results);
-            $results['day_graph'] = $this->generate_day_graph_summary($results['transactions'], $start_date, $end_date, $time_basis);
-        } else {
-            return array();
-        }
-
-        return $results;
-    }
+*/
+    // public function transactions_to_results($results, $make_day_graph = true, $start_date, $end_date, $time_basis)
+    // {
+    //     if (!empty($results['transactions'])) {
+    //         $results['transaction_info'] = $this->get_info_for_transactions($results['transactions']);
+    //         $results = $this->generate_summary_data($results);
+    //         $results['day_graph'] = $this->generate_day_graph_summary($results['transactions'], $start_date, $end_date, $time_basis);
+    //     } else {
+    //         return array();
+    //     }
+    //
+    //     return $results;
+    // }
 
     // public function summarize_uploads_by_user($eus_person_id, $start_date, $end_date, $make_day_graph)
     // {
@@ -102,6 +108,7 @@ class Reporting_model extends CI_Model
     //     return $results;
     // }
 
+/*
     public function summarize_uploads_by_user_list($eus_person_id_list, $start_date,
     $end_date, $make_day_graph, $time_basis = false)
     {
@@ -172,16 +179,23 @@ class Reporting_model extends CI_Model
         if (empty($group_list)) {
             //no results returned for group list => bail out
         }
+        var_dump($group_list);
         $results = array(
             'transactions' => array(),
             'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
         );
+
+        $this->benchmark->mark('summarizer-get_files_from_group_list_start');
         $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
+        $this->benchmark->mark('summarizer-get_files_from_group_list_end');
+
+        $this->benchmark->mark('summarizer-files_to_results_start');
         $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
+        $this->benchmark->mark('summarizer-files_to_results_end');
 
         return $results;
     }
-
+*/
     // public function summarize_uploads_by_instrument($eus_instrument_id, $start_date, $end_date, $make_day_graph)
     // {
     //     extract($this->canonicalize_date_range($start_date, $end_date));
@@ -202,6 +216,7 @@ class Reporting_model extends CI_Model
     //     return $results;
     // }
 
+/*
     private function get_transactions_from_group_list($group_list, $start_time, $end_time)
     {
         $transactions = array();
@@ -236,7 +251,6 @@ class Reporting_model extends CI_Model
 
         return $transactions;
     }
-
     public function get_files_from_group_list($group_list, $start_time, $end_time, $time_basis)
     {
         $times = array(
@@ -261,9 +275,9 @@ class Reporting_model extends CI_Model
         $this->db->select(array(
             'item_id',
             'transaction',
-            'date_trunc(\'minute\',submit_date) as submit_time',
-            'date_trunc(\'minute\',created_date) as create_time',
-            'date_trunc(\'minute\',modified_date) as modified_time',
+            'submit_date as submit_time',
+            'created_date as create_time',
+            'modified_date as modified_time',
             'size_in_bytes as size_bytes',
         ));
 
@@ -294,9 +308,9 @@ class Reporting_model extends CI_Model
                 );
             }
         }
+        // var_dump($files);
         return $files;
     }
-
 
     public function get_files_from_group_list_old($group_list, $start_time, $end_time, $time_basis)
     {
@@ -356,6 +370,7 @@ class Reporting_model extends CI_Model
         return $files;
     }
 
+
     private function get_transactions_for_user($eus_user_id, $start_date, $end_date, $unfiltered = false)
     {
         extract($this->canonicalize_date_range($start_date, $end_date));
@@ -381,6 +396,7 @@ class Reporting_model extends CI_Model
 
         return $transactions;
     }
+*/
 
     private function get_transactions_for_user_list($eus_user_id_list, $start_date, $end_date, $unfiltered = false)
     {
@@ -458,7 +474,7 @@ class Reporting_model extends CI_Model
 
         return $files;
     }
-
+/*
     public function get_info_for_transactions($transaction_info)
     {
         //$chunked_transaction_list = array_chunk(array_keys($transaction_info), 2000);
@@ -541,7 +557,7 @@ class Reporting_model extends CI_Model
                 $trans_prop_lookup[$row->transaction]['eus_person_id'] = $row->person_id;
             }
         }
-
+        // var_dump($trans_prop_lookup);
         return $trans_prop_lookup;
     }
 
@@ -638,7 +654,6 @@ class Reporting_model extends CI_Model
 
         return $results;
     }
-
     private function generate_file_summary_data($results)
     {
         $upload_stats = array(
@@ -706,6 +721,7 @@ class Reporting_model extends CI_Model
         return $results;
     }
 
+/*
     private function generate_day_graph_summary($transaction_list, $start_date = false, $end_date = false, $time_basis = 'submit_time')
     {
         if (is_string($start_date)) {
@@ -773,10 +789,9 @@ class Reporting_model extends CI_Model
 
         return $summary_list;
     }
-
     private function generate_day_graph_summary_files($file_list, $start_date = false, $end_date = false, $time_basis = 'submit_time')
     {
-        echo "start_date = {$start_date}";
+        // echo "start_date = {$start_date}";
         if (is_string($start_date)) {
             $start_date = is_string($start_date) ? date_create($start_date) : false;
         }
@@ -824,6 +839,7 @@ class Reporting_model extends CI_Model
                 continue;
             }
             $date_list[] = $ds;
+            $summary_list['by_date'][$date_key]['transaction_list'] = array_unique($summary_list['by_date'][$date_key]['transaction_list']);
         }
         ksort($summary_list['by_date']);
         $summary_list['by_date'] = day_graph_to_series($summary_list, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
@@ -840,7 +856,6 @@ class Reporting_model extends CI_Model
 
         return $latest_time;
     }
-*/
     public function earliest_latest_data($object_type, $object_id)
     {
         $spread_function_name = "available_{$object_type}_data_spread";
@@ -849,6 +864,7 @@ class Reporting_model extends CI_Model
 
         return $spread;
     }
+
 
     public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
     {
@@ -867,23 +883,6 @@ class Reporting_model extends CI_Model
             $time_field = 'stime';
         }
         $spread = $this->$spread_function_name($object_id_list, $time_field);
-        // $today = new DateTime();
-        // $data_available = $this->is_data_available($group_id_list);
-        // foreach($data_available as $group_id => $available){
-        //     if($available){
-        //         $spread = array(
-        //             'earliest' => '1999-01-01 00:00',
-        //             'latest' => $today->format('Y-m-d H:i')
-        //         );
-        //         break;
-        //     }else{
-        //         $spread = array(
-        //             'earliest' => false,
-        //             'latest' => false
-        //         );
-        //
-        //     }
-        // }
         return $spread;
     }
 
@@ -908,8 +907,8 @@ class Reporting_model extends CI_Model
         }
         return $results;
     }
-
-    private function available_instrument_data_spread($object_id_list, $time_field)
+*/
+/*    private function available_instrument_data_spread($object_id_list, $time_field)
     {
         $return_array = false;
         if (empty($object_id_list)) {
@@ -1141,8 +1140,8 @@ class Reporting_model extends CI_Model
 
         return $results;
     }
-
-    public function get_selected_objects($eus_person_id, $restrict_type = false, $group_id = false)
+*/
+/*    public function get_selected_objects($eus_person_id, $restrict_type = false, $group_id = false)
     {
         $DB_prefs = $this->load->database('website_prefs', true);
         $DB_prefs->select(array('eus_person_id', 'item_type', 'item_id', 'group_id'));
@@ -1172,7 +1171,6 @@ class Reporting_model extends CI_Model
                 $results[$row->item_type][$item_id] = $group_list;
             }
         }
-
         return $results;
     }
 
@@ -1350,7 +1348,6 @@ class Reporting_model extends CI_Model
 
         return false;
     }
-
     public function get_group_info($group_id)
     {
         $option_defaults = $this->get_group_option_defaults();
@@ -1426,4 +1423,5 @@ class Reporting_model extends CI_Model
 
         return $defaults;
     }
+*/
 }

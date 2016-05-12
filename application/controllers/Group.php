@@ -15,6 +15,8 @@ class Group extends Baseline_controller
     {
         parent::__construct();
         $this->load->model('Reporting_model', 'rep');
+        $this->load->model('Group_info_model', 'gm');
+        $this->load->model('Summary_model','summary');
         $this->load->library('EUS', '', 'eus');
         $this->load->helper(array('network', 'file_info', 'inflector', 'time', 'item', 'search_term', 'cookie'));
         $this->last_update_time = get_last_update(APPPATH);
@@ -53,7 +55,7 @@ class Group extends Baseline_controller
             '/resources/scripts/highcharts/js/highcharts.js',
             base_url().'application/resources/scripts/reporting.js',
         );
-        $my_groups = $this->rep->get_selected_groups($this->user_id, $object_type);
+        $my_groups = $this->gm->get_selected_groups($this->user_id, $object_type);
         $object_list = array();
         if (empty($my_groups)) {
             $this->page_data['content_view'] = 'object_types/select_some_groups_insert.html';
@@ -77,7 +79,7 @@ class Group extends Baseline_controller
                 $object_list = array_merge($object_list, $group_info['item_list']);
                 // echo "group_info<br />";
                 // var_dump($group_info);
-                $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
+                $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
                 // echo "date range<br />";
                 // var_dump($valid_date_range);
                 $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
@@ -126,7 +128,7 @@ class Group extends Baseline_controller
     private function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false)
     {
         if (!empty($start_date) && !empty($end_date)) {
-            $times = $this->rep->canonicalize_date_range($start_date, $end_date);
+            $times = $this->summary->canonicalize_date_range($start_date, $end_date);
 
             return $times;
         }
@@ -177,11 +179,14 @@ class Group extends Baseline_controller
     private function get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date = false, $end_date = false, $with_timeline = true, $full_object = false)
     {
         $this->output->enable_profiler(TRUE);
-        $group_info = $this->rep->get_group_info($group_id);
+        $this->benchmark->mark('get_group_info_start');
+        $group_info = $this->gm->get_group_info($group_id);
+        $this->benchmark->mark('get_group_info_end');
+        // var_dump($group_info);
         $item_list = $group_info['item_list'];
         $options_list = $group_info['options_list'];
         if ($time_range && $time_range != $options_list['time_range']) {
-            $this->rep->change_group_option($group_id, 'time_range', $time_range);
+            $this->gm->change_group_option($group_id, 'time_range', $time_range);
         } else {
             $time_range = $options_list['time_range'];
         }
@@ -194,21 +199,26 @@ class Group extends Baseline_controller
         $this->page_data["{$object_type}_id_list"] = $object_id_list;
         $this->page_data['object_type'] = $object_type;
         $this->page_data['group_id'] = $group_id;
-        $available_time_range = $this->rep->earliest_latest_data_for_list($object_type, $object_id_list, $time_basis);
 
+        $this->benchmark->mark('get_earliest_latest_start');
+        $available_time_range = $this->gm->earliest_latest_data_for_list($object_type, $object_id_list, $time_basis);
         $latest_data = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : false;
+        $this->benchmark->mark('get_earliest_latest_end');
+
         if (!$latest_data) {
             $this->page_data['results_message'] = 'No Data Available for this group of '.plural(ucwords($object_type));
             $this->load->view('object_types/group_body_insert.html', $this->page_data);
-
             return;
         }
+
         $latest_data_object = new DateTime($latest_data);
         $time_range = str_replace(array('-', '_', '+'), ' ', $time_range);
         $this->page_data['results_message'] = '&nbsp;';
         $valid_tr = strtotime($time_range);
         $valid_st = strtotime($start_date);
         $valid_et = strtotime($end_date);
+
+        $this->benchmark->mark('time_range_verify_start');
         if (!$valid_tr || ($valid_st && $valid_et)) {
             if ($time_range == 'custom' || ($valid_st && $valid_et)) {
                 $earliest_available_object = new DateTime($available_time_range['earliest']);
@@ -247,15 +257,19 @@ class Group extends Baseline_controller
                 $times = time_range_to_date_pair($time_range, $available_time_range);
             }
         }
+        $this->benchmark->mark('time_range_verify_end');
 
         extract($times);
 
         $transaction_retrieval_func = "summarize_uploads_by_{$object_type}_list";
         $transaction_info = array();
-        $transaction_info = $this->rep->$transaction_retrieval_func($object_id_list, $start_date, $end_date, $with_timeline, $time_basis);
+        $this->benchmark->mark("{$transaction_retrieval_func}_start");
+        $transaction_info = $this->summary->$transaction_retrieval_func($object_id_list, $start_date, $end_date, $with_timeline, $time_basis);
+        unset($transaction_info['transaction_list']);
         $this->page_data['transaction_info'] = $transaction_info;
         $this->page_data['times'] = $times;
         $this->page_data['include_timeline'] = $with_timeline;
+        $this->benchmark->mark("{$transaction_retrieval_func}_end");
 
         if ($with_timeline) {
             $this->load->view('object_types/group_body_insert.html', $this->page_data);

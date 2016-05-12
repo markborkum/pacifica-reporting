@@ -463,7 +463,7 @@ var get_group_objects = function(el, filter_text) {
     var instructions_container = edit_el.find('.search_instructions_container');
     var group_id = edit_el.find('.group_search_form input.group_id').val();
     var object_type = edit_el.find('.group_search_form input.object_type').val();
-    var dl_url = base_url + 'reporting/get_object_group_lookup/' + object_type + '/' + group_id;
+    var dl_url = base_url + 'group/get_object_group_lookup/' + object_type + '/' + group_id;
     var results_container = edit_el.find('.search_results_display');
     instructions_container.slideUp();
     if (el.hasClass('edit_grouping_button')) {
