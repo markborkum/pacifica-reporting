@@ -13,7 +13,6 @@ class Group_info_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
-        $this->load->database('website_prefs');
         $this->load->helper(array('item'));
         $this->debug = $this->config->item('debug_enabled');
     }

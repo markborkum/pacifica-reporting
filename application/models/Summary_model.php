@@ -15,7 +15,8 @@ class Summary_model extends CI_Model
     {
         parent::__construct();
         define('ITEM_CACHE', 'item_time_cache_by_transaction');
-        $this->load->database();
+        $this->load->database('default');
+
         $this->load->model('Group_info_model','gm');
         $this->load->helper(array('item'));
         $this->debug = $this->config->item('debug_enabled');
@@ -46,20 +47,22 @@ class Summary_model extends CI_Model
     }
 
 
-    public function summarize_uploads_by_user_list($eus_person_id_list, $start_date,
-    $end_date, $make_day_graph, $time_basis = false)
+    public function summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false)
     {
-        extract($this->canonicalize_date_range($start_date, $end_date));
+        $group_type = 'user';
+        return $this->summarize_uploads_general($eus_person_id_list, $start_date, $end_date, $make_day_graph, $time_basis, $group_type);
 
-        $results = array(
-          'transactions' => array(),
-          'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
-        );
-
-        $results['files'] = $this->get_files_for_user_list($eus_person_id_list, $start_time, $end_time, true, $time_basis);
-        $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
-
-        return $results;
+        // extract($this->canonicalize_date_range($start_date, $end_date));
+        //
+        // $results = array(
+        //   'transactions' => array(),
+        //   'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
+        // );
+        //
+        // $results['files'] = $this->get_files_for_user_list($eus_person_id_list, $start_time, $end_time, true, $time_basis);
+        // $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
+        //
+        // return $results;
     }
 
     public function summarize_uploads_by_proposal_list($eus_proposal_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false)
@@ -76,32 +79,144 @@ class Summary_model extends CI_Model
 
     public function summarize_uploads_general($id_list, $start_date, $end_date, $make_day_graph, $time_basis = false, $group_type)
     {
-        $group_list_retrieval_fn_name = "get_{$group_type}_group_list";
         extract($this->canonicalize_date_range($start_date, $end_date));
-        $group_collection = array();
-        foreach ($id_list as $item_id) {
-            $new_collection = $this->gm->$group_list_retrieval_fn_name($item_id);
-            $group_collection = $group_collection + $new_collection;
-        }
-
         $start_date_obj = new DateTime($start_date);
         $end_date_obj = new DateTime($end_date);
-
         $available_dates = $this->generate_available_dates($start_date_obj, $end_date_obj);
-        $this->results['day_graph']['by_date']['available_dates'] = $available_dates;
 
-
-        $group_list = array_keys($group_collection);
-        if (empty($group_list)) {
-            //no results returned for group list => bail out
+        if($group_type == 'instrument' || $group_type == 'proposal'){
+            $group_list_retrieval_fn_name = "get_{$group_type}_group_list";
+            $group_collection = array();
+            foreach ($id_list as $item_id) {
+                $new_collection = $this->gm->$group_list_retrieval_fn_name($item_id);
+                $group_collection = $group_collection + $new_collection;
+            }
+            $group_list = array_keys($group_collection);
+            if (empty($group_list)) {
+                //no results returned for group list => bail out
+            }
+            $temp_totals = $this->get_summary_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
+            $temp_results = $this->get_per_day_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
+        }elseif($group_type == 'user'){
+            $temp_totals = $this->get_summary_totals_from_user_list($id_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
+            $temp_results = $this->get_per_day_totals_from_user_list($id_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
         }
-        $temp_totals = $this->get_summary_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
-        $temp_results = $this->get_per_day_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
+
+        $this->results['day_graph']['by_date']['available_dates'] = $available_dates;
         $this->results['day_graph']['by_date'] = $this->temp_stats_to_output($temp_results['aggregate'], $available_dates);
         $this->results['summary_totals'] = $temp_results['totals'];
         $this->results['summary_totals']['upload_stats'] = $temp_totals['results'];
 
         return $this->results;
+    }
+
+    public function get_per_day_totals_from_user_list($eus_user_id_list, $start_date, $end_date, $time_basis)
+    {
+
+        $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
+        $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
+        $time_basis = str_replace("_time","_date",$time_basis);
+
+        //formulate subquery
+        $this->db->where_in('ing.person_id',$eus_user_id_list)->where('ing.step',5);
+        $this->db->select('ing.trans_id')->from('ingest_state')->distinct();
+        $subquery = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
+
+        //formulate main query
+        $where_clause = array("i.{$time_basis} >=" => $start_date_object->format('Y-m-d'));
+        if ($end_time) {
+            $where_clause["i.{$time_basis} <="] = $end_date_object->format('Y-m-d');
+        }
+        $select_array = array(
+            'COUNT(item_id) as file_count',
+            'SUM(size_in_bytes) as file_volume',
+            $time_basis
+        );
+
+        $this->db->select('i.transaction')->from(ITEM_CACHE)->where('group_type','instrument')->where($subquery);
+        $query = $this->db->group_by($time_basis)->order_by($time_basis)->get();
+
+        $temp_results = array(
+            'aggregate' => array(),
+            'totals' => array(
+                'total_file_count' => 0,
+                'total_size_bytes' => 0,
+                'total_size_string' => ""
+            )
+        );
+        if($query && $query->num_rows() > 0){
+            foreach($query->result() as $row){
+                $temp_results['aggregate'][$row->{$time_basis}] = array(
+                    'file_count' => $row->file_count + 0,
+                    'file_volume' => $row->file_volume + 0
+                );
+                $temp_results['totals']['total_file_count'] += $row->file_count;
+                $temp_results['totals']['total_size_bytes'] += $row->file_volume;
+            }
+            $temp_results['totals']['total_size_string'] = format_bytes($temp_results['totals']['total_size_bytes']);
+        }
+        return $temp_results;
+    }
+
+    private function get_summary_totals_from_user_list($eus_user_id_list,$start_date,$end_date,$time_basis,$group_type){
+        $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
+        $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
+        $time_basis = str_replace("_time","_date",$time_basis);
+
+        //formulate subquery
+        $this->db->where_in('ing.person_id',$eus_user_id_list)->where('ing.step',5);
+        $this->db->select('ing.trans_id as transaction')->from('ingest_state')->distinct();
+        $subquery = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
+
+        $select_array = array(
+            "g.name as group_name","MIN(g.type) as group_type","i.group_type as category","COUNT(i.item_id) as item_count"
+        );
+
+        $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
+        $this->db->where($subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
+        $this->db->where_in('group_type',array('instrument','proposal'));
+        $query = $this->db->get();
+
+        $results = array(
+            'proposal' => array(),
+            'instrument' => array(),
+            'user' => array()
+        );
+        // echo $this->db->last_query();
+        if($query && $query->num_rows() > 0){
+            foreach($query->result() as $row){
+                if($row->category == 'instrument'){
+                    $row->group_name = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.', '', $row->group_type);
+                }
+                $results[$row->category][$row->group_name] = $row->item_count;
+            }
+        }
+        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where($subquery);
+        $txn_query = $this->db->from('transactions t')->get();
+        $transaction_list = array();
+        if($txn_query && $txn_query->num_rows() > 0){
+            foreach($txn_query->result() as $row){
+                $transaction_list[$row->txn] = $row->sub;
+            }
+        }
+
+        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type',$group_type);
+        $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
+
+
+        if($user_query && $user_query->num_rows() > 0){
+            foreach($user_query->result() as $row){
+                $user = $transaction_list[$row->txn];
+                if(!array_key_exists($user,$results['user'])){
+                    $results['user'][$user] = 0;
+                }
+                $results['user'][$user] += $row->item_count;
+            }
+        }
+
+
+
+        return array('results' => $results, 'transaction_submitter_list' => $transaction_list);
     }
 
 
@@ -116,14 +231,14 @@ class Summary_model extends CI_Model
         );
         $this->db->where_in('group_id',$group_list)->where($subquery_where_array)->distinct();
         $this->db->select('transaction')->from(ITEM_CACHE);
-        $subquery = $this->db->get_compiled_select();
+        $subquery = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
 
         $select_array = array(
             "g.name as group_name","MIN(g.type) as group_type","i.group_type as category","COUNT(i.item_id) as item_count"
         );
 
         $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
-        $this->db->where("\"transaction\" in ({$subquery})")->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
+        $this->db->where($subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('group_type',array('instrument','proposal'));
         $query = $this->db->get();
 

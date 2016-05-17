@@ -73,7 +73,7 @@ class Group extends Baseline_controller
                 $time_range = $time_range ? $time_range : $options_list['time_range'];
 
                 if ($time_range && $time_range != $options_list['time_range'] && $time_range != 'custom') {
-                    $this->rep->change_group_option($group_id, 'time_range', $time_range);
+                    $this->gm->change_group_option($group_id, 'time_range', $time_range);
                 }
 
                 $object_list = array_merge($object_list, $group_info['item_list']);
@@ -147,7 +147,7 @@ class Group extends Baseline_controller
             extract($times);
         }
 
-        $times = $this->rep->canonicalize_date_range($start_date, $end_date);
+        $times = $this->summary->canonicalize_date_range($start_date, $end_date);
 
         return $times;
     }
@@ -284,11 +284,11 @@ class Group extends Baseline_controller
         if (!in_array($object_type, $this->accepted_object_types)) {
             return false;
         }
-        $group_info = $this->rep->get_group_info($group_id);
+        $group_info = $this->gm->get_group_info($group_id);
 
         $object_list = $group_info['item_list'];
         $retrieval_func = "summarize_uploads_by_{$object_type}_list";
-        $results = $this->rep->$retrieval_func($object_list, $start_date, $end_date, true, $group_info['options_list']['time_basis']);
+        $results = $this->summary->$retrieval_func($object_list, $start_date, $end_date, true, $group_info['options_list']['time_basis']);
         $downselect = $results['day_graph']['by_date'];
         $return_array = array(
             'file_volumes' => array_values($downselect['file_volume_array']),
@@ -296,8 +296,8 @@ class Group extends Baseline_controller
         );
         $start_date_obj = new DateTime($start_date);
         $end_date_obj = new DateTime($end_date);
-        $this->rep->change_group_option($group_id, 'start_time', $start_date_obj->format('Y-m-d'));
-        $this->rep->change_group_option($group_id, 'end_time', $end_date_obj->format('Y-m-d'));
+        $this->gm->change_group_option($group_id, 'start_time', $start_date_obj->format('Y-m-d'));
+        $this->gm->change_group_option($group_id, 'end_time', $end_date_obj->format('Y-m-d'));
         send_json_array($return_array);
     }
 

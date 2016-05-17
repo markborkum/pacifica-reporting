@@ -13,7 +13,8 @@ class Testing extends Baseline_controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Reporting_model', 'rep');
+        $this->load->model('Group_info_model', 'gm');
+        $this->load->model('Summary_model', 'summary');
         $this->load->library('EUS', '', 'eus');
         $this->load->helper(array('network', 'file_info', 'inflector', 'time', 'item', 'search_term', 'cookie'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
@@ -34,7 +35,7 @@ class Testing extends Baseline_controller
 
     public function test_get_uploads_for_user($eus_person_id, $start_date = false, $end_date = false)
     {
-        $results = $this->rep->summarize_uploads_by_user($eus_person_id, $start_date, $end_date);
+        $results = $this->summary->summarize_uploads_by_user($eus_person_id, $start_date, $end_date);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -43,7 +44,7 @@ class Testing extends Baseline_controller
     public function test_get_uploads_for_user_list($eus_person_id_list, $start_date = false, $end_date = false)
     {
         $eus_person_id_list = explode('-', $eus_person_id_list);
-        $results = $this->rep->summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, true);
+        $results = $this->summary->summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, true);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -52,7 +53,7 @@ class Testing extends Baseline_controller
     public function test_get_uploads_for_instrument($eus_instrument_id_list, $start_date = false, $end_date = false)
     {
         $eus_instrument_id_list = explode('-', $eus_instrument_id_list);
-        $results = $this->rep->summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, true, 'modified_time');
+        $results = $this->summary->summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, true, 'modified_time');
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -60,7 +61,7 @@ class Testing extends Baseline_controller
 
     public function test_get_selected_objects($eus_person_id)
     {
-        $results = $this->rep->get_selected_objects($eus_person_id);
+        $results = $this->gm->get_selected_objects($eus_person_id);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -68,7 +69,7 @@ class Testing extends Baseline_controller
 
     public function test_get_selected_groups($eus_person_id)
     {
-        $results = $this->rep->get_selected_groups($eus_person_id);
+        $results = $this->gm->get_selected_groups($eus_person_id);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -83,30 +84,50 @@ class Testing extends Baseline_controller
         echo '</pre>';
     }
 
-    public function test_get_latest($object_type, $object_id)
+    public function get_transactions_for_user_list($eus_person_id)
     {
-        $results = $this->rep->latest_available_data($object_type, $object_id);
+        $eus_person_id_list = array($eus_person_id);
+        $default_eus_person_id_list = array(
+            '43751','50724'
+        );
+        $eus_person_id_list = array_unique(
+            array_merge($eus_person_id_list, $default_eus_person_id_list)
+        );
+
+        $start_time = '2015-09-01 00:00:00';
+        $end_time = '2015-11-13 23:59:59';
+
+
+        $results = $this->summary->get_transactions_for_user_list($eus_person_id_list,$start_time,$end_time);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
     }
 
-    public function test_get_earliest_latest($object_type, $object_id)
-    {
-        $object_id_list = explode('-', $object_id_list);
-        $results = $this->rep->earliest_latest_data($object_type, $object_id_list);
-        echo '<pre>';
-        var_dump($results);
-        echo '</pre>';
-    }
+    // public function test_get_latest($object_type, $object_id)
+    // {
+    //     $results = $this->rep->latest_available_data($object_type, $object_id);
+    //     echo '<pre>';
+    //     var_dump($results);
+    //     echo '</pre>';
+    // }
+
+    // public function test_get_earliest_latest($object_type, $object_id)
+    // {
+    //     $object_id_list = explode('-', $object_id_list);
+    //     $results = $this->rep->earliest_latest_data($object_type, $object_id_list);
+    //     echo '<pre>';
+    //     var_dump($results);
+    //     echo '</pre>';
+    // }
 
     public function test_get_earliest_latest_list($object_type, $group_id, $time_basis)
     {
-        $group_info = $this->rep->get_group_info($group_id);
+        $group_info = $this->gm->get_group_info($group_id);
         echo '<pre>';
         var_dump($group_info);
         echo '</pre>';
-        $results = $this->rep->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
+        $results = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -114,7 +135,7 @@ class Testing extends Baseline_controller
 
     public function test_get_group_info($group_id)
     {
-        $results = $this->rep->get_group_info($group_id);
+        $results = $this->gm->get_group_info($group_id);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -122,7 +143,7 @@ class Testing extends Baseline_controller
 
     public function test_get_items_for_group($group_id)
     {
-        $results = $this->rep->get_items_for_group($group_id);
+        $results = $this->gm->get_items_for_group($group_id);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -137,7 +158,7 @@ class Testing extends Baseline_controller
         $start_time = '2015-09-01 00:00:00';
         $end_time = '2015-11-13 23:59:59';
 
-        $results = $this->rep->get_files_from_group_list($group_list, $start_time, $end_time);
+        $results = $this->summary->get_files_from_group_list($group_list, $start_time, $end_time);
     }
 
     public function test_get_transaction_info()
@@ -153,13 +174,13 @@ class Testing extends Baseline_controller
         echo '</pre>';
     }
 
-    public function test_is_data_available(){
-        $selector = array(2551071,2550881,2550882);
-        $results = $this->rep->is_data_available($selector);
-        echo '<pre>';
-        var_dump($results);
-        echo '</pre>';
-    }
-
+    // public function test_is_data_available(){
+    //     $selector = array(2551071,2550881,2550882);
+    //     $results = $this->rep->is_data_available($selector);
+    //     echo '<pre>';
+    //     var_dump($results);
+    //     echo '</pre>';
+    // }
+    //
 
 }
