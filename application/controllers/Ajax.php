@@ -14,9 +14,10 @@ class Ajax extends Baseline_controller
     {
         parent::__construct();
         $this->load->model('Reporting_model', 'rep');
+        $this->load->model('Group_info_model', 'gm');
         $this->load->library('EUS', '', 'eus');
     // $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
-    $this->load->helper(array('network'));
+    $this->load->helper(array('network','search_term'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
         $this->local_resources_folder = $this->config->item('local_resources_folder');
@@ -33,7 +34,7 @@ class Ajax extends Baseline_controller
             // $post_info = $post_info[0];
             $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : false;
             }
-            $group_info = $this->rep->make_new_group($object_type, $this->user_id, $group_name);
+            $group_info = $this->gm->make_new_group($object_type, $this->user_id, $group_name);
             if ($group_info && is_array($group_info)) {
                 send_json_array($group_info);
             } else {
@@ -46,7 +47,7 @@ class Ajax extends Baseline_controller
     public function change_group_name($group_id)
     {
         $new_group_name = false;
-        $group_info = $this->rep->get_group_info($group_id);
+        $group_info = $this->gm->get_group_info($group_id);
         if (!$group_info) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
 
@@ -79,7 +80,7 @@ class Ajax extends Baseline_controller
                 return;
             }
 
-            $new_group_info = $this->rep->change_group_name($group_id, $new_group_name);
+            $new_group_info = $this->gm->change_group_name($group_id, $new_group_name);
             if ($new_group_info && is_array($new_group_info)) {
                 send_json_array($new_group_info);
             } else {
@@ -101,7 +102,7 @@ class Ajax extends Baseline_controller
         }
         $option_type = false;
         $option_value = false;
-        $group_info = $this->rep->get_group_info($group_id);
+        $group_info = $this->gm->get_group_info($group_id);
         if (!$group_info) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
 
@@ -134,7 +135,7 @@ class Ajax extends Baseline_controller
             return;
         }
 
-        $success = $this->rep->change_group_option($group_id, $option_type, $option_value);
+        $success = $this->gm->change_group_option($group_id, $option_type, $option_value);
         if ($success && is_array($success)) {
             send_json_array($success);
         } else {
@@ -149,7 +150,7 @@ class Ajax extends Baseline_controller
 
     public function get_group_container($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
     {
-        $group_info = $this->rep->get_group_info($group_id);
+        $group_info = $this->gm->get_group_info($group_id);
         $options_list = $group_info['options_list'];
         $item_list = $group_info['item_list'];
         $time_range = !empty($time_range) ? $time_range : $options_list['time_range'];
@@ -160,7 +161,7 @@ class Ajax extends Baseline_controller
         $object_type = singular($object_type);
         $accepted_object_types = array('instrument', 'proposal', 'user');
 
-        $valid_date_range = $this->rep->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
+        $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
         $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
         $latest_available_date = new DateTime($valid_date_range['latest']);
         $earliest_available_date = new DateTime($valid_date_range['earliest']);
@@ -209,7 +210,7 @@ class Ajax extends Baseline_controller
         }
         $filter = $object_list[0]['current_search_string'];
         $new_set = array();
-        if ($this->rep->update_object_preferences($object_type, $object_list, $group_id)) {
+        if ($this->gm->update_object_preferences($object_type, $object_list, $group_id)) {
             $this->get_object_group_lookup($object_type, $group_id, $filter);
         }
     }
@@ -221,7 +222,7 @@ class Ajax extends Baseline_controller
 
             return;
         }
-        $group_info = $this->rep->get_group_info($group_id);
+        $group_info = $this->gm->get_group_info($group_id);
         if (!$group_info) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
 
@@ -232,10 +233,32 @@ class Ajax extends Baseline_controller
 
             return;
         }
-        $results = $this->rep->remove_group_object($group_id, true);
+        $results = $this->gm->remove_group_object($group_id, true);
 
         $this->output->set_status_header(200);
 
         return;
     }
+
+    public function get_object_group_lookup($object_type, $group_id, $filter = '')
+    {
+        $my_objects = $this->gm->get_selected_objects($this->user_id, $object_type, $group_id);
+        if (!array_key_exists($object_type, $my_objects)) {
+            $my_objects[$object_type] = array();
+        }
+        $filter = parse_search_term($filter);
+        $results = $this->eus->get_object_list($object_type, $filter, $my_objects[$object_type]);
+        $this->page_data['results'] = $results;
+        $this->page_data['object_type'] = $object_type;
+        $this->page_data['filter_text'] = $filter;
+        $this->page_data['my_objects'] = $my_objects[$object_type];
+        $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
+        if (!empty($results)) {
+            $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
+        } else {
+            $filter_string = implode("' '", $filter);
+            echo "<div class='info_message' style='margin-bottom:1.5em;'>No Results Returned for '{$filter_string}'</div>";
+        }
+    }
+
 }

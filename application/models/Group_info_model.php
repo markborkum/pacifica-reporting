@@ -323,10 +323,7 @@ class Group_info_model extends CI_Model
         return $spread;
     }
 
-
-
-    private function available_instrument_data_spread($object_id_list, $time_field)
-    {
+    private function available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name){
         $return_array = false;
         if (empty($object_id_list)) {
             return false;
@@ -334,7 +331,7 @@ class Group_info_model extends CI_Model
 
         $group_collection = array();
         foreach ($object_id_list as $object_id) {
-            $group_collection += $this->get_instrument_group_list($object_id);
+            $group_collection += $this->$group_list_retrieval_fn_name($object_id);
         }
         $group_list = array_keys($group_collection);
         $latest_time = false;
@@ -362,6 +359,14 @@ class Group_info_model extends CI_Model
         }
 
         return $return_array;
+    }
+
+
+
+    private function available_instrument_data_spread($object_id_list, $time_field)
+    {
+        $group_list_retrieval_fn_name = "get_instrument_group_list";
+        return $this->available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name);
     }
 
     private function available_instrument_data_spread_new($object_id_list, $time_field)
@@ -406,6 +411,9 @@ class Group_info_model extends CI_Model
 
     private function available_proposal_data_spread($object_id_list, $time_field)
     {
+        $group_list_retrieval_fn_name = "get_proposal_group_list";
+        return $this->available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name);
+
         $return_array = false;
         if (empty($object_id_list)) {
             return false;

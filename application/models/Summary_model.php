@@ -64,33 +64,23 @@ class Summary_model extends CI_Model
 
     public function summarize_uploads_by_proposal_list($eus_proposal_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false)
     {
-        extract($this->canonicalize_date_range($start_date, $end_date));
-
-        $results = array(
-            'transactions' => array(),
-            'time_range' => array('start_time' => $start_time, 'end_time' => $end_time),
-        );
-
-        $group_collection = array();
-        foreach ($eus_proposal_id_list as $eus_proposal_id) {
-            $new_collection = $this->get_proposal_group_list($eus_proposal_id);
-            $group_collection = $group_collection + $new_collection;
-        }
-
-        $group_list = array_keys($group_collection);
-
-        $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
-        $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
-
-        return $results;
+        $group_type = 'proposal';
+        return $this->summarize_uploads_general($eus_proposal_id_list, $start_date, $end_date, $make_day_graph, $time_basis, $group_type);
     }
 
     public function summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, $make_day_graph, $time_basis = false)
     {
+        $group_type = 'instrument';
+        return $this->summarize_uploads_general($eus_instrument_id_list, $start_date, $end_date, $make_day_graph, $time_basis, $group_type);
+    }
+
+    public function summarize_uploads_general($id_list, $start_date, $end_date, $make_day_graph, $time_basis = false, $group_type)
+    {
+        $group_list_retrieval_fn_name = "get_{$group_type}_group_list";
         extract($this->canonicalize_date_range($start_date, $end_date));
         $group_collection = array();
-        foreach ($eus_instrument_id_list as $eus_instrument_id) {
-            $new_collection = $this->gm->get_instrument_group_list($eus_instrument_id);
+        foreach ($id_list as $item_id) {
+            $new_collection = $this->gm->$group_list_retrieval_fn_name($item_id);
             $group_collection = $group_collection + $new_collection;
         }
 
@@ -105,32 +95,24 @@ class Summary_model extends CI_Model
         if (empty($group_list)) {
             //no results returned for group list => bail out
         }
-        $temp_totals = $this->get_summary_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis);
-        $temp_results = $this->get_per_day_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis);
+        $temp_totals = $this->get_summary_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
+        $temp_results = $this->get_per_day_totals_from_group_list($group_list,$start_date_obj,$end_date_obj,$time_basis,$group_type);
         $this->results['day_graph']['by_date'] = $this->temp_stats_to_output($temp_results['aggregate'], $available_dates);
         $this->results['summary_totals'] = $temp_results['totals'];
         $this->results['summary_totals']['upload_stats'] = $temp_totals['results'];
 
-        // $this->benchmark->mark('summarizer-get_files_from_group_list_start');
-        // $results['files'] = $this->get_files_from_group_list($group_list, $start_time, $end_time, $time_basis);
-        // $this->benchmark->mark('summarizer-get_files_from_group_list_end');
-        //
-        // $this->benchmark->mark('summarizer-files_to_results_start');
-        // $results = $this->files_to_results($results, $make_day_graph, $start_time, $end_time, $time_basis);
-        // // var_dump($results);
-        // $this->benchmark->mark('summarizer-files_to_results_end');
-        // var_dump($results);
         return $this->results;
     }
 
-    private function get_summary_totals_from_group_list($group_list,$start_date,$end_date,$time_basis){
+
+    private function get_summary_totals_from_group_list($group_list,$start_date,$end_date,$time_basis,$group_type){
         $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
         $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
         $time_basis = str_replace("_time","_date",$time_basis);
         $subquery_where_array = array(
             "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
             "{$time_basis} <=" => $end_date_object->format('Y-m-d'),
-            "group_type" => 'instrument'
+            "group_type" => $group_type
         );
         $this->db->where_in('group_id',$group_list)->where($subquery_where_array)->distinct();
         $this->db->select('transaction')->from(ITEM_CACHE);
@@ -142,6 +124,7 @@ class Summary_model extends CI_Model
 
         $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
         $this->db->where("\"transaction\" in ({$subquery})")->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
+        $this->db->where_in('group_type',array('instrument','proposal'));
         $query = $this->db->get();
 
         $results = array(
@@ -149,6 +132,7 @@ class Summary_model extends CI_Model
             'instrument' => array(),
             'user' => array()
         );
+        // echo $this->db->last_query();
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
                 if($row->category == 'instrument'){
@@ -167,7 +151,7 @@ class Summary_model extends CI_Model
             }
         }
 
-        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type','instrument');
+        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type',$group_type);
         $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
 
 
@@ -186,7 +170,7 @@ class Summary_model extends CI_Model
         return array('results' => $results, 'transaction_submitter_list' => $transaction_list);
     }
 
-    private function get_per_day_totals_from_group_list($group_list,$start_date,$end_date,$time_basis){
+    private function get_per_day_totals_from_group_list($group_list,$start_date,$end_date,$time_basis,$group_type){
         $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
         $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
         $time_basis = str_replace("_time","_date",$time_basis);
@@ -199,7 +183,7 @@ class Summary_model extends CI_Model
         $where_array = array(
             "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
             "{$time_basis} <=" => $end_date_object->format('Y-m-d'),
-            "group_type" => 'instrument'
+            "group_type" => $group_type
         );
 
         $this->db->select($select_array);

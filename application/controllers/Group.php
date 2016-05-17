@@ -271,6 +271,7 @@ class Group extends Baseline_controller
         $this->page_data['include_timeline'] = $with_timeline;
         $this->benchmark->mark("{$transaction_retrieval_func}_end");
 
+        // var_dump($this->page_data);
         if ($with_timeline) {
             $this->load->view('object_types/group_body_insert.html', $this->page_data);
         } else {
@@ -298,27 +299,6 @@ class Group extends Baseline_controller
         $this->rep->change_group_option($group_id, 'start_time', $start_date_obj->format('Y-m-d'));
         $this->rep->change_group_option($group_id, 'end_time', $end_date_obj->format('Y-m-d'));
         send_json_array($return_array);
-    }
-
-    public function get_object_group_lookup($object_type, $group_id, $filter = '')
-    {
-        $my_objects = $this->rep->get_selected_objects($this->user_id, $object_type, $group_id);
-        if (!array_key_exists($object_type, $my_objects)) {
-            $my_objects[$object_type] = array();
-        }
-        $filter = parse_search_term($filter);
-        $results = $this->eus->get_object_list($object_type, $filter, $my_objects[$object_type]);
-        $this->page_data['results'] = $results;
-        $this->page_data['object_type'] = $object_type;
-        $this->page_data['filter_text'] = $filter;
-        $this->page_data['my_objects'] = $my_objects[$object_type];
-        $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
-        if (!empty($results)) {
-            $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
-        } else {
-            $filter_string = implode("' '", $filter);
-            echo "<div class='info_message' style='margin-bottom:1.5em;'>No Results Returned for '{$filter_string}'</div>";
-        }
     }
 
     public function get_proposals($proposal_name_fragment, $active = 'active')
