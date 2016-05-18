@@ -118,13 +118,13 @@ class Summary_model extends CI_Model
         $time_basis = str_replace("_time","_date",$time_basis);
 
         //formulate subquery
-        $this->db->where_in('ing.person_id',$eus_user_id_list)->where('ing.step',5);
-        $this->db->select('ing.trans_id')->from('ingest_state')->distinct();
+        $this->db->where_in('person_id',$eus_user_id_list)->where('step',5);
+        $this->db->select('trans_id')->from('ingest_state')->distinct();
         $subquery = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
 
         //formulate main query
         $where_clause = array("i.{$time_basis} >=" => $start_date_object->format('Y-m-d'));
-        if ($end_time) {
+        if ($end_date) {
             $where_clause["i.{$time_basis} <="] = $end_date_object->format('Y-m-d');
         }
         $select_array = array(
@@ -133,7 +133,7 @@ class Summary_model extends CI_Model
             $time_basis
         );
 
-        $this->db->select('i.transaction')->from(ITEM_CACHE)->where('group_type','instrument')->where($subquery);
+        $this->db->select($select_array)->from(ITEM_CACHE." i")->where('group_type','instrument')->where($subquery);
         $query = $this->db->group_by($time_basis)->order_by($time_basis)->get();
 
         $temp_results = array(
@@ -164,16 +164,16 @@ class Summary_model extends CI_Model
         $time_basis = str_replace("_time","_date",$time_basis);
 
         //formulate subquery
-        $this->db->where_in('ing.person_id',$eus_user_id_list)->where('ing.step',5);
-        $this->db->select('ing.trans_id as transaction')->from('ingest_state')->distinct();
-        $subquery = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
+        $this->db->where_in('person_id',$eus_user_id_list)->where('step',5);
+        $this->db->select('trans_id as transaction')->from('ingest_state')->distinct();
+        $subquery = '('.$this->db->get_compiled_select().')';
 
         $select_array = array(
             "g.name as group_name","MIN(g.type) as group_type","i.group_type as category","COUNT(i.item_id) as item_count"
         );
 
         $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
-        $this->db->where($subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
+        $this->db->where('"i"."transaction" in '.$subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('group_type',array('instrument','proposal'));
         $query = $this->db->get();
 
@@ -191,7 +191,7 @@ class Summary_model extends CI_Model
                 $results[$row->category][$row->group_name] = $row->item_count;
             }
         }
-        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where($subquery);
+        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where('"t"."transaction" in '.$subquery);
         $txn_query = $this->db->from('transactions t')->get();
         $transaction_list = array();
         if($txn_query && $txn_query->num_rows() > 0){
@@ -231,8 +231,8 @@ class Summary_model extends CI_Model
         );
         $this->db->where_in('group_id',$group_list)->where($subquery_where_array)->distinct();
         $this->db->select('transaction')->from(ITEM_CACHE);
-        $subquery = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
-
+        $subquery = 'transaction in ('.$this->db->get_compiled_select().')';
+        // echo $subquery;
         $select_array = array(
             "g.name as group_name","MIN(g.type) as group_type","i.group_type as category","COUNT(i.item_id) as item_count"
         );
@@ -257,8 +257,9 @@ class Summary_model extends CI_Model
             }
         }
 
-        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where("\"transaction\" in ({$subquery})");
+        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where($subquery);
         $txn_query = $this->db->from('transactions t')->get();
+        // echo $this->db->last_query();
         $transaction_list = array();
         if($txn_query && $txn_query->num_rows() > 0){
             foreach($txn_query->result() as $row){
@@ -266,7 +267,7 @@ class Summary_model extends CI_Model
             }
         }
 
-        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type',$group_type);
+        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where($subquery)->where('group_type',$group_type);
         $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
 
 
