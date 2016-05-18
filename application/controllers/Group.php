@@ -28,7 +28,7 @@ class Group extends Baseline_controller
 
     public function view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
     {
-        // $this->output->enable_profiler(TRUE);
+        $this->output->enable_profiler(TRUE);
         $this->benchmark->mark('controller_view_start');
         $object_type = singular($object_type);
         $time_basis = !empty($time_basis) ? $time_basis : 'modification_time';
