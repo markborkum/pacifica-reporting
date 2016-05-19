@@ -124,7 +124,7 @@ var hc_timeline_options = {
 // var datepicker = $.fn.datepicker.noConflict();
 // $.fn.bootstrapDP = datepicker;
 
-var get_transaction_info = function(el, transaction_list) {
+var get_transaction_info = function(el, start_date, end_date, group_id) {
     var el = $(el);
     var parent_container = el.parents('.object_body');
     var details_container = parent_container.find('.transaction_details_container');
@@ -139,8 +139,13 @@ var get_transaction_info = function(el, transaction_list) {
             width: 4,
             lines: 11
         })
+        times_list = {
+            start_date : start_date,
+            end_date: end_date,
+            group_id: group_id
+        }
         load_indicator.fadeIn();
-        var posting = $.post(url, JSON.stringify(transaction_list), function(data) {
+        var posting = $.post(url, JSON.stringify(times_list), function(data) {
             details_container.html(data);
             disclosure_arrow.removeClass('dc_up').addClass('dc_down');
             load_indicator.fadeOut().spin(false);

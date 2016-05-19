@@ -20,19 +20,32 @@ class Reporting_model extends CI_Model
         $this->debug = $this->config->item('debug_enabled');
     }
 
-    public function detailed_transaction_list($transaction_list)
+    public function detailed_transaction_list($start_date,$end_date,$group_info)
     {
-        $eus_info = $this->get_info_for_transactions(array_combine($transaction_list, $transaction_list));
+        return array();
+        // $eus_info = $this->get_info_for_transactions(array_combine($transaction_list, $transaction_list));
+        $item_list = $group_info['item_list'];
+        $group_type = $group_info['group_type'];
+        $time_basis = str_replace("_time","_date",$group_info['time_basis']);
+        $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
+        $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
 
         $select_array = array(
-            'f.transaction', 'sum(f.size) as total_file_size',
-            'count(f.size) as total_file_count',
-            'max(t.stime) as submission_time',
-            'min(f.mtime) as earliest_modified_time',
-            'max(f.mtime) as latest_modified_time',
+            'i.transaction',
+            'sum(i.size_in_bytes) as total_file_size',
+            'count(i.item_id) as total_file_count',
+            'max(i.submit_date) as submission_time',
+            'min(i.modified_time) as earliest_modified_time',
+            'max(i.modified_time) as latest_modified_time',
         );
 
+        $where_array = array(
+            "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
+            "{$time_basis} <=" => $end_date_object->format('Y-m-d')
+        );
         $this->db->select($select_array);
+        // $this->db->from(ITEM_CACHE." i")->where($where_array)->where_in('')
+
         $this->db->from('files f')->join('transactions t', 'f.transaction = t.transaction');
         $this->db->where_in('f.transaction', $transaction_list);
         $this->db->group_by('f.transaction')->order_by('f.transaction desc');

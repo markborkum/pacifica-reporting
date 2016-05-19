@@ -28,7 +28,7 @@ class Group extends Baseline_controller
 
     public function view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
     {
-        $this->output->enable_profiler(TRUE);
+        // $this->output->enable_profiler(TRUE);
         $this->benchmark->mark('controller_view_start');
         $object_type = singular($object_type);
         $time_basis = !empty($time_basis) ? $time_basis : 'modification_time';
@@ -158,9 +158,11 @@ class Group extends Baseline_controller
             $transaction_list = $this->input->post();
         } elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $HTTP_RAW_POST_DATA = file_get_contents('php://input');
-            $transaction_list = json_decode($HTTP_RAW_POST_DATA, true);
+            $times_list = json_decode($HTTP_RAW_POST_DATA, true);
         }
-        $results = $this->rep->detailed_transaction_list($transaction_list);
+        extract($times_list); //yields $start_date, $end_date, $group_id
+        $group_info = $this->gm->get_group_info($group_id);
+        $results = $this->rep->detailed_transaction_list($start_date,$end_date,$group_info);
         $this->page_data['transaction_info'] = $results;
 
         $this->load->view('object_types/transaction_details_insert.html', $this->page_data);

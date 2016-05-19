@@ -304,43 +304,38 @@ class Group_info_model extends CI_Model
 
     public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
     {
-        $spread_function_name = "available_{$object_type}_data_spread";
-        switch ($time_basis) {
-          case 'create_time':
-            $time_field = 'ctime';
-            break;
-          case 'modified_time':
-            $time_field = 'mtime';
-            break;
-          case 'submit_time':
-            $time_field = 'stime';
-            break;
-          default:
-            $time_field = 'stime';
-        }
-        $spread = $this->$spread_function_name($object_id_list, $time_field);
+        $group_list_retrieval_fn_name = "get_{$object_type}_group_list";
+        $time_basis = str_replace("_time","_date",$time_basis);
+
+        $spread = $this->available_item_spread_general($object_id_list, $time_basis,$object_type,$group_list_retrieval_fn_name);
         return $spread;
     }
 
-    private function available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name){
+    private function available_item_spread_general($object_id_list,$time_basis,$group_type,$group_list_retrieval_fn_name = false){
         $return_array = false;
         if (empty($object_id_list)) {
             return false;
         }
-
-        $group_collection = array();
-        foreach ($object_id_list as $object_id) {
-            $group_collection += $this->$group_list_retrieval_fn_name($object_id);
-        }
-        $group_list = array_keys($group_collection);
         $latest_time = false;
-        $this->db->select(array(
-            "earliest_{$time_field} as earliest",
-            "latest_{$time_field} as latest",
-        ));
+        $earliest_time = false;
 
-        $this->db->where_in('group_id', $group_list);
-        $query = $this->db->get('earliest_latest_times_cache');
+
+        if($group_type == 'instrument' || $group_type == 'proposal'){
+            $group_collection = array();
+            foreach ($object_id_list as $object_id) {
+                $group_collection += $this->$group_list_retrieval_fn_name($object_id);
+            }
+            $group_list = array_keys($group_collection);
+
+            $this->db->where_in('group_id', $group_list);
+        }elseif($group_type == 'user'){
+            $this->db->where_in('submitter',$object_id_list);
+        }
+        $this->db->select(array(
+            "MIN({$time_basis}) as earliest",
+            "MAX({$time_basis}) as latest",
+        ));
+        $query = $this->db->get(ITEM_CACHE);
 
         if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
             $row = $query->row_array();
@@ -363,96 +358,16 @@ class Group_info_model extends CI_Model
     private function available_instrument_data_spread($object_id_list, $time_field)
     {
         $group_list_retrieval_fn_name = "get_instrument_group_list";
-        return $this->available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name);
+        return $this->available_item_spread_general($object_id_list,$time_field,'instrument',$group_list_retrieval_fn_name);
     }
 
-    // private function available_instrument_data_spread_new($object_id_list, $time_field)
-    // {
-    //     $return_array = false;
-    //     if (empty($object_id_list)) {
-    //         return false;
-    //     }
-    //
-    //     $group_collection = array();
-    //     foreach ($object_id_list as $object_id) {
-    //         $group_collection += $this->get_instrument_group_list($object_id);
-    //     }
-    //     $group_list = array_keys($group_collection);
-    //     $latest_time = false;
-    //     $criteria = array('latest' => 'desc','earliest' => 'asc');
-    //     foreach($criteria as $return_name => $sort_dir){
-    //         $this->db->select("{$time_field} as {$return_name}");
-    //         $this->db->from('group_items gi, files f');
-    //         $this->db->where('gi.item_id = f.item_id');
-    //         $this->db->where_in('gi.group_id', $group_list)->limit(1);
-    //         $this->db->order_by("{$time_field} {$sort_dir}");
-    //         $query = $this->db->get();
-    //         if($query && $query->num_rows() > 0 || !empty($query->row()->latest)){
-    //             $row = $query->row();
-    //             $new_var = "{$return_name}_time";
-    //             ${$new_var} = !empty($row->$return_name) ? new DateTime($row->$return_name) : false;
-    //         }
-    //     }
-    //     if (!$earliest_time && !$latest_time) {
-    //         return false;
-    //     }
-    //     $latest_time = !$latest_time ? new DateTime() : $latest_time;
-    //     $return_array = array(
-    //         'earliest' => $earliest_time->format('Y-m-d H:i'),
-    //         'latest' => $latest_time->format('Y-m-d H:i'),
-    //     );
-    //
-    //     return $return_array;
-    // }
-    //
 
     private function available_proposal_data_spread($object_id_list, $time_field)
     {
         $group_list_retrieval_fn_name = "get_proposal_group_list";
-        return $this->available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name);
+        return $this->available_item_spread_general($object_id_list,$time_field,'proposal',$group_list_retrieval_fn_name);
     }
 
-
-    // private function available_proposal_data_spread_old($object_id_list, $time_field)
-    // {
-    //     $group_list_retrieval_fn_name = "get_proposal_group_list";
-    //     return $this->available_item_spread_general($object_id_list,$time_field,$group_list_retrieval_fn_name);
-    //
-    //     $return_array = false;
-    //     if (empty($object_id_list)) {
-    //         return false;
-    //     }
-    //     $group_collection = array();
-    //     foreach ($object_id_list as $object_id) {
-    //         $group_collection += $this->get_proposal_group_list($object_id);
-    //     }
-    //     $group_list = array_keys($group_collection);
-    //
-    //     $this->db->select(array(
-    //         "MIN(DATE_TRUNC('day', $time_field)) as earliest",
-    //         "MAX(DATE_TRUNC('day', $time_field)) as latest",
-    //     ));
-    //
-    //     $this->db->from('group_items gi');
-    //     $this->db->join('files f', 'gi.item_id = f.item_id');
-    //     $this->db->join('transactions t', 'f.transaction = t.transaction');
-    //     $this->db->where_in('gi.group_id', $group_list)->limit(1);
-    //     $query = $this->db->get();
-    //     if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
-    //         $row = $query->row_array();
-    //         $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : false;
-    //         $latest_time = !empty($row['latest']) ? new DateTime($row['latest']) : false;
-    //         if (!$earliest_time && !$latest_time) {
-    //             return false;
-    //         }
-    //         $return_array = array(
-    //             'earliest' => $earliest_time->format('Y-m-d H:i'),
-    //             'latest' => $latest_time->format('Y-m-d H:i'),
-    //         );
-    //     }
-    //
-    //     return $return_array;
-    // }
 
     private function available_user_data_spread($object_id_list, $time_field)
     {
@@ -461,9 +376,9 @@ class Group_info_model extends CI_Model
             return false;
         }
         $this->db->select(array(
-      "MIN(DATE_TRUNC('day', $time_field)) as earliest",
-      "MAX(DATE_TRUNC('day', $time_field)) as latest",
-    ));
+            "earliest_{$time_field} as earliest",
+            "latest_{$time_field} as latest",
+        ));
 
         $this->db->where('t.stime is not null');
         $this->db->where_in('submitter', $object_id_list);
