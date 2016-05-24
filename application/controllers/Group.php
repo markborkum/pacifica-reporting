@@ -76,6 +76,8 @@ class Group extends Baseline_controller
                     $this->gm->change_group_option($group_id, 'time_range', $time_range);
                 }
 
+                $update_start = !$my_start_date ? true:false;
+                $update_end = !$my_end_date ? true:false;
                 // $object_list = array_merge($object_list, $group_info['item_list']);
                 // echo "group_info<br />";
                 // var_dump($group_info);
@@ -83,6 +85,10 @@ class Group extends Baseline_controller
                 // echo "date range<br />";
                 // var_dump($valid_date_range);
                 $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
+
+                if($update_start) $this->gm->change_group_option($group_id,'start_time',$my_times['start_time_object']->format('Y-m-d'));
+                if($update_end) $this->gm->change_group_option($group_id,'end_time',$my_times['end_time_object']->format('Y-m-d'));
+
                 $latest_available_date = new DateTime($valid_date_range['latest']);
                 $earliest_available_date = new DateTime($valid_date_range['earliest']);
                 // var_dump($my_times);
