@@ -191,7 +191,7 @@ class Summary_model extends CI_Model
         //         $transaction_list[$row->txn] = $row->sub;
         //     }
         // }
-        $select_array(
+        $select_array = array(
             'submitter',
             'COUNT(item_id) as item_count'
         );
@@ -205,10 +205,9 @@ class Summary_model extends CI_Model
         // $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type',$group_type);
         // $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
 
-
         if($user_query && $user_query->num_rows() > 0){
             foreach($user_query->result() as $row){
-                if(!array_key_exists($user,$results['user'])){
+                if(!array_key_exists($row->submitter,$results['user'])){
                     $results['user'][$row->submitter] = 0;
                 }
                 $results['user'][$row->submitter] += $row->item_count;
@@ -242,7 +241,7 @@ class Summary_model extends CI_Model
         $this->db->where($subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('group_type',array('instrument','proposal'));
         $query = $this->db->get();
-
+        // echo $this->db->last_query();
         $results = array(
             'proposal' => array(),
             'instrument' => array(),
@@ -315,6 +314,7 @@ class Summary_model extends CI_Model
                 'total_size_string' => ""
             )
         );
+        // echo $this->db->last_query();
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
                 $temp_results['aggregate'][$row->{$time_basis}] = array(
@@ -400,215 +400,218 @@ class Summary_model extends CI_Model
         return $date_string;
     }
 
-    public function get_files_from_group_list($group_list, $start_time, $end_time, $time_basis)
-    {
-        $times = array(
-            'submit' => array(),
-            'create' => array(),
-            'modified' => array(),
-        );
-        switch ($time_basis) {
-          case 'create_time':
-            $time_field = 'created_date';
-            break;
-          case 'modified_time':
-            $time_field = 'modified_date';
-            break;
-          case 'submit_time':
-            $time_field = 'submit_date';
-            break;
-          default:
-            $time_field = 'submit_date';
-        }
-        $files = array();
-        $this->db->select(array(
-            'item_id',
-            'transaction',
-            'submit_date as submit_time',
-            'created_date as create_time',
-            'modified_date as modified_time',
-            'size_in_bytes as size_bytes',
-        ));
+    // public function get_files_from_group_list($group_list, $start_time, $end_time, $time_basis)
+    // {
+    //     $times = array(
+    //         'submit' => array(),
+    //         'create' => array(),
+    //         'modified' => array(),
+    //     );
+    //     echo "time_basis => {$time_basis}";
+    //     switch ($time_basis) {
+    //       case 'create_time':
+    //         $time_field = 'created_date';
+    //         break;
+    //       case 'modified_time':
+    //         $time_field = 'modified_date';
+    //         break;
+    //       case 'submit_time':
+    //         $time_field = 'submit_date';
+    //         break;
+    //       default:
+    //         $time_field = 'submit_date';
+    //     }
+    //     $files = array();
+    //     $this->db->select(array(
+    //         'item_id',
+    //         'transaction',
+    //         'submit_date as submit_time',
+    //         'created_date as create_time',
+    //         'modified_date as modified_time',
+    //         'size_in_bytes as size_bytes',
+    //     ));
+    //
+    //     $this->db->where("{$time_field} >=", $start_time);
+    //     if ($end_time) {
+    //         $this->db->where("{$time_field} <=", $end_time);
+    //     }
+    //
+    //     $this->db->from('item_time_cache_by_transaction');
+    //
+    //     // $this->db->from('transactions as t')->join('files as f', 'f.transaction = t.transaction');
+    //     // $this->db->join('group_items as gi', 'gi.item_id = f.item_id');
+    //     $this->db->where_in('group_id', $group_list);
+    //     $this->db->order_by('transaction desc')->distinct();
+    //     $query = $this->db->get();
+    //     // echo $this->db->last_query();
+    //     if ($query && $query->num_rows() > 0) {
+    //         foreach ($query->result() as $row) {
+    //             $stime = date_create($row->submit_time);
+    //             $ctime = date_create($row->create_time);
+    //             $mtime = date_create($row->modified_time);
+    //             $files[$row->item_id] = array(
+    //                 'submit_time' => $stime->format('Y-m-d H:i:s'),
+    //                 'create_time' => $ctime->format('Y-m-d H:i:s'),
+    //                 'modified_time' => $mtime->format('Y-m-d H:i:s'),
+    //                 'transaction' => $row->transaction,
+    //                 'size_bytes' => $row->size_bytes,
+    //             );
+    //         }
+    //     }
+    //     // var_dump($files);
+    //     return $files;
+    // }
 
-        $this->db->where("{$time_field} >=", $start_time);
-        if ($end_time) {
-            $this->db->where("{$time_field} <=", $end_time);
-        }
+    // public function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis)
+    // {
+    //     echo "time_basis => {$time_basis}\n";
+    //     $transactions = array();
+    //     $results['day_graph'] = array('by_date' => array());
+    //     if (!empty($results['files'])) {
+    //         foreach ($results['files'] as $item_id => $item_info) {
+    //             $transactions[$item_info['transaction']] = $item_info['transaction'];
+    //         }
+    //         $results['transactions'] = $transactions;
+    //         // var_dump($transactions);
+    //         $this->benchmark->mark('files_to_results--get_txn_info_start');
+    //         $results['transaction_info'] = $this->gm->get_info_for_transactions($transactions);
+    //         $this->benchmark->mark('files_to_results--get_txn_info_end');
+    //         $this->benchmark->mark('files_to_results--gen_file_summary_data_start');
+    //         $results = $this->generate_file_summary_data($results);
+    //         $this->benchmark->mark('files_to_results--gen_file_summary_data_end');
+    //         $this->benchmark->mark('files_to_results--gen_day_graph_summary_start');
+    //         $results['day_graph'] = $this->generate_day_graph_summary_files($results['files'], $start_date, $end_date, $time_basis);
+    //         $this->benchmark->mark('files_to_results--gen_day_graph_summary_end');
+    //         unset($results['files']);
+    //     }
+    //
+    //     return $results;
+    // }
 
-        $this->db->from('item_time_cache_by_transaction');
+    // private function generate_file_summary_data($results)
+    // {
+    //     $upload_stats = array(
+    //         'proposal' => array(),
+    //         'instrument' => array(),
+    //         'user' => array(),
+    //     );
+    //     $total_file_size_summary = 0;
+    //     $total_file_count_summary = 0;
+    //     if (!empty($results['files'])) {
+    //         $transaction_records = array(
+    //         'most_files' => array('transaction_id' => false, 'file_count' => 0),
+    //         'largest_upload' => array('transaction_id' => false, 'file_size' => 0),
+    //         'most_prolific' => array('person_id' => false, 'file_size' => 0),
+    //     );
+    //         $file_list = $results['files'];
+    //         $output_list = array();
+    //         foreach ($file_list as $item_id => $info) {
+    //             // if(array_key_exists($info['transaction'],$results['transaction_info'])){
+    //             $tx_i = $results['transaction_info'][$info['transaction']];
+    //             // }
+    //             if(!array_key_exists('eus_person_id',$tx_i)){
+    //                 $tx_i['eus_person_id'] = '0';
+    //             }
+    //
+    //             $new_info = array(
+    //                 'size_string' => format_bytes($info['size_bytes']),
+    //                 'eus_instrument_id' => array_key_exists('eus_instrument_id', $tx_i) ? $tx_i['eus_instrument_id'] : 0,
+    //                 'eus_person_id' => array_key_exists('eus_person_id', $tx_i) ? $tx_i['eus_person_id'] : '0',
+    //             );
+    //             $results['files'][$item_id] += $new_info;
+    //             ++$total_file_count_summary;
+    //             $total_file_size_summary += $info['size_bytes'];
+    //
+    //             if (!array_key_exists($tx_i['eus_person_id'], $upload_stats['user'])) {
+    //                 $upload_stats['user'][$tx_i['eus_person_id']] = 1;
+    //             } else {
+    //                 $upload_stats['user'][$tx_i['eus_person_id']] += 1;
+    //             }
+    //             if (array_key_exists('eus_instrument_id', $tx_i)) {
+    //                 if (!array_key_exists($tx_i['eus_instrument_id'], $upload_stats['instrument'])) {
+    //                     $upload_stats['instrument'][$tx_i['eus_instrument_id']] = 1;
+    //                 } else {
+    //                     $upload_stats['instrument'][$tx_i['eus_instrument_id']] += 1;
+    //                 }
+    //             }
+    //             if (array_key_exists('eus_proposal_id', $tx_i)) {
+    //                 if (!array_key_exists($tx_i['eus_proposal_id'], $upload_stats['proposal'])) {
+    //                     $upload_stats['proposal'][$tx_i['eus_proposal_id']] = 1;
+    //                 } else {
+    //                     $upload_stats['proposal'][$tx_i['eus_proposal_id']] += 1;
+    //                 }
+    //             }
+    //         }
+    //     }
+    //
+    //     $results['summary_totals'] = array(
+    //         'upload_stats' => $upload_stats,
+    //         'total_file_count' => $total_file_count_summary,
+    //         'total_size_bytes' => $total_file_size_summary,
+    //         'total_size_string' => format_bytes($total_file_size_summary),
+    //     );
+    //     unset($results['transaction_info']);
+    //     // var_dump($results);
+    //     return $results;
+    // }
 
-        // $this->db->from('transactions as t')->join('files as f', 'f.transaction = t.transaction');
-        // $this->db->join('group_items as gi', 'gi.item_id = f.item_id');
-        $this->db->where_in('group_id', $group_list);
-        $this->db->order_by('transaction desc')->distinct();
-        $query = $this->db->get();
-        // echo $this->db->last_query();
-        if ($query && $query->num_rows() > 0) {
-            foreach ($query->result() as $row) {
-                $stime = date_create($row->submit_time);
-                $ctime = date_create($row->create_time);
-                $mtime = date_create($row->modified_time);
-                $files[$row->item_id] = array(
-                    'submit_time' => $stime->format('Y-m-d H:i:s'),
-                    'create_time' => $ctime->format('Y-m-d H:i:s'),
-                    'modified_time' => $mtime->format('Y-m-d H:i:s'),
-                    'transaction' => $row->transaction,
-                    'size_bytes' => $row->size_bytes,
-                );
-            }
-        }
-        // var_dump($files);
-        return $files;
-    }
-
-    public function files_to_results($results, $make_day_graph = true, $start_date = false, $end_date = false, $time_basis)
-    {
-        $transactions = array();
-        $results['day_graph'] = array('by_date' => array());
-        if (!empty($results['files'])) {
-            foreach ($results['files'] as $item_id => $item_info) {
-                $transactions[$item_info['transaction']] = $item_info['transaction'];
-            }
-            $results['transactions'] = $transactions;
-            // var_dump($transactions);
-            $this->benchmark->mark('files_to_results--get_txn_info_start');
-            $results['transaction_info'] = $this->gm->get_info_for_transactions($transactions);
-            $this->benchmark->mark('files_to_results--get_txn_info_end');
-            $this->benchmark->mark('files_to_results--gen_file_summary_data_start');
-            $results = $this->generate_file_summary_data($results);
-            $this->benchmark->mark('files_to_results--gen_file_summary_data_end');
-            $this->benchmark->mark('files_to_results--gen_day_graph_summary_start');
-            $results['day_graph'] = $this->generate_day_graph_summary_files($results['files'], $start_date, $end_date, $time_basis);
-            $this->benchmark->mark('files_to_results--gen_day_graph_summary_end');
-            unset($results['files']);
-        }
-
-        return $results;
-    }
-
-    private function generate_file_summary_data($results)
-    {
-        $upload_stats = array(
-            'proposal' => array(),
-            'instrument' => array(),
-            'user' => array(),
-        );
-        $total_file_size_summary = 0;
-        $total_file_count_summary = 0;
-        if (!empty($results['files'])) {
-            $transaction_records = array(
-            'most_files' => array('transaction_id' => false, 'file_count' => 0),
-            'largest_upload' => array('transaction_id' => false, 'file_size' => 0),
-            'most_prolific' => array('person_id' => false, 'file_size' => 0),
-        );
-            $file_list = $results['files'];
-            $output_list = array();
-            foreach ($file_list as $item_id => $info) {
-                // if(array_key_exists($info['transaction'],$results['transaction_info'])){
-                $tx_i = $results['transaction_info'][$info['transaction']];
-                // }
-                if(!array_key_exists('eus_person_id',$tx_i)){
-                    $tx_i['eus_person_id'] = '0';
-                }
-
-                $new_info = array(
-                    'size_string' => format_bytes($info['size_bytes']),
-                    'eus_instrument_id' => array_key_exists('eus_instrument_id', $tx_i) ? $tx_i['eus_instrument_id'] : 0,
-                    'eus_person_id' => array_key_exists('eus_person_id', $tx_i) ? $tx_i['eus_person_id'] : '0',
-                );
-                $results['files'][$item_id] += $new_info;
-                ++$total_file_count_summary;
-                $total_file_size_summary += $info['size_bytes'];
-
-                if (!array_key_exists($tx_i['eus_person_id'], $upload_stats['user'])) {
-                    $upload_stats['user'][$tx_i['eus_person_id']] = 1;
-                } else {
-                    $upload_stats['user'][$tx_i['eus_person_id']] += 1;
-                }
-                if (array_key_exists('eus_instrument_id', $tx_i)) {
-                    if (!array_key_exists($tx_i['eus_instrument_id'], $upload_stats['instrument'])) {
-                        $upload_stats['instrument'][$tx_i['eus_instrument_id']] = 1;
-                    } else {
-                        $upload_stats['instrument'][$tx_i['eus_instrument_id']] += 1;
-                    }
-                }
-                if (array_key_exists('eus_proposal_id', $tx_i)) {
-                    if (!array_key_exists($tx_i['eus_proposal_id'], $upload_stats['proposal'])) {
-                        $upload_stats['proposal'][$tx_i['eus_proposal_id']] = 1;
-                    } else {
-                        $upload_stats['proposal'][$tx_i['eus_proposal_id']] += 1;
-                    }
-                }
-            }
-        }
-
-        $results['summary_totals'] = array(
-            'upload_stats' => $upload_stats,
-            'total_file_count' => $total_file_count_summary,
-            'total_size_bytes' => $total_file_size_summary,
-            'total_size_string' => format_bytes($total_file_size_summary),
-        );
-        unset($results['transaction_info']);
-        // var_dump($results);
-        return $results;
-    }
-
-    private function generate_day_graph_summary_files($file_list, $start_date = false, $end_date = false, $time_basis = 'submit_time')
-    {
-        // echo "start_date = {$start_date}";
-        if (is_string($start_date)) {
-            $start_date = is_string($start_date) ? date_create($start_date) : false;
-        }
-        if (is_string($end_date)) {
-            $end_date = strtotime($end_date) ? date_create($end_date) : false;
-        }
-
-        if ($start_date) {
-            $padded_start = clone $start_date;
-            $padded_start->modify('-2 days');
-            $start_date = clone $padded_start;
-        }
-        if ($end_date) {
-            $padded_end = clone $end_date;
-            $padded_end->modify('+2 days');
-            $end_date = clone $padded_end;
-        }
-
-        $date_list = array();
-        $summary_list = array('by_date' => array());
-
-        foreach ($file_list as $item_id => $info) {
-            $info['count'] = 1;
-            $trans_id = $info['transaction'];
-            if (strtotime($info[$time_basis])) {
-                $ds = date_create($info[$time_basis]);
-                $date_key = clone $ds;
-                $date_key = $date_key->setTime(0, 0, 0)->format('Y-m-d');
-                $time_key = clone $ds;
-                $time_key = $time_key->setTime($time_key->format('H'), 0, 0)->format('H:i');
-                if (!array_key_exists($date_key, $summary_list['by_date'])) {
-                    $summary_list['by_date'][$date_key] = array(
-                        'file_size' => $info['size_bytes'] + 0,
-                        'file_count' => $info['count'] + 0,
-                        'upload_count' => 1,
-                        'transaction_list' => array($trans_id),
-                    );
-                } else {
-                    $summary_list['by_date'][$date_key]['file_size'] += ($info['size_bytes'] + 0);
-                    $summary_list['by_date'][$date_key]['file_count'] += ($info['count'] + 0);
-                    $summary_list['by_date'][$date_key]['upload_count'] += 1;
-                    $summary_list['by_date'][$date_key]['transaction_list'][] = $trans_id;
-                }
-            } else {
-                continue;
-            }
-            $date_list[] = $ds;
-            $summary_list['by_date'][$date_key]['transaction_list'] = array_unique($summary_list['by_date'][$date_key]['transaction_list']);
-        }
-        ksort($summary_list['by_date']);
-        $summary_list['by_date'] = day_graph_to_series($summary_list, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
-
-        return $summary_list;
-    }
+    // private function generate_day_graph_summary_files($file_list, $start_date = false, $end_date = false, $time_basis = 'submit_time')
+    // {
+    //     // echo "start_date = {$start_date}";
+    //     echo "time_basis => {$time_basis}\n";
+    //     if (is_string($start_date)) {
+    //         $start_date = is_string($start_date) ? date_create($start_date) : false;
+    //     }
+    //     if (is_string($end_date)) {
+    //         $end_date = strtotime($end_date) ? date_create($end_date) : false;
+    //     }
+    //
+    //     if ($start_date) {
+    //         $padded_start = clone $start_date;
+    //         $padded_start->modify('-2 days');
+    //         $start_date = clone $padded_start;
+    //     }
+    //     if ($end_date) {
+    //         $padded_end = clone $end_date;
+    //         $padded_end->modify('+2 days');
+    //         $end_date = clone $padded_end;
+    //     }
+    //
+    //     $date_list = array();
+    //     $summary_list = array('by_date' => array());
+    //
+    //     foreach ($file_list as $item_id => $info) {
+    //         $info['count'] = 1;
+    //         $trans_id = $info['transaction'];
+    //         if (strtotime($info[$time_basis])) {
+    //             $ds = date_create($info[$time_basis]);
+    //             $date_key = clone $ds;
+    //             $date_key = $date_key->setTime(0, 0, 0)->format('Y-m-d');
+    //             $time_key = clone $ds;
+    //             $time_key = $time_key->setTime($time_key->format('H'), 0, 0)->format('H:i');
+    //             if (!array_key_exists($date_key, $summary_list['by_date'])) {
+    //                 $summary_list['by_date'][$date_key] = array(
+    //                     'file_size' => $info['size_bytes'] + 0,
+    //                     'file_count' => $info['count'] + 0,
+    //                     'upload_count' => 1,
+    //                     'transaction_list' => array($trans_id),
+    //                 );
+    //             } else {
+    //                 $summary_list['by_date'][$date_key]['file_size'] += ($info['size_bytes'] + 0);
+    //                 $summary_list['by_date'][$date_key]['file_count'] += ($info['count'] + 0);
+    //                 $summary_list['by_date'][$date_key]['upload_count'] += 1;
+    //                 $summary_list['by_date'][$date_key]['transaction_list'][] = $trans_id;
+    //             }
+    //         } else {
+    //             continue;
+    //         }
+    //         $date_list[] = $ds;
+    //         $summary_list['by_date'][$date_key]['transaction_list'] = array_unique($summary_list['by_date'][$date_key]['transaction_list']);
+    //     }
+    //     ksort($summary_list['by_date']);
+    //     $summary_list['by_date'] = day_graph_to_series($summary_list, $start_date->format('Y-m-d'), $end_date->format('Y-m-d'));
+    //
+    //     return $summary_list;
+    // }
 
 }

@@ -251,13 +251,12 @@ class EUS
 
     public function get_proposal_name($eus_proposal_id)
     {
+        $result = false;
         $DB_ers = $this->CI->load->database('eus_for_myemsl', true);
         $query = $DB_ers->select('title as proposal_name')->get_where(PROPOSALS_TABLE, array('proposal_id' => strval($eus_proposal_id)), 1);
-    // echo $DB_ers->last_query();
     if ($query && $query->num_rows() > 0) {
         $result = $query->row()->proposal_name;
     }
-
         return $result;
     }
 

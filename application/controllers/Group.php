@@ -56,7 +56,7 @@ class Group extends Baseline_controller
             base_url().'application/resources/scripts/reporting.js',
         );
         $my_groups = $this->gm->get_selected_groups($this->user_id, $object_type);
-        $object_list = array();
+        // $object_list = array();
         if (empty($my_groups)) {
             $this->page_data['content_view'] = 'object_types/select_some_groups_insert.html';
         } else {
@@ -76,7 +76,7 @@ class Group extends Baseline_controller
                     $this->gm->change_group_option($group_id, 'time_range', $time_range);
                 }
 
-                $object_list = array_merge($object_list, $group_info['item_list']);
+                // $object_list = array_merge($object_list, $group_info['item_list']);
                 // echo "group_info<br />";
                 // var_dump($group_info);
                 $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
@@ -85,7 +85,7 @@ class Group extends Baseline_controller
                 $my_times = $this->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
                 $latest_available_date = new DateTime($valid_date_range['latest']);
                 $earliest_available_date = new DateTime($valid_date_range['earliest']);
-
+                // var_dump($my_times);
                 $valid_range = array(
                     'earliest' => $earliest_available_date->format('Y-m-d H:i:s'),
                     'latest' => $latest_available_date->format('Y-m-d H:i:s'),
@@ -113,10 +113,9 @@ class Group extends Baseline_controller
                     'times' => $my_times,
                 );
             }
-            $object_info = $this->eus->get_object_info($object_list, $object_type);
-
+            // $object_info = $this->eus->get_object_info($object_list, $object_type);
             $time_range = str_replace(array('-', '_', '+'), ' ', $time_range);
-            $this->page_data['my_objects'] = $object_info;
+            // $this->page_data['my_objects'] = $object_info;
             $this->page_data['my_groups'] = $my_groups;
             $this->page_data['content_view'] = 'object_types/group.html';
         }

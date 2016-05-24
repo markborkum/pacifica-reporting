@@ -10,6 +10,7 @@
 class Group_info_model extends CI_Model
 {
     private $debug;
+    private $group_id_list = false;
     public function __construct()
     {
         parent::__construct();
@@ -17,11 +18,41 @@ class Group_info_model extends CI_Model
         $this->debug = $this->config->item('debug_enabled');
     }
 
+    public function get_group_options($group_id){
+        $option_defaults = $this->get_group_option_defaults();
+        $DB_prefs = $this->load->database('website_prefs', true);
+        $query = $DB_prefs->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
+        $options = array();
+        if ($query && $query->num_rows() > 0) {
+            $options_query = $DB_prefs->get_where('reporting_object_group_options', array('group_id' => $group_id));
+            if ($options_query && $options_query->num_rows() > 0) {
+                foreach ($options_query->result() as $option_row) {
+                    $options[$option_row->option_type] = $option_row->option_value;
+                }
+            }
+            $group_info = $query->row_array();
+            $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+            // var_dump($member_query->result_array());
+            // echo "<br /><br />";
+            if ($member_query && $member_query->num_rows() > 0) {
+                foreach ($member_query->result() as $row) {
+                    $group_info['item_list'][] = $row->item_id;
+                }
+            } else {
+                $group_info['item_list'] = array();
+            }
+
+            $group_info['options_list'] = $options + $option_defaults;
+        }
+        return $group_info;
+    }
+
     public function get_group_info($group_id)
     {
         $option_defaults = $this->get_group_option_defaults();
         $DB_prefs = $this->load->database('website_prefs', true);
         $query = $DB_prefs->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
+        // var_dump($query->result_array());
         $group_info = false;
         $options = array();
         if ($query && $query->num_rows() > 0) {
@@ -33,6 +64,8 @@ class Group_info_model extends CI_Model
             }
             $group_info = $query->row_array();
             $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+            // var_dump($member_query->result_array());
+            // echo "<br /><br />";
             if ($member_query && $member_query->num_rows() > 0) {
                 foreach ($member_query->result() as $row) {
                     $group_info['item_list'][] = $row->item_id;
@@ -40,8 +73,10 @@ class Group_info_model extends CI_Model
             } else {
                 $group_info['item_list'] = array();
             }
+
             $group_info['options_list'] = $options + $option_defaults;
         }
+        // var_dump($group_info);
         $earliest_latest = $this->earliest_latest_data_for_list(
           $group_info['group_type'],
           $group_info['item_list'],
@@ -75,7 +110,6 @@ class Group_info_model extends CI_Model
             $group_info['options_list']['start_time'] = $start_time_obj->format('Y-m-d');
             $group_info['options_list']['end_time'] = $end_time_obj->format('Y-m-d');
         }
-
         return $group_info;
     }
 
@@ -86,6 +120,15 @@ class Group_info_model extends CI_Model
         $defaults = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
+                if($row->option_type == 'start_time' && $row->option_default = 0){
+                    $start_time = new Datetime();
+                    $row->option_default = $start_time->format('Y-m-d');
+                }
+                if($row->option_type == 'end_time' && $row->option_default = 0){
+                    $end_time = new Datetime();
+                    $end_time->modify('-1 week');
+                    $row->option_default = $end_time->format('Y-m-d');
+                }
                 $defaults[$row->option_type] = $row->option_default;
             }
         }
@@ -116,7 +159,7 @@ class Group_info_model extends CI_Model
         if (!$group_name) {
             $group_name = 'New '.ucwords($object_type).' Group';
         }
-            $where_array = array(
+        $where_array = array(
           'person_id' => $eus_person_id,
           'group_name' => $group_name,
         );
@@ -173,7 +216,6 @@ class Group_info_model extends CI_Model
         return false;
     }
 
-
     public function get_selected_objects($eus_person_id, $restrict_type = false, $group_id = false)
     {
         $DB_prefs = $this->load->database('website_prefs', true);
@@ -204,10 +246,11 @@ class Group_info_model extends CI_Model
                 $results[$row->item_type][$item_id] = $group_list;
             }
         }
+
         return $results;
     }
 
-    public function get_selected_groups($eus_person_id, $restrict_type = false)
+    public function get_selected_groups($eus_person_id, $restrict_type = false, $get_group_info = false)
     {
         $this->benchmark->mark('get_selected_groups_start');
         $results = array();
@@ -224,11 +267,17 @@ class Group_info_model extends CI_Model
         $group_id_list = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
-                $group_info = $this->get_group_info($row->group_id);
+                if($get_group_info){
+                    $group_info = $this->get_group_info($row->group_id);
+                }else{
+                    $group_info = $this->get_group_options($row->group_id);
+                }
                 $results[$row->group_id] = $group_info;
             }
         }
         $this->benchmark->mark('get_selected_groups_end');
+        $this->group_id_list = $results;
+
         return $results;
     }
 
@@ -305,38 +354,44 @@ class Group_info_model extends CI_Model
     public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
     {
         $group_list_retrieval_fn_name = "get_{$object_type}_group_list";
-        $time_basis = str_replace("_time","_date",$time_basis);
+        $time_basis = str_replace('_time', '_date', $time_basis);
 
-        $spread = $this->available_item_spread_general($object_id_list, $time_basis,$object_type,$group_list_retrieval_fn_name);
+        $spread = $this->available_item_spread_general($object_id_list, $time_basis, $object_type, $group_list_retrieval_fn_name);
+
         return $spread;
     }
 
-    private function available_item_spread_general($object_id_list,$time_basis,$group_type,$group_list_retrieval_fn_name = false){
+    private function available_item_spread_general($object_id_list, $time_basis, $group_type, $group_list_retrieval_fn_name = false)
+    {
+        // echo "<br />in available_item_spread_general<br  />";
+        // $e = new \Exception;
+        // var_dump($e->getTraceAsString());
+
         $return_array = false;
-        if (empty($object_id_list)) {
-            return false;
-        }
+        // if (empty($object_id_list)) {
+        //     return false;
+        // }
         $latest_time = false;
         $earliest_time = false;
-
-
-        if($group_type == 'instrument' || $group_type == 'proposal'){
+        if (in_array($group_type, array('instrument', 'proposal'))) {
             $group_collection = array();
+            // echo "\n* * * * * * * group_list * * * * * * \n\n";
             foreach ($object_id_list as $object_id) {
                 $group_collection += $this->$group_list_retrieval_fn_name($object_id);
+                // var_dump($group_collection);
             }
             $group_list = array_keys($group_collection);
-
             $this->db->where_in('group_id', $group_list);
-        }elseif($group_type == 'user'){
-            $this->db->where_in('submitter',$object_id_list);
+        } elseif ($group_type == 'user') {
+            $this->db->where_in('submitter', $object_id_list);
         }
         $this->db->select(array(
+            // "'2000-01-01' as earliest",
             "MIN({$time_basis}) as earliest",
             "MAX({$time_basis}) as latest",
         ));
         $query = $this->db->get(ITEM_CACHE);
-
+        // echo $this->db->last_query();
         if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
             $row = $query->row_array();
             $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : false;
@@ -353,21 +408,19 @@ class Group_info_model extends CI_Model
         return $return_array;
     }
 
-
-
     private function available_instrument_data_spread($object_id_list, $time_field)
     {
-        $group_list_retrieval_fn_name = "get_instrument_group_list";
-        return $this->available_item_spread_general($object_id_list,$time_field,'instrument',$group_list_retrieval_fn_name);
-    }
+        $group_list_retrieval_fn_name = 'get_instrument_group_list';
 
+        return $this->available_item_spread_general($object_id_list, $time_field, 'instrument', $group_list_retrieval_fn_name);
+    }
 
     private function available_proposal_data_spread($object_id_list, $time_field)
     {
-        $group_list_retrieval_fn_name = "get_proposal_group_list";
-        return $this->available_item_spread_general($object_id_list,$time_field,'proposal',$group_list_retrieval_fn_name);
-    }
+        $group_list_retrieval_fn_name = 'get_proposal_group_list';
 
+        return $this->available_item_spread_general($object_id_list, $time_field, 'proposal', $group_list_retrieval_fn_name);
+    }
 
     private function available_user_data_spread($object_id_list, $time_field)
     {
@@ -404,6 +457,9 @@ class Group_info_model extends CI_Model
 
     public function get_proposal_group_list($proposal_id_filter = '')
     {
+        // if(!empty($this->group_id_list)){
+        //     return $this->group_id_list;
+        // }
         $this->db->select(array('group_id', 'name as proposal_id'))->where('type', 'proposal');
         if (!empty($proposal_id_filter)) {
             if (is_array($proposal_id_filter)) {
@@ -420,16 +476,26 @@ class Group_info_model extends CI_Model
                 $results_by_proposal[$row->group_id] = $row->proposal_id;
             }
         }
+        $this->group_id_list = $results_by_proposal;
 
         return $results_by_proposal;
     }
 
     public function get_instrument_group_list($inst_id_filter = '')
     {
+        // $e = new Exception();
+        // var_dump($e->getTraceAsString());
         $this->db->select(array('group_id', 'name', 'type'));
-        $where_clause = "(type = 'omics.dms.instrument_id' or type ilike 'instrument.%') and name not in ('foo')";
-
-        $this->db->where($where_clause);
+        if (!empty($inst_id_filter)) {
+            $where_clause = array(
+            'type' => 'omics.dms.instrument_id',
+            'name' => $inst_id_filter, );
+            $this->db->where($where_clause);
+            $this->db->or_where('type', "Instrument.{$inst_id_filter}");
+        } else {
+            $where_clause = "(type = 'omics.dms.instrument_id' or type ilike 'instrument.%') and name not in ('foo')";
+            $this->db->where($where_clause);
+        }
         $query = $this->db->order_by('name')->get('groups');
         $results_by_inst_id = array();
         if ($query && $query->num_rows() > 0) {
@@ -450,9 +516,10 @@ class Group_info_model extends CI_Model
             $results = $results_by_inst_id;
         }
 
+        $this->group_id_list = $results;
+
         return $results;
     }
-
 
     public function get_info_for_transactions($transaction_info)
     {
@@ -460,17 +527,17 @@ class Group_info_model extends CI_Model
         $this->db->select(array('f.transaction', 'g.name as proposal_id'));
         $this->db->or_group_start();
         foreach ($ranged_transactions as $block) {
-            if(sizeof($block) == 1){
-                $this->db->or_where('f.transaction',$block[0]);
-            }else{
+            if (sizeof($block) == 1) {
+                $this->db->or_where('f.transaction', $block[0]);
+            } else {
                 $this->db->or_group_start();
-                $this->db->where('f.transaction >=',$block[0]);
-                $this->db->where('f.transaction <=',$block[1]);
+                $this->db->where('f.transaction >=', $block[0]);
+                $this->db->where('f.transaction <=', $block[1]);
                 $this->db->group_end();
             }
         }
         $this->db->group_end();
-        $this->db->where('g.type','proposal');
+        $this->db->where('g.type', 'proposal');
 
         $this->db->from('item_time_cache_by_transaction f');
         $this->db->join('groups g', 'g.group_id = f.group_id');
@@ -488,12 +555,12 @@ class Group_info_model extends CI_Model
 
         $this->db->or_group_start();
         foreach ($ranged_transactions as $block) {
-            if(sizeof($block) == 1){
-                $this->db->or_where('f.transaction',$block[0]);
-            }else{
+            if (sizeof($block) == 1) {
+                $this->db->or_where('f.transaction', $block[0]);
+            } else {
                 $this->db->or_group_start();
-                $this->db->where('f.transaction >=',$block[0]);
-                $this->db->where('f.transaction <=',$block[1]);
+                $this->db->where('f.transaction >=', $block[0]);
+                $this->db->where('f.transaction <=', $block[1]);
                 $this->db->group_end();
             }
         }
@@ -509,17 +576,16 @@ class Group_info_model extends CI_Model
             }
         }
 
-
         $this->db->select(array('person_id', 'trans_id as transaction'));
         $this->db->order_by('step desc');
         $this->db->or_group_start();
         foreach ($ranged_transactions as $block) {
-            if(sizeof($block) == 1){
-                $this->db->or_where('trans_id',$block[0]);
-            }else{
+            if (sizeof($block) == 1) {
+                $this->db->or_where('trans_id', $block[0]);
+            } else {
                 $this->db->or_group_start();
-                $this->db->where('trans_id >=',$block[0]);
-                $this->db->where('trans_id <=',$block[1]);
+                $this->db->where('trans_id >=', $block[0]);
+                $this->db->where('trans_id <=', $block[1]);
                 $this->db->group_end();
             }
         }
@@ -535,4 +601,3 @@ class Group_info_model extends CI_Model
         return $trans_prop_lookup;
     }
 }
-?>
