@@ -73,12 +73,11 @@ class Reporting_model extends CI_Model
         $this->db->select($select_array)->group_by('i.transaction');
         $this->db->from(ITEM_CACHE." i")->where_in('i.transaction',$transaction_list);
         $query = $this->db->get();
-
         $results = array();
         if($query && $query->num_rows() > 0){
             foreach($query->result_array() as $row){
-                $row['proposal_id'] = $eus_lookup[$row['upload_id']]['proposal'];
-                $row['instrument_id'] = $eus_lookup[$row['upload_id']]['instrument'];
+                $row['proposal_id'] = array_key_exists('proposal',$eus_lookup[$row['upload_id']]) ? $eus_lookup[$row['upload_id']]['proposal'] : "Unknown";
+                $row['instrument_id'] = array_key_exists('instrument',$eus_lookup[$row['upload_id']]) ? $eus_lookup[$row['upload_id']]['instrument'] : "Unknown";
                 $results[$row['upload_id']] = $row;
             }
         }
