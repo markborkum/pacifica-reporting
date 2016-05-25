@@ -122,7 +122,6 @@ class Summary_model extends CI_Model
 
         $this->db->select($select_array)->from(ITEM_CACHE." i")->where('group_type','instrument')->where($subquery);
         $query = $this->db->group_by($time_basis)->order_by($time_basis)->get();
-
         $temp_results = array(
             'aggregate' => array(),
             'totals' => array(
@@ -142,6 +141,18 @@ class Summary_model extends CI_Model
             }
             $temp_results['totals']['total_size_string'] = format_bytes($temp_results['totals']['total_size_bytes']);
         }
+        $where_array = array(
+            "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
+            "{$time_basis} <=" => $end_date_object->format('Y-m-d'),
+            "group_type" => 'instrument'
+        );
+
+        $transactions_by_day = $this->get_user_transactions_by_date($eus_user_id_list, $where_array, $time_basis);
+        // var_dump($transactions_by_day);
+        foreach($transactions_by_day as $date_key => $transaction_list){
+            $temp_results['aggregate'][$date_key]['transactions'] = $transaction_list;
+        }
+
         return $temp_results;
     }
 
@@ -326,7 +337,45 @@ class Summary_model extends CI_Model
             }
             $temp_results['totals']['total_size_string'] = format_bytes($temp_results['totals']['total_size_bytes']);
         }
+        $transactions_by_day = $this->get_transactions_by_date($group_list, $where_array, $time_basis);
+        foreach($transactions_by_day as $date_key => $transaction_list){
+            $temp_results['aggregate'][$date_key]['transactions'] = $transaction_list;
+        }
         return $temp_results;
+    }
+
+    private function get_transactions_by_date($group_id_list, $where_array, $time_basis){
+        $select_array = array(
+            'transaction',$time_basis
+        );
+        $results = array();
+        $this->db->select($select_array)->from(ITEM_CACHE);
+        $this->db->where($where_array)->where_in('group_id',$group_id_list);
+        $query = $this->db->order_by("{$time_basis}, transaction")->distinct()->get();
+        // var_dump($query->result_array());
+        if($query && $query->num_rows() > 0){
+            foreach($query->result() as $row){
+                $results[$row->{$time_basis}][] = $row->transaction;
+            }
+        }
+        return $results;
+    }
+
+    private function get_user_transactions_by_date($eus_id_list, $where_array, $time_basis){
+        $select_array = array(
+            'transaction',$time_basis
+        );
+        $results = array();
+        $this->db->select($select_array)->from(ITEM_CACHE);
+        $this->db->where($where_array)->where_in('submitter',$eus_id_list);
+        $query = $this->db->order_by("{$time_basis}, transaction")->distinct()->get();
+        // var_dump($query->result_array());
+        if($query && $query->num_rows() > 0){
+            foreach($query->result() as $row){
+                $results[$row->{$time_basis}][] = $row->transaction;
+            }
+        }
+        return $results;
     }
 
     private function temp_stats_to_output($temp_results,$available_dates){
@@ -337,11 +386,13 @@ class Summary_model extends CI_Model
                 $file_volume[$date_key] = $temp_results[$date_key]['file_volume'];
                 $transaction_count_array[$date_key] = array($date_timestamp,$temp_results[$date_key]['file_count']);
                 $file_volume_array[$date_key] = array($date_timestamp,$temp_results[$date_key]['file_volume']);
+                $transactions_by_day[$date_key] = $temp_results[$date_key]['transactions'];
             }else{
                 $file_count[$date_key] = 0;
                 $file_volume[$date_key] = 0;
                 $transaction_count_array[$date_key] = array($date_timestamp,intval(0));
                 $file_volume_array[$date_key] = array($date_timestamp,intval(0));
+                // $transactions_by_day[$date_key] = array();
             }
         }
         $return_array = array(
@@ -349,7 +400,8 @@ class Summary_model extends CI_Model
             'file_count' => $file_count,
             'file_volume' => $file_volume,
             'transaction_count_array' => $transaction_count_array,
-            'file_volume_array' => $file_volume_array
+            'file_volume_array' => $file_volume_array,
+            'transactions_by_day' => $transactions_by_day
         );
         return $return_array;
     }

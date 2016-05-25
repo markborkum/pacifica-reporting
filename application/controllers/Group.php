@@ -163,11 +163,11 @@ class Group extends Baseline_controller
             $transaction_list = $this->input->post();
         } elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $HTTP_RAW_POST_DATA = file_get_contents('php://input');
-            $times_list = json_decode($HTTP_RAW_POST_DATA, true);
+            $transaction_list = json_decode($HTTP_RAW_POST_DATA, true);
         }
-        extract($times_list); //yields $start_date, $end_date, $group_id
-        $group_info = $this->gm->get_group_info($group_id);
-        $results = $this->rep->detailed_transaction_list($start_date,$end_date,$group_info);
+        // extract($times_list); //yields $start_date, $end_date, $group_id
+        // $group_info = $this->gm->get_group_info($group_id);
+        $results = $this->rep->detailed_transaction_list($transaction_list);
         $this->page_data['transaction_info'] = $results;
 
         $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
