@@ -317,9 +317,21 @@ class EUS
     );
         $result = array();
         $query = $DB_ers->select($select_array)->get_where(USERS_TABLE, array('person_id' => $eus_id), 1);
+        // echo "name query for {$eus_id}\n";
+        // echo $DB_ers->last_query();
         if ($query && $query->num_rows() > 0) {
             $result = $query->row_array();
-            $result['display_name'] = "{$result['last_name']}, {$result['first_name']}";
+            if(!empty($result['last_name']) && !empty($result['first_name'])){
+                $result['display_name'] = " {$result['first_name']} {$result['last_name']}";
+            }elseif(!empty($result['last_name']) && empty($result['first_name'])){
+                $result['display_name'] = "{$result['last_name']}";
+            }elseif(empty($result['last_name']) && !empty($result['first_name'])){
+                $result['display_name'] = "{$result['first_name']}";
+            }elseif(empty($result['last_name']) && empty($result['first_name']) && !empty($result['email_address'])){
+                $result['display_name'] = "{$result['email_address']}";
+            }else{
+                $result['display_name'] = strval($eus_id);
+            }
         }
 
         return $result;

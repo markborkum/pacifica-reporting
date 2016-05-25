@@ -23,7 +23,7 @@
     <ul id='upload_totals_<?= $group_id ?>' class='stats_list'>
       <li><span id='file_count_<?= $group_id ?>' class='file_count'><?= $summary_totals['total_file_count'] ?></span> File<?= $file_plural ?> (<span id='file_volume_<?= $group_id ?>' class='file_volume'><?= $summary_totals['total_size_string'] ?></span>)</li>
     </ul>
-    <div id="contained_objects_header_<?= $group_id ?>" class="stats_header"><?= ucwords(plural($object_type)) ?> Referenced</div>
+    <div id="contained_objects_header_<?= $group_id ?>" class="stats_header"><?= ucwords(plural($object_type)) ?> in this group</div>
     <?php $processed_obj_list = array_chunk($object_id_list,3); ?>
     <?php $processed_obj_list_strings = array();
           foreach($processed_obj_list as $line){

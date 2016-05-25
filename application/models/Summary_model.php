@@ -388,7 +388,7 @@ class Summary_model extends CI_Model
                 $file_volume_array[$date_key] = array($date_timestamp,$temp_results[$date_key]['file_volume']);
                 $transactions_by_day[$date_key] = $temp_results[$date_key]['transactions'];
             }else{
-                $file_count[$date_key] = 0;
+                // $file_count[$date_key] = 0;
                 $file_volume[$date_key] = 0;
                 $transaction_count_array[$date_key] = array($date_timestamp,intval(0));
                 $file_volume_array[$date_key] = array($date_timestamp,intval(0));

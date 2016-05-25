@@ -13,6 +13,7 @@
     </tr>
     </thead>
     <tbody>
+        <?php ksort($transaction_info); ?>
       <?php foreach($transaction_info as $id => $item): ?>
       <?php
       $ul_time = new DateTime($item['upload_date']);
