@@ -17,7 +17,7 @@ class Baseline_controller extends CI_Controller
     // $this->user_id = 43751;
     if (!$this->user_id) {
         //something is wrong with the authentication system or the user's log in
-      $message = 'Unable to retrieve username from [REMOTE_USER]';
+      	$message = 'Unable to retrieve username from [REMOTE_USER]';
         show_error($message, 500, 'User Authorization Error or Server Misconfiguration in Auth System');
     }
 
@@ -48,3 +48,4 @@ class Baseline_controller extends CI_Controller
         $this->controller_name = $this->uri->rsegment(1);
     }
 }
+?>

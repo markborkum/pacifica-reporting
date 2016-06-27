@@ -157,7 +157,7 @@
         buttons: {
           "Delete Group" : function(){
             var my_container = $('#reporting_object_container_<?= $id ?>');
-            var url = base_url + 'reporting/remove_group/<?= $id ?>';
+            var url = base_url + 'ajax/remove_group/<?= $id ?>';
             var getter = $.get(url, function(data){
               my_container.remove();
             });

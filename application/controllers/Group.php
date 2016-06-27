@@ -34,7 +34,7 @@ class Group extends Baseline_controller
         $time_basis = !empty($time_basis) ? $time_basis : 'modification_time';
         $accepted_object_types = array('instrument', 'proposal', 'user');
         if (!in_array($object_type, $accepted_object_types)) {
-            redirect('reporting/group_view/instrument');
+            redirect('group/view/instrument');
         }
         $this->page_data['page_header'] = 'Aggregated MyEMSL Uploads by '.ucwords($object_type).' Grouping';
         $this->page_data['my_object_type'] = $object_type;

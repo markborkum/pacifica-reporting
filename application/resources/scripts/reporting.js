@@ -191,59 +191,6 @@ var submit_group_option_change = function(el, option_type, new_value) {
     }, 'json');
 };
 
-
-
-// var submit_object_change_worker = function(el, object_type, object_id, action){
-//   var group_id = parseInt(el.parents('.reporting_object_container').find('.group_search_form .group_id').val(),10);
-//   var current_search_string = el.parents('.group_edit_section').find('.object_search_box').val();
-//   var update_list = JSON.stringify(
-//     [
-//       { 'object_id' : object_id,
-//         'group_id' : group_id,
-//         'action' : action,
-//         'current_search_string' : current_search_string
-//       }
-//     ]);
-//   var url = base_url + 'reporting/update_object_preferences/' + object_type + '/' + group_id;
-//
-//   $.post(url, update_list, function(data){
-//     //need to update the DOM to add/remove the appropriate object
-//     if(action == 'remove'){
-//       my_el.parents('.reporting_object_container').remove();
-//       var my_list_item = el.parents('li').detach();
-//       remove_empty_uls();
-//     }else if(action == 'add'){
-//       if($('.reporting_object_container').length == 0){
-//         $('#search_results_display').after('<div class="reporting_object_container"></div>');
-//       }
-//       $('.info_container').fadeOut();
-//       var first_container = $('.reporting_object_container')[0];
-//       var container_url = base_url + 'reporting/get_object_container/';
-//       container_url += object_type + '/' + object_id + '/' + time_range;
-//       var posting = $.get(container_url, function(data){
-//         //add in the new container
-//         $(first_container).before(data);
-//         if(el.is('input[type="checkbox"]')){
-//           var list_item = el.parents('li').detach();
-//           if($('#' + object_type + "_my_" + object_type + "s_search_results").length == 0){
-//             var new_element = $('<ul id="' + object_type + '_my_' + object_type + 's_search_results" class="search_results_list"></ul>');
-//             $('#search_results_display > ul').before(new_element);
-//             new_element = $('#' + object_type + '_my_' + object_type + 's_search_results');
-//             new_element.append('<div class="search_results_header">my ' + object_type + 's</div>');
-//           }
-//           // debugger;
-//           $('#' + object_type + "_my_" + object_type + "s_search_results").append(list_item);
-//           remove_empty_uls();
-//         }
-//
-//       })
-//       .fail(function(){
-//         location.reload();
-//       });
-//     }
-//   });
-// }
-
 var humanFileSize = function(size) {
     if (size == 0) {
         return "0";
@@ -298,39 +245,6 @@ var submit_group_change = function(el, object_type, object_id, action) {
     submit_group_change_worker(el, object_type, object_id, action)
 }
 
-// var submit_object_change = function(el, object_type, object_id, action){
-//   //action is add or remove
-//   if(el.is('input[type="checkbox"]')){
-//     my_el = $('#remove_icon_' + object_id);
-//     remove_empty_uls();
-//   }else{
-//     my_el = el;
-//     el = $('#' + object_type + '_id_' + object_id);
-//   }
-//   if(action == 'remove'){
-//     var d_box = $(my_el).siblings('.remove_confirmation_dialog');
-//     var message = $(my_el).siblings('.remove_dialog_message').text();
-//     var object_id = $(my_el).siblings('.container_id').text();
-//     d_box.html(message);
-//     d_box.dialog({
-//       resizable:false,
-//       modal:true,
-//       title: 'Remove ' + object_type + ' ID ' + object_id,
-//       width:250,
-//       buttons: {
-//         "Yes" : function(){
-//           submit_object_change_worker(el, object_type,object_id,action);
-//           $(this).dialog('close');
-//         },
-//         "No" : function(){
-//           $(this).dialog('close');
-//         }
-//       }
-//     });
-//   }else{
-//     submit_object_change_worker(el, object_type,object_id,action);
-//   }
-// }
 
 var remove_empty_uls = function() {
     $('#search_results_display').find('ul').each(function(index, item) {
@@ -347,7 +261,6 @@ var load_results = function(object_type, object_id) {
     var getter = $.get(url);
     getter.done(function(data, status) {
         $('#loading_status_' + object_id).spin(false);
-
         $('#object_body_container_' + object_id).replaceWith(data);
     });
 };
@@ -440,7 +353,7 @@ var submit_group_name_change = function(group_name, group_id, input_el) {
 };
 
 var update_group_time_range = function(group_id, start_time, end_time) {
-    var url = base_url + 'reporting/change_group_option/' + group_id;
+    var url = base_url + 'ajax/change_group_option/' + group_id;
     var start_time_obj = new moment(start_time);
     var end_time_obj = new moment(end_time);
 

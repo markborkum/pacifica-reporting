@@ -24,17 +24,17 @@ class EUS
         if (!$this->CI->load->database('eus_for_myemsl')) {
             $myemsl_array = parse_ini_file('/etc/myemsl/general.ini', true);
             $db_config = array(
-        'hostname' => $myemsl_array['metadata']['host'],
-        'username' => $myemsl_array['metadata']['user'],
-        'password' => $myemsl_array['metadata']['password'],
-        'database' => $myemsl_array['metadata']['database'],
-        'dbdriver' => 'postgre',
-        'dbprefix' => 'eus.',
-        'pconnect' => true,
-        'db_debug' => true,
-        'cache_on' => false,
-        'cachedir' => '',
-      );
+        	'hostname' => $myemsl_array['metadata']['host'],
+        	'username' => $myemsl_array['metadata']['user'],
+        	'password' => $myemsl_array['metadata']['password'],
+        	'database' => $myemsl_array['metadata']['database'],
+        	'dbdriver' => 'postgre',
+        	'dbprefix' => 'eus.',
+        	'pconnect' => true,
+        	'db_debug' => true,
+        	'cache_on' => false,
+        	'cachedir' => '',
+      	    );
             $this->CI->load->database($db_config);
         }
     }
@@ -50,20 +50,18 @@ class EUS
       'instrument_name as instrument_description',
       'name_short as instrument_name_short',
       'COALESCE(`eus_display_name`,`instrument_name`) as display_name',
-      'last_change_date as last_updated',
+      'last_change_date as last_updated'
     );
 
       if (!empty($filter)) {
-          //check for numeric only and use in instrument_id?
-      $DB_ers->like('instrument_name', $filter);
-          $DB_ers->or_like('name_short', $filter);
-          $DB_ers->or_like('eus_display_name', $filter);
+        //check for numeric only and use in instrument_id?
+      	$DB_ers->like('instrument_name',$filter);
+      	$DB_ers->or_like('name_short',$filter);
+      	$DB_ers->or_like('eus_display_name',$filter);
       }
 
       $DB_ers->select($select_array, true)->where('active_sw', 'Y');
       $DB_ers->order_by('eus_display_name');
-      if ($unused_only) {
-      }
 
       $query = $DB_ers->get(INST_TABLE);
       $results = array();
@@ -93,8 +91,8 @@ class EUS
     {
         $DB_ers = $this->CI->load->database('eus_for_myemsl', true);
 
-        $select_array = array(
-      'person_id as eus_id', 'first_name', 'last_name', 'email_address',
+    $select_array = array(
+      'person_id as eus_id', 'first_name', 'last_name', 'email_address'
     );
 
         if (!empty($filter)) {
@@ -104,10 +102,10 @@ class EUS
         $query = $DB_ers->select($select_array)->get(USERS_TABLE);
 
         $results_array = array(
-      'success' => false,
-      'message' => "No EUS users found using the filter '*{$filter}*'",
-      'names' => array(),
-    );
+            'success' => false,
+            'message' => "No EUS users found using the filter '*{$filter}*'",
+      	    'names' => array()
+        );
 
         if ($query && $query->num_rows() > 0) {
             $plural_mod = $query->num_rows() > 1 ? 's' : '';
@@ -117,10 +115,10 @@ class EUS
                 $display_name = ucwords("{$row->first_name} {$row->last_name}");
                 $display_name .= !empty($row->email_address) ? " <{$row->email_address}>" : '';
                 $name_components = array(
-          'first_name' => $row->first_name,
-          'last_name' => $row->last_name,
-          'email_address' => $row->email_address,
-        );
+          	    'first_name' => $row->first_name,
+	            'last_name' => $row->last_name,
+	            'email_address' => $row->email_address,
+        	);
                 foreach (array_keys($name_components) as $key_name) {
                     $comp = $name_components[$key_name];
                     $comp = preg_replace("/(.*)({$filter})(.*)/i", '$1<span class="hilite">$2</span>$3', $comp);
@@ -130,13 +128,13 @@ class EUS
                 $marked_up_display_name .= !empty($name_components['email_address']) ? " <{$marked_components['email_address']}>" : '';
 
                 $results_array['names'][$row->eus_id] = array(
-          'eus_id' => $row->eus_id,
-          'first_name' => ucfirst($row->first_name),
-          'last_name' => ucfirst($row->last_name),
-          'email_address' => $row->email_address,
-          'display_name' => $display_name,
-          'marked_up_display_name' => $marked_up_display_name,
-        );
+	            'eus_id' => $row->eus_id,
+	            'first_name' => ucfirst($row->first_name),
+  	            'last_name' => ucfirst($row->last_name),
+	            'email_address' => $row->email_address,
+	            'display_name' => $display_name,
+	            'marked_up_display_name' => $marked_up_display_name
+        	);
             }
         }
 
@@ -156,12 +154,10 @@ class EUS
         $closing_date = new DateTime();
         $closing_date->modify('-6 months');
 
-    // print_r($closing_date);
-
-    $where_array = array(
-      'proposal_id' => $eus_proposal_id,
-      'actual_end_date <' => $closing_date->format('Y-m-d'),
-    );
+    	$where_array = array(
+	    'proposal_id' => $eus_proposal_id,
+	    'actual_end_date <' => $closing_date->format('Y-m-d')
+    	);
         $DB_ers->where($where_array);
 
         $prop_exists = $DB_ers->count_all_results(PROPOSALS_TABLE) > 0 ? true : false;
@@ -175,8 +171,8 @@ class EUS
         $instrument_list = array();
 
         $select_array = array(
-      'i.instrument_id', 'i.eus_display_name',
-    );
+            'i.instrument_id', 'i.eus_display_name',
+    	);
 
         $DB_ers->select($select_array)->from(INST_TABLE.' i');
         $DB_ers->join(INST_PROPOSAL_XREF.' pi', 'i.instrument_id = pi.instrument_id');
@@ -206,10 +202,10 @@ class EUS
         $DB_ers = $this->CI->load->database('eus_for_myemsl', true);
 
     //check that instrument_id is legal and active
-    $where_array = array(
-      'active_sw' => 'Y',
-      'instrument_id' => $eus_instrument_id,
-    );
+    	$where_array = array(
+	    'active_sw' => 'Y',
+	    'instrument_id' => $eus_instrument_id,
+	);
         $inst_exists = $DB_ers->where($where_array)->count_all_results(INST_TABLE) > 0 ? true : false;
 
         $result_array = array('success' => false);
@@ -361,7 +357,7 @@ class EUS
         $DB_eus->select(array(
       'proposal_id', 'title', 'group_id',
       'actual_start_date as start_date',
-      'actual_end_date as end_date', )
+      'actual_end_date as end_date')
     );
         $DB_eus->where('closed_date');
         $DB_eus->where('title ILIKE', "%{$proposal_name_fragment}%");
@@ -382,12 +378,12 @@ class EUS
                 }
 
                 $results[$row->proposal_id] = array(
-          'title' => trim($row->title, '.'),
-          'currently_active' => $currently_active ? 'yes' : 'no',
-          'start_date' => $start_date ? $start_date->format('Y-m-d') : '---',
-          'end_date' => $end_date ? $end_date->format('Y-m-d') : '---',
-          'group_id' => $row->group_id,
-        );
+          	    'title' => trim($row->title, '.'),
+	            'currently_active' => $currently_active ? 'yes' : 'no',
+	            'start_date' => $start_date ? $start_date->format('Y-m-d') : '---',
+	            'end_date' => $end_date ? $end_date->format('Y-m-d') : '---',
+	            'group_id' => $row->group_id,
+	        );
             }
         }
 
