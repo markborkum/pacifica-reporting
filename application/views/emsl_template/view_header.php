@@ -3,6 +3,7 @@
   $page_header = isset($page_header) ? $page_header : "Untitled Page";
   $title = isset($title) ? $title : $page_header;
   $rss_link = isset($rss_link) ? $rss_link : "";
+  $index_page = $this->config->item('index_page');
 ?>
 <html>
   <head>
@@ -31,7 +32,7 @@
 
 <?php endif; ?>
     <script type="text/javascript">
-      var base_url = "<?= base_url() ?>";
+      var base_url = "<?= rtrim(base_url().$index_page,'/').'/' ?>";
     </script>
   </head>
   <body>
@@ -52,7 +53,7 @@
                     <?php if($my_object_type == $object_type): ?>
                     <?= $object_type ?>
                     <?php else: ?>
-                    <a href="<?= base_url() ?><?= $this->config->item('index_page') ?>/reporting/group_view/<?= $object_type ?>"><?= $object_type ?></a>
+                    <a href="<?= base_url() ?><?= $this->config->item('index_page') ?>/group/view/<?= $object_type ?>"><?= $object_type ?></a>
                   <?php endif; ?>
                     <?php if(sizeof($menu_types) > 0): ?>
                     <span class="menu_separator">|</span>

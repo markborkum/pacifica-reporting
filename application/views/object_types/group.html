@@ -14,7 +14,6 @@
       <div class="object_name">
         <div class="disclosure_triangle<?= $current_state ?>" id="disclosure_triangle_<?= $id ?>"></div>
         <span class="container_name"><?= $display_group_name ?> Grouping - <span class="displayed_group_name"><?= $group_info['group_name'] ?></span></span>
-        <!-- <span><a href="<?= base_url() ?>index.php/reporting/view/<?= $my_object_type ?>/<?= $id ?>/<?= $clean_time_range ?>" target="_blank">[Details]</a></span> -->
       </div>
       <div class="object_name_short"><span class="displayed_group_name"><?= $group_info['group_name'] ?></span></div>
       <span class="container_id" id="container_id_<?= $id ?>" style="display:none;"><?= $id ?></span>
@@ -158,7 +157,7 @@
         buttons: {
           "Delete Group" : function(){
             var my_container = $('#reporting_object_container_<?= $id ?>');
-            var url = base_url + 'index.php/reporting/remove_group/<?= $id ?>';
+            var url = base_url + 'ajax/remove_group/<?= $id ?>';
             var getter = $.get(url, function(data){
               my_container.remove();
             });
@@ -243,7 +242,7 @@
 
       $('#time_range_container_<?= $id ?>').on('apply.daterangepicker', function(event, picker){
         //look at the dates and upload the changes
-        var update_url = base_url + 'index.php/reporting/change_group_option/<?= $id ?>';
+        var update_url = base_url + 'ajax/change_group_option/<?= $id ?>';
         var update_list = {};
         if(picker.oldStartDate != picker.startDate){
           update_list = {

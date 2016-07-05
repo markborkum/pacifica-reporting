@@ -31,7 +31,7 @@ $(function () {
           var details_container = $('#transaction_details_container_<?= $object_id ?>');
           var new_start = moment(new Date(userMin).setHours(0,0,0)).format('YYYY-MM-DD');
           var new_end = moment(new Date(userMax).setHours(23,59,59)).format('YYYY-MM-DD');
-          var url = base_url + 'index.php/reporting/get_reporting_info_no_timeline/<?= $object_type ?>/<?= $object_id ?>/custom/';
+          var url = base_url + 'item/get_reporting_info_no_timeline/<?= $object_type ?>/<?= $object_id ?>/custom/';
           url += new_start + '/' + new_end;
           $('#stats_graph_container_<?= $object_id ?>').addClass('loading_new_graphics');
           var getter = $.get(url);

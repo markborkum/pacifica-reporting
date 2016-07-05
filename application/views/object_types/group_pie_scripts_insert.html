@@ -6,7 +6,7 @@
     $('#file_volume_<?= $group_id ?>').html('<?= $summary_totals["total_size_string"] ?>');
     my_transactions_<?= $group_id ?> = <?= json_encode(array_keys($transactions)); ?>;
     $('#transaction_details_notifier_<?= $group_id ?>').click(function(){
-      get_transaction_info(this, my_transactions_<?= $group_id ?>);
+      get_transaction_info(this, current_transaction_list_<?= $group_id ?>);
     });
     // Build the chart
 
@@ -15,6 +15,9 @@
     foreach($summary_totals['upload_stats']['proposal'] as $proposal_id => $proposal_count){
       $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['total_file_count'],2));
       $proposal_name = $this->eus->get_proposal_name($proposal_id);
+      if(!$proposal_name){
+          $proposal_name = "Unknown Proposal";
+      }
       $proposal_lookup[$proposal_id] = $proposal_name;
     }
     ?>
