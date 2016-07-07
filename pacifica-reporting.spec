@@ -1,6 +1,6 @@
 Name:		pacifica-reporting
 Epoch:		1
-Version:	0.99.6
+Version:	0.99.7
 Release:	1%{?dist}
 Summary:	The pacifica reporting web page
 Group:		System Environment/Libraries
@@ -41,5 +41,5 @@ rm -rf %{buildroot}
 /var/www/myemsl/reporting/application/logs
 
 %changelog
-* Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.2-1
+* Mon Mar 21 2016 David Brown <david.brown@pnnl.gov> 0.99.7-1
 - Initial RHEL release.
