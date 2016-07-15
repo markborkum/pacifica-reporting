@@ -368,9 +368,9 @@ class Group_info_model extends CI_Model
         // var_dump($e->getTraceAsString());
 
         $return_array = false;
-        // if (empty($object_id_list)) {
-        //     return false;
-        // }
+        if (empty($object_id_list)) {
+            return false;
+        }
         $latest_time = false;
         $earliest_time = false;
         if (in_array($group_type, array('instrument', 'proposal'))) {

@@ -20,7 +20,7 @@
       </div>
       <div id="search_results_display" class="search_results_display" style="display:none;">&nbsp;</div>
       <?php $this->load->view($content_view); ?>
-      <?php if($this->router->fetch_method() == 'group_view'): ?>
+      <?php if($this->router->fetch_method() == 'view'): ?>
       <?php $this->load->view('object_types/insert_new_group.html') ?>
       <?php endif; ?>
     </div>
