@@ -1,6 +1,6 @@
 Name:		pacifica-reporting
 Epoch:		1
-Version:	0.99.7
+Version:	0.99.8
 Release:	1%{?dist}
 Summary:	The pacifica reporting web page
 Group:		System Environment/Libraries
