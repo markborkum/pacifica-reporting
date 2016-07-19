@@ -24,7 +24,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $protocol = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
-$basedir = '/myemsl/reporting';
+$rooted = isset($_SERVER["CI_ROOTED"]) && $_SERVER["CI_ROOTED"] == true ? true : false;
+$basedir = $rooted ? '' : '/myemsl/reporting';
 $config['base_url']	= "{$protocol}://".$_SERVER["SERVER_NAME"].$basedir;
 $config['base_dir'] = $basedir;
 $config['local_resources_folder'] = "application/resources";
@@ -38,7 +39,7 @@ $config['local_resources_folder'] = "application/resources";
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = $rooted ? '' : 'index.php';
 
 /*
 |--------------------------------------------------------------------------
@@ -241,7 +242,7 @@ $config['log_path'] = '';
 | Note: Leaving it blank will default to 'php'.
 |
 */
-$config['log_file_extension'] = '';
+$config['log_file_extension'] = 'log';
 
 /*
 |--------------------------------------------------------------------------

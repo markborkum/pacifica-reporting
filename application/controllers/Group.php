@@ -26,6 +26,10 @@ class Group extends Baseline_controller
         $this->debug = $this->config->item('debug_enabled');
     }
 
+    public function index(){
+      redirect('group/view');
+    }
+
     public function view($object_type, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
     {
         // $this->output->enable_profiler(TRUE);

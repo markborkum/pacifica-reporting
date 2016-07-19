@@ -53,7 +53,7 @@
                     <?php if($my_object_type == $object_type): ?>
                     <?= $object_type ?>
                     <?php else: ?>
-                    <a href="<?= base_url() ?><?= $this->config->item('index_page') ?>/group/view/<?= $object_type ?>"><?= $object_type ?></a>
+                    <a href="<?= base_url() ?><?= $this->config->item('index_page') ?>group/view/<?= $object_type ?>"><?= $object_type ?></a>
                   <?php endif; ?>
                     <?php if(sizeof($menu_types) > 0): ?>
                     <span class="menu_separator">|</span>
