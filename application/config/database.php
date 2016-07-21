@@ -49,8 +49,8 @@ $active_group = 'default';
 // $active_record = TRUE;
 $query_builder = TRUE;
 
-$ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
-
+#$ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
+$ini_file_name = 'general.ini';
 $myemsl_array = parse_ini_file("/etc/myemsl/{$ini_file_name}", TRUE);
 
 $db['default'] = array(
@@ -93,21 +93,6 @@ $db['website_prefs'] = array(
   'cache_on' => FALSE,
   'cachedir' => ""
 );
-
-
-// $db['ers'] = array(
-//   'hostname' => "eusi.emsl.pnl.gov",
-//   'username' => "auberry_user",
-//   'password' => "l0Ve2getEUSd3ta",
-//   'database' => "Auberry",
-//   'dbdriver' => "mysql",
-//   'dbprefix' => "",
-//   'active_r' => TRUE,
-//   'pconnect' => FALSE,
-//   'db_debug' => FALSE,
-//   'cache_on' => FALSE,
-//   'cachedir' => ""
-// );
 
 
 /* End of file database.php */
