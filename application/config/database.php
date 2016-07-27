@@ -51,7 +51,7 @@ $query_builder = TRUE;
 
 #$ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
 $ini_file_name = 'general.ini';
-$myemsl_array = parse_ini_file("/etc/myemsl/{$ini_file_name}", TRUE);
+$myemsl_array = parse_ini_file("/etc/myemsl/".$ini_file_name, TRUE);
 
 $db['default'] = array(
   'hostname' => $myemsl_array['metadata']['host'],
