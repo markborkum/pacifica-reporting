@@ -8,15 +8,15 @@ require_once APPPATH.'libraries/Requests.php';
 /*                                                                             */
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 class Myemsl_model extends CI_Model {
-  
+
   function __construct(){
     parent::__construct();
     $this->load->helper('myemsl');
     Requests::register_autoloader();
     $this->myemsl_ini = read_myemsl_config_file('general');
   }
-  
-  
+
+
   function get_user_info(){
     $protocol = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
     $basedir = 'myemsl';
@@ -28,14 +28,14 @@ class Myemsl_model extends CI_Model {
       'connect_timeout' => 30
     );
     $headers = array();
-    
+
     foreach($_COOKIE as $cookie_name => $cookie_value){
       $headers[] = "{$cookie_name}={$cookie_value}";
     }
 
     $headers = array('Cookie' => implode(';',$headers));
     $session = new Requests_Session($url_base, $headers, array(), $options);
-    
+
     try{
       $response = $session->get('/myemsl/userinfo');
       $user_info = json_decode($response->body,true);
@@ -45,13 +45,13 @@ class Myemsl_model extends CI_Model {
     }
 
     $DB_myemsl = $this->load->database('default',true);
-    
+
     //go retrieve the instrument/group lookup table
     $DB_myemsl->like('type','Instrument.')->or_like('type','omics.dms.instrument');
     $query = $DB_myemsl->get('groups');
-    
+
     $inst_group_lookup = array();
-    
+
     if($query && $query->num_rows()>0){
       foreach($query->result() as $row){
         if($row->type == 'omics.dms.instrument'){
@@ -64,9 +64,9 @@ class Myemsl_model extends CI_Model {
         $inst_group_lookup[$inst_id]['groups'][] = intval($row->group_id);
       }
     }
-    
+
     $new_instruments_list = array();
-    
+
     foreach($user_info['instruments'] as $eus_instrument_id => $inst_info){
       $new_instruments_list[$eus_instrument_id] = $inst_info;
       if(array_key_exists($eus_instrument_id, $inst_group_lookup)){
@@ -76,12 +76,12 @@ class Myemsl_model extends CI_Model {
       }
     }
     $user_info['instruments'] = $new_instruments_list;
-    
-    
+
+
     return $user_info;
   }
- 
-  
-  
+
+
+
 }
 ?>

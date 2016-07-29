@@ -379,6 +379,12 @@ class Summary_model extends CI_Model
     }
 
     private function temp_stats_to_output($temp_results,$available_dates){
+        if(!isset($file_count)){
+            $file_count = array();
+        }
+        if(!isset($transactions_by_day)){
+            $transactions_by_day = array();
+        }
         foreach($available_dates as $date_key => $date_string){
             $date_timestamp = intval(strtotime($date_key)) * 1000;
             if(array_key_exists($date_key,$temp_results)){

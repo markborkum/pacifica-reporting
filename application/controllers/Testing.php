@@ -15,6 +15,7 @@ class Testing extends Baseline_controller
         parent::__construct();
         $this->load->model('Group_info_model', 'gm');
         $this->load->model('Summary_model', 'summary');
+        $this->load->model('Myemsl_model', 'myemsl');
         $this->load->library('EUS', '', 'eus');
         $this->load->helper(array('network', 'file_info', 'inflector', 'time', 'item', 'search_term', 'cookie'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
@@ -102,6 +103,11 @@ class Testing extends Baseline_controller
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
+    }
+
+    public function test_get_user_info_myemsl(){
+        $ui = $this->myemsl->get_user_info();
+        print json_encode($ui);
     }
 
     // public function test_get_latest($object_type, $object_id)
