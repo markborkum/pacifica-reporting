@@ -15,9 +15,10 @@ class Ajax extends Baseline_controller
         parent::__construct();
         $this->load->model('Reporting_model', 'rep');
         $this->load->model('Group_info_model', 'gm');
+        $this->load->model('Summary_model', 'summary');
         $this->load->library('EUS', '', 'eus');
     // $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
-    $this->load->helper(array('network','search_term'));
+        $this->load->helper(array('network','search_term','inflector'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
         $this->local_resources_folder = $this->config->item('local_resources_folder');
@@ -162,7 +163,7 @@ class Ajax extends Baseline_controller
         $accepted_object_types = array('instrument', 'proposal', 'user');
 
         $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
-        $my_times = $this->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
+        $my_times = $this->summary->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
         $latest_available_date = new DateTime($valid_date_range['latest']);
         $earliest_available_date = new DateTime($valid_date_range['earliest']);
 
@@ -193,7 +194,7 @@ class Ajax extends Baseline_controller
         if (empty($item_list)) {
             $this->page_data['examples'] = add_objects_instructions($object_type);
         } else {
-            $this->page_data['placeholder_info'][$group_id]['times'] = $this->fix_time_range($time_range, $start_date, $end_date);
+            $this->page_data['placeholder_info'][$group_id]['times'] = $this->summary->fix_time_range($time_range, $start_date, $end_date);
         }
         $this->load->view('object_types/group.html', $this->page_data);
     }

@@ -17,7 +17,7 @@ class Summary_model extends CI_Model
         $this->load->database('default');
 
         $this->load->model('Group_info_model','gm');
-        $this->load->helper(array('item'));
+        $this->load->helper(array('item','time'));
         $this->debug = $this->config->item('debug_enabled');
         $this->results = array(
             'transactions' => array(),
@@ -411,6 +411,34 @@ class Summary_model extends CI_Model
         );
         return $return_array;
     }
+
+    public function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false)
+    {
+        if (!empty($start_date) && !empty($end_date)) {
+            $times = $this->canonicalize_date_range($start_date, $end_date);
+
+            return $times;
+        }
+        $time_range = str_replace(array('-', '_', '+'), ' ', $time_range);
+        if (!strtotime($time_range)) {
+            if ($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)) {
+                //custom date_range, just leave them. Canonicalize will fix them
+            } else {
+                //looks like the time range is borked, pick the default
+                $time_range = '1 week';
+                $times = time_range_to_date_pair($time_range, $valid_date_range);
+                extract($times);
+            }
+        } else {
+            $times = time_range_to_date_pair($time_range, $valid_date_range);
+            extract($times);
+        }
+
+        $times = $this->canonicalize_date_range($start_date, $end_date);
+
+        return $times;
+    }
+
 
     private function generate_available_dates($start_date, $end_date){
         $results = array();
