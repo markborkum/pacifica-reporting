@@ -8,7 +8,7 @@ function get_user_details_myemsl($eus_id){
   $users_table = "users";
   $DB_eus = $CI->load->database('eus_for_myemsl',TRUE);
 
-  $select_array = array('person_id', 'first_name','last_name', 'email_address', 'network_id');
+  $select_array = array('person_id', 'first_name','last_name', 'email_address', 'network_id', 'emsl_employee');
 
   $query = $DB_eus->select($select_array)->get_where($users_table, array('person_id' => $eus_id),1);
 

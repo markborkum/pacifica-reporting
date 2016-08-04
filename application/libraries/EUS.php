@@ -259,16 +259,16 @@ class EUS
     public function get_object_list($object_type, $search_terms = false, $my_objects = false)
     {
         $DB_ers = $this->CI->load->database('eus_for_myemsl', true);
-    $is_emsl_staff = $this->is_emsl_staff();
-    $proposals_available = false;
-    if(!$is_emsl_staff){
-        $proposals_available = $this->get_proposals_for_user($this->CI->user_id);
-    }
+        $is_emsl_staff = $this->CI->is_emsl_staff;
+        $proposals_available = false;
+        if(!$is_emsl_staff){
+            $proposals_available = $this->get_proposals_for_user($this->CI->user_id);
+        }
 
 
-    if ($my_objects) {
-        $DB_ers->where_in('id', array_map('strval', array_keys($my_objects)));
-    }
+        if ($my_objects) {
+            $DB_ers->where_in('id', array_map('strval', array_keys($my_objects)));
+        }
         if ($search_terms && !empty($search_terms)) {
             foreach ($search_terms as $search_term) {
                 $DB_ers->or_like('search_field', $search_term);
@@ -342,7 +342,7 @@ class EUS
 
     public function get_proposals_for_user($eus_user_id)
     {
-        $is_emsl_staff = $this->is_emsl_staff($eus_user_id);
+        $is_emsl_staff = $this->CI->is_emsl_staff;
         $DB_ers = $this->CI->load->database('eus_for_myemsl', true);
         $select_array = array('proposal_id', 'person_id');
         $DB_ers->select($select_array)->where('active', 'Y');
@@ -369,7 +369,7 @@ class EUS
           'actual_start_date as start_date',
           'actual_end_date as end_date')
         );
-        $is_emsl_staff = $this->is_emsl_staff();
+        $is_emsl_staff = $this->CI->is_emsl_staff;
         if(!$is_emsl_staff){
             $proposals_available = $this->get_proposals_for_user($this->user_id);
             $DB_eus->where_in('proposal_id',$proposals_available);
@@ -418,22 +418,22 @@ class EUS
         return $results;
     }
 
-    public function is_emsl_staff($eus_user_id = false){
-        $user_id = !$eus_user_id ? $this->CI->user_id : $eus_user_id;
-        $DB_ers = $this->CI->load->database('eus_for_myemsl',true);
-        $is_staff = false;
-        $select_array = array('person_id');
-        $where_array = array(
-            'emsl_employee' => 'Y',
-            'person_id' => $user_id
-        );
-        $query = $DB_ers->select($select_array)->get_where(USERS_TABLE, $where_array, 1);
-        if($query){
-            if($query->num_rows() > 0){
-                $is_staff = true;
-            }
-        }
-        return $is_staff;
-    }
+    // public function is_emsl_staff($eus_user_id = false){
+    //     $user_id = !$eus_user_id ? $this->CI->user_id : $eus_user_id;
+    //     $DB_ers = $this->CI->load->database('eus_for_myemsl',true);
+    //     $is_staff = false;
+    //     $select_array = array('person_id');
+    //     $where_array = array(
+    //         'emsl_employee' => 'Y',
+    //         'person_id' => $user_id
+    //     );
+    //     $query = $DB_ers->select($select_array)->get_where(USERS_TABLE, $where_array, 1);
+    //     if($query){
+    //         if($query->num_rows() > 0){
+    //             $is_staff = true;
+    //         }
+    //     }
+    //     return $is_staff;
+    // }
 
 }

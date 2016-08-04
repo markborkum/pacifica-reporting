@@ -15,6 +15,7 @@ class Group_info_model extends CI_Model
     {
         parent::__construct();
         $this->load->helper(array('item'));
+        $this->load->library('EUS', '', 'eus');
         $this->debug = $this->config->item('debug_enabled');
     }
 
@@ -457,10 +458,12 @@ class Group_info_model extends CI_Model
 
     public function get_proposal_group_list($proposal_id_filter = '')
     {
-        // if(!empty($this->group_id_list)){
-        //     return $this->group_id_list;
-        // }
+        $is_emsl_staff = $this->is_emsl_staff;
         $this->db->select(array('group_id', 'name as proposal_id'))->where('type', 'proposal');
+        $proposals_available = false;
+        if(!$is_emsl_staff || $this->user_id == 43751){
+            $proposals_available = $this->eus->get_proposals_for_user($this->user_id);
+        }
         if (!empty($proposal_id_filter)) {
             if (is_array($proposal_id_filter)) {
                 $this->db->where_in('name', $proposal_id_filter);
@@ -473,7 +476,11 @@ class Group_info_model extends CI_Model
         $results_by_proposal = array();
         if ($query && $query->num_rows()) {
             foreach ($query->result() as $row) {
-                $results_by_proposal[$row->group_id] = $row->proposal_id;
+                if((!$is_emsl_staff || $this->user_id == 43751) && in_array($row->proposal_id, $proposals_available)){
+                    $results_by_proposal[$row->group_id] = $row->proposal_id;
+                }elseif($is_emsl_staff){
+                    $results_by_proposal[$row->group_id] = $row->proposal_id;
+                }
             }
         }
         $this->group_id_list = $results_by_proposal;
