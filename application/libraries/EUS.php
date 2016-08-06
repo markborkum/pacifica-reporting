@@ -344,13 +344,13 @@ class EUS
     {
         $is_emsl_staff = $this->CI->is_emsl_staff;
         $DB_ers = $this->CI->load->database('eus_for_myemsl', true);
-        $select_array = array('proposal_id', 'person_id');
+        $select_array = array('proposal_id');
         $DB_ers->select($select_array)->where('active', 'Y');
         if(!$is_emsl_staff){
             $DB_ers->where('person_id',$eus_user_id);
         }
 
-        $query = $DB_ers->get(PROPOSAL_MEMBERS);
+        $query = $DB_ers->distinct()->get(PROPOSAL_MEMBERS);
         $results = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {

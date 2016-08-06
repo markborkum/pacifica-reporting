@@ -17,6 +17,7 @@ class Summary_model extends CI_Model
         $this->load->database('default');
 
         $this->load->model('Group_info_model','gm');
+        $this->load->library('EUS', '', 'eus');
         $this->load->helper(array('item','time'));
         $this->debug = $this->config->item('debug_enabled');
         $this->results = array(
@@ -161,13 +162,6 @@ class Summary_model extends CI_Model
         $end_date_object = is_object($end_date) ? $end_date : new DateTime($end_date);
         $time_basis = str_replace("_time","_date",$time_basis);
 
-        // $this->db->
-
-        //formulate subquery
-        // $this->db->where_in('person_id',$eus_user_id_list)->where('step',5);
-        // $this->db->select('trans_id as transaction')->from('ingest_state')->distinct();
-        // $subquery = '('.$this->db->get_compiled_select().')';
-
         $select_array = array(
             "g.name as group_name",
             "MIN(g.type) as group_type",
@@ -186,36 +180,35 @@ class Summary_model extends CI_Model
             'user' => array()
         );
         // echo $this->db->last_query();
+        $available_proposals = !$this->is_emsl_staff ? $this->eus->get_proposals_for_user($this->user_id) : false;
+
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
                 if($row->category == 'instrument'){
                     $row->group_name = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.', '', $row->group_type);
+                    $results[$row->category][$row->group_name] = $row->item_count;
                 }
-                $results[$row->category][$row->group_name] = $row->item_count;
+                if($this->is_emsl_staff || ($row->category == 'proposal' && in_array($row->group_name,$available_proposals))){
+                    $results[$row->category][$row->group_name] = $row->item_count;
+                }elseif($row->category == 'proposal' && !in_array($row->group_name,$available_proposals)){
+                    if(!isset($results[$row->category]['Other'])){
+                        $results[$row->category]['Other'] = $row->item_count;
+                    }else{
+                        $results[$row->category]['Other'] += $row->item_count;
+                    }
+                }
             }
         }
-        // $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where('"t"."transaction" in '.$subquery);
-        // $txn_query = $this->db->from('transactions t')->get();
-        // $transaction_list = array();
-        // if($txn_query && $txn_query->num_rows() > 0){
-        //     foreach($txn_query->result() as $row){
-        //         $transaction_list[$row->txn] = $row->sub;
-        //     }
-        // }
+
         $select_array = array(
             'submitter',
             'COUNT(item_id) as item_count'
         );
         $this->db->select($select_array)->from(ITEM_CACHE." i");
-        // $this->db->where('"i"."transaction" in '.$subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('i.submitter',$eus_user_id_list)->group_by('i.submitter')->order_by('i.submitter');
         $this->db->where_in('group_type',array('instrument'));
         $user_query = $this->db->get();
-
-
-        // $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where("\"transaction\" in ({$subquery})")->where('group_type',$group_type);
-        // $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
-
+        // echo $this->db->last_query();
         if($user_query && $user_query->num_rows() > 0){
             foreach($user_query->result() as $row){
                 if(!array_key_exists($row->submitter,$results['user'])){
@@ -258,13 +251,24 @@ class Summary_model extends CI_Model
             'instrument' => array(),
             'user' => array()
         );
+        $available_proposals = !$this->is_emsl_staff ? $this->eus->get_proposals_for_user($this->user_id) : false;
+
         // echo $this->db->last_query();
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
                 if($row->category == 'instrument'){
                     $row->group_name = $row->group_type == 'omics.dms.instrument_id' ? $row->group_name : str_ireplace('instrument.', '', $row->group_type);
+                    $results[$row->category][$row->group_name] = $row->item_count;
                 }
-                $results[$row->category][$row->group_name] = $row->item_count;
+                if($this->is_emsl_staff || ($row->category == 'proposal' && in_array($row->group_name,$available_proposals))){
+                    $results[$row->category][$row->group_name] = $row->item_count;
+                }elseif($row->category == 'proposal' && !in_array($row->group_name,$available_proposals)){
+                    if(!isset($results[$row->category]['Other'])){
+                        $results[$row->category]['Other'] = $row->item_count;
+                    }else{
+                        $results[$row->category]['Other'] += $row->item_count;
+                    }
+                }
             }
         }
 
@@ -338,6 +342,7 @@ class Summary_model extends CI_Model
             $temp_results['totals']['total_size_string'] = format_bytes($temp_results['totals']['total_size_bytes']);
         }
         $transactions_by_day = $this->get_transactions_by_date($group_list, $where_array, $time_basis);
+        // var_dump($transactions_by_day);
         foreach($transactions_by_day as $date_key => $transaction_list){
             $temp_results['aggregate'][$date_key]['transactions'] = $transaction_list;
         }
@@ -370,6 +375,7 @@ class Summary_model extends CI_Model
         $this->db->where($where_array)->where_in('submitter',$eus_id_list);
         $query = $this->db->order_by("{$time_basis}, transaction")->distinct()->get();
         // var_dump($query->result_array());
+        // echo $this->db->last_query();
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
                 $results[$row->{$time_basis}][] = $row->transaction;

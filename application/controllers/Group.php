@@ -86,6 +86,10 @@ class Group extends Baseline_controller
                 // echo "group_info<br />";
                 // var_dump($group_info);
                 $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
+                // $valid_date_range = array(
+                //     'earliest' => '2000-01-01 00:00:00',
+                //     'latest' => '2016-08-05 00:00:00'
+                // );
                 // echo "date range<br />";
                 // var_dump($valid_date_range);
                 $my_times = $this->summary->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
@@ -120,7 +124,7 @@ class Group extends Baseline_controller
                     'item_list' => $group_info['item_list'],
                     'time_basis' => $time_basis,
                     'time_range' => $time_range,
-                    'times' => $my_times,
+                    'times' => $my_times
                 );
             }
             // $object_info = $this->eus->get_object_info($object_list, $object_type);
@@ -134,32 +138,6 @@ class Group extends Baseline_controller
         $this->benchmark->mark('controller_view_end');
     }
 
-    // private function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = false)
-    // {
-    //     if (!empty($start_date) && !empty($end_date)) {
-    //         $times = $this->summary->canonicalize_date_range($start_date, $end_date);
-    //
-    //         return $times;
-    //     }
-    //     $time_range = str_replace(array('-', '_', '+'), ' ', $time_range);
-    //     if (!strtotime($time_range)) {
-    //         if ($time_range == 'custom' && strtotime($start_date) && strtotime($end_date)) {
-    //             //custom date_range, just leave them. Canonicalize will fix them
-    //         } else {
-    //             //looks like the time range is borked, pick the default
-    //             $time_range = '1 week';
-    //             $times = time_range_to_date_pair($time_range, $valid_date_range);
-    //             extract($times);
-    //         }
-    //     } else {
-    //         $times = time_range_to_date_pair($time_range, $valid_date_range);
-    //         extract($times);
-    //     }
-    //
-    //     $times = $this->summary->canonicalize_date_range($start_date, $end_date);
-    //
-    //     return $times;
-    // }
 
     public function get_transaction_list_details()
     {

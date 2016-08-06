@@ -53,6 +53,7 @@ class Group_info_model extends CI_Model
         $option_defaults = $this->get_group_option_defaults();
         $DB_prefs = $this->load->database('website_prefs', true);
         $query = $DB_prefs->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
+
         // var_dump($query->result_array());
         $group_info = false;
         $options = array();
@@ -64,9 +65,11 @@ class Group_info_model extends CI_Model
                 }
             }
             $group_info = $query->row_array();
+            if($group_info['group_type'] == 'proposal' && !$this->is_emsl_staff){
+                $available_proposals = $this->eus->get_proposals_for_user($this->user_id);
+                $DB_prefs->where_in('item_id',$available_proposals);
+            }
             $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
-            // var_dump($member_query->result_array());
-            // echo "<br /><br />";
             if ($member_query && $member_query->num_rows() > 0) {
                 foreach ($member_query->result() as $row) {
                     $group_info['item_list'][] = $row->item_id;
@@ -77,7 +80,6 @@ class Group_info_model extends CI_Model
 
             $group_info['options_list'] = $options + $option_defaults;
         }
-        // var_dump($group_info);
         $earliest_latest = $this->earliest_latest_data_for_list(
           $group_info['group_type'],
           $group_info['item_list'],

@@ -17,11 +17,13 @@ class Reporting_model extends CI_Model
         define('FILES_TABLE', 'files');
         $this->load->database();
         $this->load->helper(array('item'));
+        $this->load->library('EUS', '', 'eus');
         $this->debug = $this->config->item('debug_enabled');
     }
 
     public function detailed_transaction_list($transaction_list)
     {
+        $available_proposals = !$this->is_emsl_staff ? $this->eus->get_proposals_for_user($this->user_id) : false;
         $eus_select_array = array(
             'i.transaction','i.group_type as category',
             'MIN(g.name) as group_name',
@@ -59,7 +61,6 @@ class Reporting_model extends CI_Model
             'sum(i.size_in_bytes) as bundle_size',
             'count(i.item_id) as file_count'
         );
-
         $this->db->select($select_array)->group_by('i.transaction');
         $this->db->from(ITEM_CACHE." i")->where_in('i.transaction',$transaction_list);
         $query = $this->db->get();
@@ -68,7 +69,9 @@ class Reporting_model extends CI_Model
             foreach($query->result_array() as $row){
                 $row['proposal_id'] = array_key_exists('proposal',$eus_lookup[$row['upload_id']]) ? $eus_lookup[$row['upload_id']]['proposal'] : "Unknown";
                 $row['instrument_id'] = array_key_exists('instrument',$eus_lookup[$row['upload_id']]) ? $eus_lookup[$row['upload_id']]['instrument'] : "Unknown";
-                $results[$row['upload_id']] = $row;
+                if($this->is_emsl_staff || in_array($row['proposal_id'],$available_proposals)){
+                    $results[$row['upload_id']] = $row;
+                }
             }
         }
 
