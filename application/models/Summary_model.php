@@ -168,11 +168,16 @@ class Summary_model extends CI_Model
             "i.group_type as category",
             "COUNT(i.item_id) as item_count"
         );
+        $where_array = array(
+            "{$time_basis} >=" => $start_date_object->format('Y-m-d'),
+            "{$time_basis} <=" => $end_date_object->format('Y-m-d')
+        );
 
         $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
         // $this->db->where('"i"."transaction" in '.$subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('i.submitter',$eus_user_id_list)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('group_type',array('instrument','proposal'));
+        $this->db->where($where_array);
         $query = $this->db->get();
         $results = array(
             'proposal' => array(),
