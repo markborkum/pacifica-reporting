@@ -384,6 +384,9 @@ class Group_info_model extends CI_Model
                 // var_dump($group_collection);
             }
             $group_list = array_keys($group_collection);
+            if(empty($group_list)){
+                return false;
+            }
             $this->db->where_in('group_id', $group_list);
         } elseif ($group_type == 'user') {
             $this->db->where_in('submitter', $object_id_list);
