@@ -54,7 +54,6 @@ class Group_info_model extends CI_Model
         $DB_prefs = $this->load->database('website_prefs', true);
         $query = $DB_prefs->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
 
-        // var_dump($query->result_array());
         $group_info = false;
         $options = array();
         if ($query && $query->num_rows() > 0) {
@@ -70,6 +69,7 @@ class Group_info_model extends CI_Model
                 $DB_prefs->where_in('item_id',$available_proposals);
             }
             $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+            // echo $DB_prefs->last_query();
             if ($member_query && $member_query->num_rows() > 0) {
                 foreach ($member_query->result() as $row) {
                     $group_info['item_list'][] = $row->item_id;
@@ -253,7 +253,7 @@ class Group_info_model extends CI_Model
         return $results;
     }
 
-    public function get_selected_groups($eus_person_id, $restrict_type = false, $get_group_info = false)
+    public function get_selected_groups($eus_person_id, $restrict_type = false, $get_group_info = true)
     {
         $this->benchmark->mark('get_selected_groups_start');
         $results = array();
@@ -466,7 +466,7 @@ class Group_info_model extends CI_Model
         $is_emsl_staff = $this->is_emsl_staff;
         $this->db->select(array('group_id', 'name as proposal_id'))->where('type', 'proposal');
         $proposals_available = false;
-        if(!$is_emsl_staff || $this->user_id == 43751){
+        if(!$is_emsl_staff){
             $proposals_available = $this->eus->get_proposals_for_user($this->user_id);
         }
         if (!empty($proposal_id_filter)) {
@@ -481,7 +481,7 @@ class Group_info_model extends CI_Model
         $results_by_proposal = array();
         if ($query && $query->num_rows()) {
             foreach ($query->result() as $row) {
-                if((!$is_emsl_staff || $this->user_id == 43751) && in_array($row->proposal_id, $proposals_available)){
+                if(!$is_emsl_staff && in_array($row->proposal_id, $proposals_available)){
                     $results_by_proposal[$row->group_id] = $row->proposal_id;
                 }elseif($is_emsl_staff){
                     $results_by_proposal[$row->group_id] = $row->proposal_id;
