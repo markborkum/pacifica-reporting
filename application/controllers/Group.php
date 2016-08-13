@@ -83,14 +83,6 @@ class Group extends Baseline_controller
                 $update_start = !$my_start_date ? true:false;
                 $update_end = !$my_end_date ? true:false;
                 $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
-                // var_dump($valid_date_range);
-                // var_dump($group_info['item_list']);
-                // if (!$valid_date_range) {
-                //     $this->page_data['content_view'] = 'object_types/select_some_objects_insert.html';
-                //     $this->page_data['examples'] = add_objects_instructions($object_type);
-                //     $this->load->view('reporting_view.html', $this->page_data);
-                //     return false;
-                // }
                 $my_times = $this->summary->fix_time_range($time_range, $my_start_date, $my_end_date, $valid_date_range);
 
                 if($update_start) $this->gm->change_group_option($group_id,'start_time',$my_times['start_time_object']->format('Y-m-d'));
@@ -126,9 +118,7 @@ class Group extends Baseline_controller
                     'times' => $my_times
                 );
             }
-            // $object_info = $this->eus->get_object_info($object_list, $object_type);
             $time_range = str_replace(array('-', '_', '+'), ' ', $time_range);
-            // $this->page_data['my_objects'] = $object_info;
             $this->page_data['my_groups'] = $my_groups;
             $this->page_data['content_view'] = 'object_types/group.html';
         }
