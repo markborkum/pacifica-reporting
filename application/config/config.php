@@ -26,10 +26,11 @@ date_default_timezone_set('America/Los_Angeles');
 |
 */
 $protocol = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
-$basedir = '/myemsl/reporting';
+$rooted = isset($_SERVER["CI_ROOTED"]) && $_SERVER["CI_ROOTED"] == true ? true : false;
+$basedir = $rooted ? '' : '/myemsl/reporting';
 $config['base_url']	= "{$protocol}://".$_SERVER["SERVER_NAME"].$basedir;
 $config['base_dir'] = $basedir;
-
+$config['local_resources_folder'] = "application/resources";
 /*
 |--------------------------------------------------------------------------
 | Index File
@@ -40,7 +41,7 @@ $config['base_dir'] = $basedir;
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = $rooted ? '' : 'index.php';
 
 /*
 |--------------------------------------------------------------------------
