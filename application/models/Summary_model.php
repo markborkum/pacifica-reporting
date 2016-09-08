@@ -247,7 +247,8 @@ class Summary_model extends CI_Model
         );
 
         $this->db->select($select_array)->from(ITEM_CACHE." i")->join('groups g','g.group_id = i.group_id');
-        $this->db->where($subquery)->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
+        $this->db->where_in('g.group_id',$group_list)->where($subquery_where_array);
+        $this->db->group_by('g.name,i.group_type')->order_by('i.group_type,g.name');
         $this->db->where_in('group_type',array('instrument','proposal'));
         $query = $this->db->get();
         // echo $this->db->last_query();
@@ -258,7 +259,6 @@ class Summary_model extends CI_Model
         );
         $available_proposals = !$this->is_emsl_staff ? $this->eus->get_proposals_for_user($this->user_id) : false;
 
-        // echo $this->db->last_query();
         if($query && $query->num_rows() > 0){
             foreach($query->result() as $row){
                 if($row->category == 'instrument'){
@@ -277,9 +277,15 @@ class Summary_model extends CI_Model
             }
         }
 
-        $this->db->select(array('t.transaction as txn','t.submitter as sub'))->where($subquery);
-        $txn_query = $this->db->from('transactions t')->get();
-        // echo $this->db->last_query();
+        $txn_select_array = array(
+            'i.transaction as txn',
+            'i.submitter as sub'
+        );
+
+        $this->db->select($txn_select_array)->distinct();
+        $this->db->where_in('i.group_id',$group_list)->where($subquery_where_array);
+        $txn_query = $this->db->from(ITEM_CACHE." i")->get();
+
         $transaction_list = array();
         if($txn_query && $txn_query->num_rows() > 0){
             foreach($txn_query->result() as $row){
@@ -287,7 +293,7 @@ class Summary_model extends CI_Model
             }
         }
 
-        $this->db->select(array('transaction txn','COUNT(item_id) item_count'))->where($subquery)->where('group_type',$group_type);
+        $this->db->select(array('transaction txn','COUNT(item_id) item_count', 'SUM(size_in_bytes) total_size'))->where($subquery)->where('group_type',$group_type);
         $user_query = $this->db->from(ITEM_CACHE." i")->group_by('transaction')->get();
 
 

@@ -62,8 +62,10 @@ class Reporting_model extends CI_Model
             'count(i.item_id) as file_count'
         );
         $this->db->select($select_array)->group_by('i.transaction');
+        $this->db->where('group_type','instrument');
         $this->db->from(ITEM_CACHE." i")->where_in('i.transaction',$transaction_list);
         $query = $this->db->get();
+        // echo $this->db->last_query();
         $results = array();
         if($query && $query->num_rows() > 0){
             foreach($query->result_array() as $row){
