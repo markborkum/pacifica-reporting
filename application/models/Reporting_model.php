@@ -59,11 +59,13 @@ class Reporting_model extends CI_Model
             'max(i.modified_date) as file_date_end',
             'min(i.submitter) as uploaded_by_id',
             'sum(i.size_in_bytes) as bundle_size',
-            'count(i.item_id) as file_count'
+            'count(i.item_id) as file_count',
+            'min(t.stime) as upload_datetime'
         );
         $this->db->select($select_array)->group_by('i.transaction');
         $this->db->where('group_type','instrument');
         $this->db->from(ITEM_CACHE." i")->where_in('i.transaction',$transaction_list);
+        $this->db->join('transactions t','t.transaction = i.transaction');
         $query = $this->db->get();
         // echo $this->db->last_query();
         $results = array();

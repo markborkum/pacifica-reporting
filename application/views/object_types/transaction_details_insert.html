@@ -16,7 +16,7 @@
         <?php ksort($transaction_info); ?>
       <?php foreach($transaction_info as $id => $item): ?>
       <?php
-      $ul_time = new DateTime($item['upload_date']);
+      $ul_time = new DateTime($item['upload_datetime']);
       $ul_latest_mod = new DateTime($item['file_date_end']);
       $ul_earliest_mod = new DateTime($item['file_date_start']);
       $ul_mod_string = $ul_latest_mod->format('m/d/Y') != $ul_earliest_mod->format('m/d/Y') ?
