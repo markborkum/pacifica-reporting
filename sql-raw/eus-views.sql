@@ -30,9 +30,9 @@ CREATE VIEW "eus"."v_instrument_groupings" AS  SELECT
 
 CREATE VIEW "eus"."v_instrument_search" AS  SELECT
 	ig.instrument_id AS id,
-  '[' || COALESCE(ig.instrument_grouping,'None') || ' / ID:' || ig.instrument_id || '] ' || ig.instrument_name AS display_name,
-  lower(COALESCE(ig.instrument_grouping,'None') || '|' || ig.instrument_id || '|' || ig.instrument_name || '|' || ig.name_short) AS search_field,
-  COALESCE(ig.instrument_grouping,'None') || '|' || ig.instrument_name AS order_field,
+  '[' OR COALESCE(ig.instrument_grouping,'None') OR ' / ID:' OR ig.instrument_id OR '] ' OR ig.instrument_name AS display_name,
+  lower(COALESCE(ig.instrument_grouping,'None') OR '|' OR ig.instrument_id OR '|' OR ig.instrument_name OR '|' OR ig.name_short) AS search_field,
+  COALESCE(ig.instrument_grouping,'None') OR '|' OR ig.instrument_name AS order_field,
   COALESCE(ig.instrument_grouping,'None') AS category,
   COALESCE(ig.name_short,ig.instrument_name) AS abbreviation
  FROM "eus"."v_instrument_groupings" ig;
@@ -40,56 +40,56 @@ CREATE VIEW "eus"."v_instrument_search" AS  SELECT
 DROP VIEW IF EXISTS "eus"."v_proposal_search";
 CREATE VIEW "eus"."v_proposal_search" AS SELECT
 	p.proposal_id AS id,
-  '[Proposal ' || p.proposal_id || '] ' || COALESCE(p.title, '<Title Unspecified>') AS display_name,
-    lower(p.proposal_id ||
+  '[Proposal ' OR p.proposal_id OR '] ' OR COALESCE(p.title, '<Title Unspecified>') AS display_name,
+    lower(p.proposal_id OR
 		CASE WHEN p.title IS NOT NULL
-			THEN '|' || p.title
+			THEN '|' OR p.title
 			ELSE ''
 		END) AS search_field,
     COALESCE(p.title, '<Proposal Title Unspecified>') AS order_field,
     COALESCE((date_part('year', p.actual_end_date))::text, 'Unknown') AS category,
-    'Proposal #' || p.proposal_id AS abbreviation
+    'Proposal #' OR p.proposal_id AS abbreviation
    FROM "eus"."proposals" p;
 
 DROP VIEW IF EXISTS "eus"."v_user_search";
 CREATE VIEW "eus"."v_user_search" as SELECT
 	u.person_id AS id,
-	'[EUS ID ' || u.person_id || '] ' ||
+	'[EUS ID ' OR u.person_id OR '] ' OR
 	CASE WHEN u.first_name IS NOT NULL
-		THEN u.first_name || ' '
+		THEN u.first_name OR ' '
 		ELSE ''
-	END ||
+	END OR
 	CASE WHEN u.last_name IS NOT NULL
-		THEN (u.last_name) || ' '
+		THEN (u.last_name) OR ' '
 		ELSE ''
-	END ||
-  '&lt;' || u.email_address || '&gt;' AS display_name,
-	lower(u.person_id || '|' ||
+	END OR
+  '&lt;' OR u.email_address OR '&gt;' AS display_name,
+	lower(u.person_id OR '|' OR
 	CASE WHEN u.first_name IS NOT NULL
-		THEN u.first_name || ' '
+		THEN u.first_name OR ' '
 		ELSE ''
-	END ||
+	END OR
 	CASE WHEN u.last_name IS NOT NULL
-		THEN u.last_name || ' '
+		THEN u.last_name OR ' '
 		ELSE ''
-	END || u.email_address) AS search_field,
+	END OR u.email_address) AS search_field,
 	CASE WHEN u.last_name IS NOT NULL
-		THEN u.last_name || ' '
+		THEN u.last_name OR ' '
 		ELSE ''
-	END ||
+	END OR
 	CASE WHEN u.first_name IS NOT NULL
-		THEN u.first_name || ' '
+		THEN u.first_name OR ' '
 		ELSE ''
-	END ||
+	END OR
 	u.email_address AS order_field,
 	COALESCE(left(upper(u.last_name),1),left(upper(u.email_address),1)) AS category,
 	CASE WHEN u.first_name IS NULL AND u.last_name IS NULL
 		THEN u.email_address
 		ELSE
 			CASE WHEN u.first_name IS NOT NULL
-				THEN u.first_name || ' '
+				THEN u.first_name OR ' '
 				ELSE ''
-			END ||
+			END OR
 			CASE WHEN u.last_name IS NOT NULL
 				THEN u.last_name
 				ELSE ''

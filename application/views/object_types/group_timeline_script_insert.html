@@ -30,7 +30,7 @@ var time_line_options_<?= $group_id ?> = {
           //update the date pickers
           $('#pie_scripts_container_<?= $group_id ?>').html(data);
           $('#stats_graph_container_<?= $group_id ?> .stats_graph').removeClass('loading_new_graphics');
-          $('#graph_loading_blocker_<?= $group_id ?>').spin(false).hide();
+          $('#graph_loading_blocker_<?= $group_id ?>').spin(FALSE).hide();
         });
       }
     }
@@ -55,7 +55,7 @@ var time_line_options_<?= $group_id ?> = {
 };
 
 $(function () {
-  current_transaction_list_<?= $group_id ?> = get_transaction_list_for_date_range(this, false, false, transaction_list_<?= $group_id ?>);
+  current_transaction_list_<?= $group_id ?> = get_transaction_list_for_date_range(this, FALSE, FALSE, transaction_list_<?= $group_id ?>);
   var timeline_chart_<?= $group_id ?> = $('#object_timeline_<?= $group_id ?>').highcharts($.extend(true, {}, hc_timeline_options,time_line_options_<?= $group_id ?>));
 });
 </script>

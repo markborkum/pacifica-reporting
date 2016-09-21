@@ -14,7 +14,7 @@
  Date: 09/14/2016 16:00:50 PM
 */
 
-PRAGMA foreign_keys = false;
+PRAGMA foreign_keys = FALSE;
 
 -- ----------------------------
 --  Table structure for cart

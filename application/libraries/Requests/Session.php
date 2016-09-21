@@ -216,7 +216,7 @@ class Requests_Session {
 	 */
 	public function request_multiple($requests, $options = array()) {
 		foreach ($requests as $key => $request) {
-			$requests[$key] = $this->merge_request($request, false);
+			$requests[$key] = $this->merge_request($request, FALSE);
 		}
 
 		$options = array_merge($this->options, $options);
@@ -246,7 +246,7 @@ class Requests_Session {
 			$request['data'] = array_merge($this->data, $request['data']);
 		}
 
-		if ($merge_options !== false) {
+		if ($merge_options !== FALSE) {
 			$request['options'] = array_merge($this->options, $request['options']);
 
 			// Disallow forcing the type, as that's a per request setting

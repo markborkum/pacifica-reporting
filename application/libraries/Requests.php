@@ -270,12 +270,12 @@ class Requests {
 	 * - `blocking`: Should we block processing on this request?
 	 *    (boolean, default: true)
 	 * - `filename`: File to stream the body to instead.
-	 *    (string|boolean, default: false)
+	 *    (string|boolean, default: FALSE)
 	 * - `auth`: Authentication handler or array of user/password details to use
 	 *    for Basic authentication
-	 *    (Requests_Auth|array|boolean, default: false)
+	 *    (Requests_Auth|array|boolean, default: FALSE)
 	 * - `proxy`: Proxy details to use for proxy by-passing and authentication
-	 *    (Requests_Proxy|array|boolean, default: false)
+	 *    (Requests_Proxy|array|boolean, default: FALSE)
 	 * - `idn`: Enable IDN parsing
 	 *    (boolean, default: true)
 	 * - `transport`: Custom transport. Either a class name, or a
@@ -445,7 +445,7 @@ class Requests {
 	 * @param boolean $multirequest Is this a multirequest?
 	 * @return array Default option values
 	 */
-	protected static function get_default_options($multirequest = false) {
+	protected static function get_default_options($multirequest = FALSE) {
 		$defaults = array(
 			'timeout' => 10,
 			'connect_timeout' => 10,
@@ -455,17 +455,17 @@ class Requests {
 			'follow_redirects' => true,
 			'blocking' => true,
 			'type' => self::GET,
-			'filename' => false,
-			'auth' => false,
-			'proxy' => false,
-			'cookies' => false,
+			'filename' => FALSE,
+			'auth' => FALSE,
+			'proxy' => FALSE,
+			'cookies' => FALSE,
 			'idn' => true,
 			'hooks' => null,
 			'transport' => null,
 			'verify' => dirname( __FILE__ ) . '/Requests/Transport/cacert.pem',
 			'verifyname' => true,
 		);
-		if ($multirequest !== false) {
+		if ($multirequest !== FALSE) {
 			$defaults['complete'] = null;
 		}
 		return $defaults;
@@ -493,14 +493,14 @@ class Requests {
 		if (is_array($options['auth'])) {
 			$options['auth'] = new Requests_Auth_Basic($options['auth']);
 		}
-		if ($options['auth'] !== false) {
+		if ($options['auth'] !== FALSE) {
 			$options['auth']->register($options['hooks']);
 		}
 
 		if (!empty($options['proxy'])) {
 			$options['proxy'] = new Requests_Proxy_HTTP($options['proxy']);
 		}
-		if ($options['proxy'] !== false) {
+		if ($options['proxy'] !== FALSE) {
 			$options['proxy']->register($options['hooks']);
 		}
 
@@ -510,11 +510,11 @@ class Requests {
 		elseif (empty($options['cookies'])) {
 			$options['cookies'] = new Requests_Cookie_Jar();
 		}
-		if ($options['cookies'] !== false) {
+		if ($options['cookies'] !== FALSE) {
 			$options['cookies']->register($options['hooks']);
 		}
 
-		if ($options['idn'] !== false) {
+		if ($options['idn'] !== FALSE) {
 			$iri = new Requests_IRI($url);
 			$iri->host = Requests_IDNAEncoder::encode($iri->ihost);
 			$url = $iri->uri;
@@ -545,7 +545,7 @@ class Requests {
 		$return->url = $url;
 
 		if (!$options['filename']) {
-			if (($pos = strpos($headers, "\r\n\r\n")) === false) {
+			if (($pos = strpos($headers, "\r\n\r\n")) === FALSE) {
 				// Crap!
 				throw new Requests_Exception('Missing header/body separator', 'requests.no_crlf_separator');
 			}
@@ -591,7 +591,7 @@ class Requests {
 
 		$options['hooks']->dispatch('requests.before_redirect_check', array(&$return, $req_headers, $req_data, $options));
 
-		if ((in_array($return->status_code, array(300, 301, 302, 303, 307)) || $return->status_code > 307 && $return->status_code < 400) && $options['follow_redirects'] === true) {
+		if ((in_array($return->status_code, array(300, 301, 302, 303, 307)) OR $return->status_code > 307 && $return->status_code < 400) && $options['follow_redirects'] === true) {
 			if (isset($return->headers['location']) && $options['redirected'] < $options['redirects']) {
 				if ($return->status_code === 303) {
 					$options['type'] = Requests::GET;
@@ -603,7 +603,7 @@ class Requests {
 					$location = Requests_IRI::absolutize($url, $location);
 					$location = $location->uri;
 				}
-				$redirected = self::request($location, $req_headers, $req_data, false, $options);
+				$redirected = self::request($location, $req_headers, $req_data, FALSE, $options);
 				$redirected->history[] = $return;
 				return $redirected;
 			}
@@ -669,7 +669,7 @@ class Requests {
 			$decoded .= $part = substr($encoded, $chunk_length, $length);
 			$encoded = substr($encoded, $chunk_length + $length + 2);
 
-			if (trim($encoded) === '0' || empty($encoded)) {
+			if (trim($encoded) === '0' OR empty($encoded)) {
 				return $decoded;
 			}
 		}
@@ -720,16 +720,16 @@ class Requests {
 			return $data;
 		}
 
-		if (function_exists('gzdecode') && ($decoded = @gzdecode($data)) !== false) {
+		if (function_exists('gzdecode') && ($decoded = @gzdecode($data)) !== FALSE) {
 			return $decoded;
 		}
-		elseif (function_exists('gzinflate') && ($decoded = @gzinflate($data)) !== false) {
+		elseif (function_exists('gzinflate') && ($decoded = @gzinflate($data)) !== FALSE) {
 			return $decoded;
 		}
-		elseif (($decoded = self::compatible_gzinflate($data)) !== false) {
+		elseif (($decoded = self::compatible_gzinflate($data)) !== FALSE) {
 			return $decoded;
 		}
-		elseif (function_exists('gzuncompress') && ($decoded = @gzuncompress($data)) !== false) {
+		elseif (function_exists('gzuncompress') && ($decoded = @gzuncompress($data)) !== FALSE) {
 			return $decoded;
 		}
 
@@ -775,7 +775,7 @@ class Requests {
 					$i = $i + 2;
 			}
 			$decompressed = self::compatible_gzinflate( substr( $gzData, $i ) );
-			if ( false !== $decompressed ) {
+			if ( FALSE !== $decompressed ) {
 				return $decompressed;
 			}
 		}
@@ -788,7 +788,7 @@ class Requests {
 		//
 		// See http://decompres.blogspot.com/ for a quick explanation of this
 		// data type
-		$huffman_encoded = false;
+		$huffman_encoded = FALSE;
 
 		// low nibble of first byte should be 0x08
 		list( , $first_nibble )    = unpack( 'h', $gzData );
@@ -800,7 +800,7 @@ class Requests {
 			$huffman_encoded = true;
 
 		if ( $huffman_encoded ) {
-			if ( false !== ( $decompressed = @gzinflate( substr( $gzData, 2 ) ) ) )
+			if ( FALSE !== ( $decompressed = @gzinflate( substr( $gzData, 2 ) ) ) )
 				return $decompressed;
 		}
 
@@ -826,24 +826,24 @@ class Requests {
 			// Determine the first byte of data, based on the above ZIP header
 			// offsets:
 			$first_file_start = array_sum( unpack( 'v2', substr( $gzData, 26, 4 ) ) );
-			if ( false !== ( $decompressed = @gzinflate( substr( $gzData, 30 + $first_file_start ) ) ) ) {
+			if ( FALSE !== ( $decompressed = @gzinflate( substr( $gzData, 30 + $first_file_start ) ) ) ) {
 				return $decompressed;
 			}
-			return false;
+			return FALSE;
 		}
 
 		// Finally fall back to straight gzinflate
-		if ( false !== ( $decompressed = @gzinflate( $gzData ) ) ) {
+		if ( FALSE !== ( $decompressed = @gzinflate( $gzData ) ) ) {
 			return $decompressed;
 		}
 
 		// Fallback for all above failing, not expected, but included for
 		// debugging and preventing regressions and to track stats
-		if ( false !== ( $decompressed = @gzinflate( substr( $gzData, 2 ) ) ) ) {
+		if ( FALSE !== ( $decompressed = @gzinflate( substr( $gzData, 2 ) ) ) ) {
 			return $decompressed;
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	public static function match_domain($host, $reference) {
@@ -856,7 +856,7 @@ class Requests {
 		// Also validates that the host has 3 parts or more, as per Firefox's
 		// ruleset.
 		$parts = explode('.', $host);
-		if (ip2long($host) === false && count($parts) >= 3) {
+		if (ip2long($host) === FALSE && count($parts) >= 3) {
 			$parts[0] = '*';
 			$wildcard = implode('.', $parts);
 			if ($wildcard === $reference) {
@@ -864,6 +864,6 @@ class Requests {
 			}
 		}
 
-		return false;
+		return FALSE;
 	}
 }

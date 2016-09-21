@@ -1,111 +1,138 @@
-<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
-  
-// function format_bytes($bytes) {
-   // if ($bytes < 1024) return $bytes.' B';
-   // elseif ($bytes < 1048576) return round($bytes / 1024, 2).' KB';
-   // elseif ($bytes < 1073741824) return round($bytes / 1048576, 2).' MB';
-   // elseif ($bytes < 1099511627776) return round($bytes / 1073741824, 2).' GB';
-   // else return round($bytes / 1099511627776, 2).' TB';
-// }
+<?php
+/**
+ * Pacifica
+ *
+ * Pacifica is an open-source data management framework designed
+ * for the curation and storage of raw and processed scientific
+ * data. It is based on the [CodeIgniter web framework](http://codeigniter.com).
+ *
+ *  The Pacifica-Reporting module provides an interface for
+ *  concerned and interested parties to view the current
+ *  contribution status of any and all instruments in the
+ *  system. The reporting interface can be customized and
+ *  filtered streamline the report to fit any level of user,
+ *  from managers through instrument operators.
+ *
+ *  This file contains a number of common functions related to
+ *  file info and handling.
+ *
+ * PHP version 5.5
+ *
+ * @package Pacifica-reporting
+ *
+ * @author  Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @license BSD https://opensource.org/licenses/BSD-3-Clause
+ *
+ * @link http://github.com/EMSL-MSC/Pacifica-reporting
+ */
 
-function quarter_to_range($quarter_num){
-  $last_q = $quarter_num - 1;
-  $this_q = $quarter_num;
-  
-  $first_month_num = $last_q * 3 + 1;
-  $last_month_num = $this_q * 3;
-  
-  $first_month = get_month_string($first_month_num);
-  $last_month = get_month_string($last_month_num);
-  
-  return "{$first_month}&ndash;{$last_month}";
- 
+  if (!defined('BASEPATH')) exit('No direct script access allowed');
+
+/**
+ *  Converts a numeric year quarter into starting/ending month
+ *
+ *  @param string $quarter_num numeric quarter of the year to use (1-4)
+ *
+ *  @return string (first_month)-(last_month) i.e. Jan-Mar
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
+function quarter_to_range($quarter_num)
+{
+    $last_q = $quarter_num - 1;
+    $this_q = $quarter_num;
+
+    $first_month_num = $last_q * 3 + 1;
+    $last_month_num = $this_q * 3;
+
+    $first_month = date("M", mktime(0, 0, 0, $first_month_num, 1, 2012));
+    $last_month = date("M", mktime(0, 0, 0, $last_month_num, 1, 2012));
+
+    return "{$first_month}&ndash;{$last_month}";
+
 }
 
-function get_month_string($month_num){
-  return date("M", mktime(0,0,0, $month_num, 1, 2012));
+/**
+ *  Checks the current status of any given file within the archive
+ *  system itself. Returns true if the file only resides currently
+ *  in the tape archive, not the spinning disk cache
+ *
+ *  @param string $path filepath to check for current status
+ *
+ *  @return boolean does the file only currently exist on tape backup?
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
+function is_file_on_tape($path)
+{
+    $on_tape = check_disk_stage($path, TRUE);
+    $on_tape = $on_tape == 0 ? TRUE : FALSE;
+    return $on_tape;
 }
 
-
-function generate_bread_crumbs($path, $controller, $method){
-  $bc_parts = !empty($path) ? explode(DIRECTORY_SEPARATOR, $path) : array();
-  $bc = array("Home" => "");
-  if(sizeof($bc_parts) > 0) {
-    foreach($bc_parts as $directory){
-      $bc[$directory] = $directory;
+/**
+ *  With the right backend support, this function can
+ *  determine the current status of any file within the
+ *  system for purposes of fast retrieval
+ *
+ *  @param string  $path    filepath to check for current status
+ *  @param boolean $numeric return a numeric value for true/false
+ *                          or return a human readable string
+ *
+ *  @return string/integer
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
+function check_disk_stage($path, $numeric = FALSE)
+{
+    //fake it out until I get real support
+    if($numeric) {
+        return 0;
+    }else{
+        return "on_tape";
     }
-  }
+    $attr = exec("which attr");
+    $status_attribute_name = "disk_stage_status";
+    $attr_cmd = "{$attr} -g \"{$status_attribute_name}\" \"{$path}\"";
+    $status_bit = exec($attr_cmd);
+    $status_bit = intval($status_bit);
 
-  $root_path = $controller.DIRECTORY_SEPARATOR.$method;
-  $bc_string = "";
-  $bc_components = array();
-  $path = rtrim($root_path,DIRECTORY_SEPARATOR);
-  $counter = 0;
-  foreach($bc as $name => $directory){
-    $counter++;
-    $path .= $directory.DIRECTORY_SEPARATOR;
-    $link_bits = $counter == sizeof($bc) ? $name : anchor($path, $name, array("class" => "bc_link"));
-    $bc_components[] = "<span class='bc_dirname'>{$link_bits}</span>";
-  }
-  $bc_string = implode("<span class='bc_divider'> &gt; </span>&nbsp", $bc_components);
-  return $bc_string;
+    $status = $status_bit == 0 ? "on_tape" : "on_disk";
+
+    $status_bit = $numeric ? $status_bit : $status;
+
+    return $status_bit;
 }
 
-function is_file_on_tape($path){
-  $on_tape = check_disk_stage($path,TRUE);
-  $on_tape = $on_tape == 0 ? true : false;
-  return $on_tape;
-}
-
-
-function check_disk_stage($path, $numeric = false){
-  //fake it out until I get real support
-  if($numeric){
-    return 0;
-  }else{
-    return "on_tape";
-  }
-  $attr = exec("which attr");
-  $status_attribute_name = "disk_stage_status";
-  $attr_cmd = "{$attr} -g \"{$status_attribute_name}\" \"{$path}\"";
-  $status_bit = exec($attr_cmd);
-  $status_bit = intval($status_bit);
-
-  $status = $status_bit == 0 ? "on_tape" : "on_disk";
-  
-  $status_bit = $numeric ? $status_bit : $status;
-  
-  return $status_bit;
-}
-
-function array_prefix_values($prefix, $array){
-  $callback = create_function('$s','return "'.$prefix.'".$s;');
-  return array_map($callback,$array);
-}
-
-function get_last_update(){
-  if ( func_num_args() < 1 ) return 0;
-  $dirs = func_get_args();
-  $files = array();
-  foreach ( $dirs as $dir )
-  {
-    // $directory = new RecursiveDirectoryIterator($dir);
-    $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir),RecursiveIteratorIterator::LEAVES_ONLY);
-    $files = array_keys(iterator_to_array($objects,TRUE));
-  }
-  $maxtimestamp = 0;
-  $maxfilename = "";
-  foreach ( $files as $file )
-  {
-    $timestamp = filemtime($file);
-    if ( $timestamp > $maxtimestamp )
+/**
+ *  Calculate the last modified date for the current file
+ *
+ *  @return datetime
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
+function get_last_update()
+{
+    if (func_num_args() < 1 ) return 0;
+    $dirs = func_get_args();
+    $files = array();
+    foreach ( $dirs as $dir )
     {
-      $maxtimestamp = $timestamp;
-      $maxfilename = $file; 
+        // $directory = new RecursiveDirectoryIterator($dir);
+        $objects = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir), RecursiveIteratorIterator::LEAVES_ONLY);
+        $files = array_keys(iterator_to_array($objects, TRUE));
     }
-  }
-  $d = new DateTime();
-  $d->setTimestamp($maxtimestamp);
-  return $d;
+    $maxtimestamp = 0;
+    $maxfilename = "";
+    foreach ( $files as $file )
+    {
+        $timestamp = filemtime($file);
+        if ($timestamp > $maxtimestamp ) {
+            $maxtimestamp = $timestamp;
+            $maxfilename = $file;
+        }
+    }
+    $d = new DateTime();
+    $d->setTimestamp($maxtimestamp);
+    return $d;
 }
-

@@ -73,7 +73,7 @@ class Requests_IDNAEncoder {
 		// Step 2: nameprep
 		$string = self::nameprep($string);
 
-		// Step 3: UseSTD3ASCIIRules is false, continue
+		// Step 3: UseSTD3ASCIIRules is FALSE, continue
 		// Step 4: Check if it's ASCII now
 		if (self::is_ascii($string)) {
 			// Skip to step 7
@@ -193,18 +193,18 @@ class Requests_IDNAEncoder {
 			if (
 				// Non-shortest form sequences are invalid
 				   $length > 1 && $character <= 0x7F
-				|| $length > 2 && $character <= 0x7FF
-				|| $length > 3 && $character <= 0xFFFF
+				OR $length > 2 && $character <= 0x7FF
+				OR $length > 3 && $character <= 0xFFFF
 				// Outside of range of ucschar codepoints
 				// Noncharacters
-				|| ($character & 0xFFFE) === 0xFFFE
-				|| $character >= 0xFDD0 && $character <= 0xFDEF
-				|| (
+				OR ($character & 0xFFFE) === 0xFFFE
+				OR $character >= 0xFDD0 && $character <= 0xFDEF
+				OR (
 					// Everything else not in ucschar
 					   $character > 0xD7FF && $character < 0xF900
-					|| $character < 0x20
-					|| $character > 0x7E && $character < 0xA0
-					|| $character > 0xEFFFD
+					OR $character < 0x20
+					OR $character > 0x7E && $character < 0xA0
+					OR $character > 0xEFFFD
 				)
 			) {
 				throw new Requests_Exception('Invalid Unicode codepoint', 'idna.invalidcodepoint', $character);
@@ -344,7 +344,7 @@ class Requests_IDNAEncoder {
 	protected static function digit_to_char($digit) {
 		// @codeCoverageIgnoreStart
 		// As far as I know, this never happens, but still good to be sure.
-		if ($digit < 0 || $digit > 35) {
+		if ($digit < 0 OR $digit > 35) {
 			throw new Requests_Exception(sprintf('Invalid digit %d', $digit), 'idna.invalid_digit', $digit);
 		}
 		// @codeCoverageIgnoreEnd

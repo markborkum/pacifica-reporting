@@ -39,16 +39,16 @@ class Requests_Response {
 	public $headers = array();
 
 	/**
-	 * Status code, false if non-blocking
+	 * Status code, FALSE if non-blocking
 	 * @var integer|boolean
 	 */
-	public $status_code = false;
+	public $status_code = FALSE;
 
 	/**
 	 * Whether the request succeeded or not
 	 * @var boolean
 	 */
-	public $success = false;
+	public $success = FALSE;
 
 	/**
 	 * Number of redirects the request used
@@ -76,9 +76,9 @@ class Requests_Response {
 	/**
 	 * Throws an exception if the request was not successful
 	 *
-	 * @throws Requests_Exception If `$allow_redirects` is false, and code is 3xx (`response.no_redirects`)
+	 * @throws Requests_Exception If `$allow_redirects` is FALSE, and code is 3xx (`response.no_redirects`)
 	 * @throws Requests_Exception_HTTP On non-successful status code. Exception class corresponds to code (e.g. {@see Requests_Exception_HTTP_404})
-	 * @param boolean $allow_redirects Set to false to throw on a 3xx as well
+	 * @param boolean $allow_redirects Set to FALSE to throw on a 3xx as well
 	 */
 	public function throw_for_status($allow_redirects = true) {
 		if ($this->status_code >= 300 && $this->status_code < 400) {

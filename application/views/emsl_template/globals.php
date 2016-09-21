@@ -1,4 +1,3 @@
-
     <!-- start global inserts -->
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">

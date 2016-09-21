@@ -1,5 +1,18 @@
 <?php
+/**
+ * CI Default Configuration
+ *
+ * PHP Version 5
+ *
+ * @category Configuration
+ * @package  Default_Config
+ * @author   Ken Auberry <Kenneth.Auberry@pnnl.gov>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
+ * @link     http://github.com/EMSL-MSC/pacifica-reporting
+ */
+
 defined('BASEPATH') OR exit('No direct script access allowed');
+
 
 date_default_timezone_set('America/Los_Angeles');
 
@@ -26,9 +39,9 @@ date_default_timezone_set('America/Los_Angeles');
 |
 */
 $protocol = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
-$rooted = isset($_SERVER["CI_ROOTED"]) && $_SERVER["CI_ROOTED"] == true ? true : false;
+$rooted = isset($_SERVER["CI_ROOTED"]) && $_SERVER["CI_ROOTED"] == TRUE ? TRUE : FALSE;
 $basedir = $rooted ? '' : '/myemsl/reporting';
-$config['base_url']	= "{$protocol}://".$_SERVER["SERVER_NAME"].$basedir;
+$config['base_url']    = "{$protocol}://".$_SERVER["SERVER_NAME"].$basedir;
 $config['base_dir'] = $basedir;
 $config['local_resources_folder'] = "application/resources";
 /*
@@ -58,7 +71,7 @@ $config['index_page'] = $rooted ? '' : 'index.php';
 |
 | WARNING: If you set this to 'PATH_INFO', URIs will always be URL-decoded!
 */
-$config['uri_protocol']	= 'PATH_INFO';
+$config['uri_protocol']    = 'PATH_INFO';
 
 /*
 |--------------------------------------------------------------------------
@@ -82,7 +95,7 @@ $config['url_suffix'] = '';
 | than english.
 |
 */
-$config['language']	= 'english';
+$config['language']    = 'english';
 
 /*
 |--------------------------------------------------------------------------
@@ -396,11 +409,11 @@ $config['sess_regenerate_destroy'] = FALSE;
 |       'cookie_httponly') will also affect sessions.
 |
 */
-$config['cookie_prefix']	= '';
-$config['cookie_domain']	= '';
-$config['cookie_path']		= '/';
-$config['cookie_secure']	= FALSE;
-$config['cookie_httponly'] 	= FALSE;
+$config['cookie_prefix']    = '';
+$config['cookie_domain']    = '';
+$config['cookie_path']        = '/';
+$config['cookie_secure']    = FALSE;
+$config['cookie_httponly']     = FALSE;
 
 /*
 |--------------------------------------------------------------------------

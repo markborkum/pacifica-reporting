@@ -47,7 +47,7 @@ class Requests_Hooks implements Requests_Hooker {
 	 */
 	public function dispatch($hook, $parameters = array()) {
 		if (empty($this->hooks[$hook])) {
-			return false;
+			return FALSE;
 		}
 
 		foreach ($this->hooks[$hook] as $priority => $hooked) {

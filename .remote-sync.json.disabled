@@ -1,0 +1,19 @@
+{
+  "transport": "scp",
+  "hostname": "dev1.my.emsl.pnl.gov",
+  "port": "22",
+  "username": "d3k857",
+  "target": "/var/www/myemsl/reporting",
+  "ignore": [
+    ".remote-sync.json",
+    ".git/**",
+    "Docker*",
+    ".travis*",
+    ".atomignore"
+  ],
+  "uploadOnSave": true,
+  "deleteLocal": FALSE,
+  "useAgent": true,
+  "useAtomicWrites": FALSE,
+  "watch": []
+}

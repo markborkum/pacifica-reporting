@@ -58,7 +58,7 @@ class Requests_IPv6
             {
                 $c2 = substr_count($ip2, ':');
             }
-            if (strpos($ip2, '.') !== false)
+            if (strpos($ip2, '.') !== FALSE)
             {
                 $c2++;
             }
@@ -153,7 +153,7 @@ class Requests_IPv6
      */
     private static function split_v6_v4($ip)
     {
-        if (strpos($ip, '.') !== false)
+        if (strpos($ip, '.') !== FALSE)
         {
             $pos = strrpos($ip, ':');
             $ipv6_part = substr($ip, 0, $pos);
@@ -180,17 +180,17 @@ class Requests_IPv6
         list($ipv6, $ipv4) = self::split_v6_v4($ip);
         $ipv6 = explode(':', $ipv6);
         $ipv4 = explode('.', $ipv4);
-        if (count($ipv6) === 8 && count($ipv4) === 1 || count($ipv6) === 6 && count($ipv4) === 4)
+        if (count($ipv6) === 8 && count($ipv4) === 1 OR count($ipv6) === 6 && count($ipv4) === 4)
         {
             foreach ($ipv6 as $ipv6_part)
             {
                 // The section can't be empty
                 if ($ipv6_part === '')
-                    return false;
+                    return FALSE;
 
                 // Nor can it be over four characters
                 if (strlen($ipv6_part) > 4)
-                    return false;
+                    return FALSE;
 
                 // Remove leading zeros (this is safe because of the above)
                 $ipv6_part = ltrim($ipv6_part, '0');
@@ -199,23 +199,23 @@ class Requests_IPv6
 
                 // Check the value is valid
                 $value = hexdec($ipv6_part);
-                if (dechex($value) !== strtolower($ipv6_part) || $value < 0 || $value > 0xFFFF)
-                    return false;
+                if (dechex($value) !== strtolower($ipv6_part) OR $value < 0 OR $value > 0xFFFF)
+                    return FALSE;
             }
             if (count($ipv4) === 4)
             {
                 foreach ($ipv4 as $ipv4_part)
                 {
                     $value = (int) $ipv4_part;
-                    if ((string) $value !== $ipv4_part || $value < 0 || $value > 0xFF)
-                        return false;
+                    if ((string) $value !== $ipv4_part OR $value < 0 OR $value > 0xFF)
+                        return FALSE;
                 }
             }
             return true;
         }
         else
         {
-            return false;
+            return FALSE;
         }
     }
 }

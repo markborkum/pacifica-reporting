@@ -1,4 +1,17 @@
-<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+<?php
+/**
+ * CI Default Database
+ *
+ * PHP Version 5
+ *
+ * @category Configuration
+ * @package  Default_Database
+ * @author   Ken Auberry <Kenneth.Auberry@pnnl.gov>
+ * @license  http://www.gnu.org/copyleft/gpl.html GNU General Public License
+ * @link     http://github.com/EMSL-MSC/pacifica-reporting
+ */
+
+ if (! defined('BASEPATH')) exit('No direct script access allowed');
 /*
 | -------------------------------------------------------------------
 | DATABASE CONNECTIVITY SETTINGS
@@ -49,7 +62,7 @@ $active_group = 'default';
 // $active_record = TRUE;
 $query_builder = TRUE;
 
-#$ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
+// $ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
 $ini_file_name = 'general.ini';
 $myemsl_array = parse_ini_file("/etc/myemsl/".$ini_file_name, TRUE);
 

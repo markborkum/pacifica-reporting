@@ -1,8 +1,44 @@
 <?php
- if (!defined('BASEPATH')) {
-     exit('No direct script access allowed');
- }
+/**
+ * Pacifica
+ *
+ * Pacifica is an open-source data management framework designed
+ * for the curation and storage of raw and processed scientific
+ * data. It is based on the [CodeIgniter web framework](http://codeigniter.com).
+ *
+ *  The Pacifica-Reporting module provides an interface for
+ *  concerned and interested parties to view the current
+ *  contribution status of any and all instruments in the
+ *  system. The reporting interface can be customized and
+ *  filtered streamline the report to fit any level of user,
+ *  from managers through instrument operators.
+ *
+ *  This file contains a number of common functions related to
+ *  file info and handling.
+ *
+ * PHP version 5.5
+ *
+ * @package Pacifica-reporting
+ *
+ * @author  Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @license BSD https://opensource.org/licenses/BSD-3-Clause
+ *
+ * @link http://github.com/EMSL-MSC/Pacifica-reporting
+ */
+ if (!defined('BASEPATH')) exit('No direct script access allowed');
 
+/**
+ *  Recursively construct the proper HTML
+ *  for representing a folder full of items
+ *
+ *  @param array $dirs       array of directory objects to process
+ *  @param array $path_array path components in array form
+ *  @param array $item_info  metadata about each item
+ *
+ *  @return void
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
 function build_folder_structure(&$dirs, $path_array, $item_info)
 {
     if (count($path_array) > 1) {
@@ -21,13 +57,24 @@ function build_folder_structure(&$dirs, $path_array, $item_info)
     }
 }
 
+/**
+ *  Construct an array of folders that can be translated to
+ *  a JSON object
+ *
+ *  @param array  $folder_obj  container for folders
+ *  @param string $folder_name display name for the folder object
+ *
+ *  @return array
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
 function format_folder_object_json($folder_obj, $folder_name)
 {
     $output = array();
 
     if (array_key_exists('folders', $folder_obj)) {
         foreach ($folder_obj['folders'] as $folder_entry => $folder_tree) {
-            $folder_output = array('title' => $folder_entry, 'folder' => true);
+            $folder_output = array('title' => $folder_entry, 'folder' => TRUE);
             $children = format_folder_object_json($folder_tree, $folder_entry);
             if (!empty($children)) {
                 foreach ($children as $child) {
@@ -46,6 +93,16 @@ function format_folder_object_json($folder_obj, $folder_name)
     return $output;
 }
 
+/**
+ *  Similar to format_folder_object_json, but outputs HTML
+ *
+ *  @param array  $folder_obj       container for folders
+ *  @param string $output_structure complete HTML structure, passed by ref
+ *
+ *  @return string
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
 function format_folder_object_html($folder_obj, &$output_structure)
 {
     foreach (array_keys($folder_obj) as $folder_entry) {
@@ -62,6 +119,16 @@ function format_folder_object_html($folder_obj, &$output_structure)
     }
 }
 
+/**
+ *  Constructs the list item for each individual object
+ *
+ *  @param array $file_obj         the file item object to format
+ *  @param array $output_structure complete HTML structure, passed by ref
+ *
+ *  @return void
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
 function format_file_object_html($file_obj, &$output_structure)
 {
     foreach ($file_obj as $file_entry) {
@@ -69,6 +136,15 @@ function format_file_object_html($file_obj, &$output_structure)
     }
 }
 
+/**
+ *  Converts byte-wise file sizes to human-readable strings
+ *
+ *  @param integer $bytes file size in bytes to convert
+ *
+ *  @return string
+ *
+ *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ */
 function format_bytes($bytes)
 {
     if ($bytes < 1024) {
@@ -82,34 +158,4 @@ function format_bytes($bytes)
     } else {
         return round($bytes / 1099511627776, 2).' TB';
     }
-}
-
-function process_search_query($query_filter)
-{
-    $query_terms = explode(' ', $query_filter);
-
-    return $query_terms;
-}
-
-function split_array_into_ranges($items)
-{
-	sort($items);
-	$output_array = array();
-	$end_value = 0;
-	$start_value = intval(array_shift($items));
-	$prev_value = $start_value;
-	while($item = intval(array_shift($items))){
-		if($item - $prev_value > 1 and $item != $prev_value){
-			$end_value = $prev_value;
-			if($start_value == $end_value){
-				$output_array[] = array($start_value);
-			}else{
-				$output_array[] = array($start_value,$end_value);
-			}
-			$start_value = $item;
-		}
-		$prev_value = $item;
-	}
-    $output_array[] = array($start_value,$prev_value);
-	return $output_array;
 }

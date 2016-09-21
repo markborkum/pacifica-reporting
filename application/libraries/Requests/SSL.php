@@ -32,12 +32,12 @@ class Requests_SSL {
 	public static function verify_certificate($host, $cert) {
 		// Calculate the valid wildcard match if the host is not an IP address
 		$parts = explode('.', $host);
-		if (ip2long($host) === false) {
+		if (ip2long($host) === FALSE) {
 			$parts[0] = '*';
 		}
 		$wildcard = implode('.', $parts);
 
-		$has_dns_alt = false;
+		$has_dns_alt = FALSE;
 
 		// Check the subjectAltName
 		if (!empty($cert['extensions']) && !empty($cert['extensions']['subjectAltName'])) {
@@ -68,7 +68,7 @@ class Requests_SSL {
 			}
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	/**
@@ -93,22 +93,22 @@ class Requests_SSL {
 		// Check the first part of the name
 		$first = array_shift($parts);
 
-		if (strpos($first, '*') !== false) {
+		if (strpos($first, '*') !== FALSE) {
 			// Check that the wildcard is the full part
 			if ($first !== '*') {
-				return false;
+				return FALSE;
 			}
 
 			// Check that we have at least 3 components (including first)
 			if (count($parts) < 2) {
-				return false;
+				return FALSE;
 			}
 		}
 
 		// Check the remaining parts
 		foreach ($parts as $part) {
-			if (strpos($part, '*') !== false) {
-				return false;
+			if (strpos($part, '*') !== FALSE) {
+				return FALSE;
 			}
 		}
 
@@ -126,7 +126,7 @@ class Requests_SSL {
 	public static function match_domain($host, $reference) {
 		// Check if the reference is blacklisted first
 		if (self::verify_reference_name($reference) !== true) {
-			return false;
+			return FALSE;
 		}
 
 		// Check for a direct match
@@ -137,7 +137,7 @@ class Requests_SSL {
 		// Calculate the valid wildcard match if the host is not an IP address
 		// Also validates that the host has 3 parts or more, as per Firefox's
 		// ruleset.
-		if (ip2long($host) === false) {
+		if (ip2long($host) === FALSE) {
 			$parts = explode('.', $host);
 			$parts[0] = '*';
 			$wildcard = implode('.', $parts);
@@ -146,6 +146,6 @@ class Requests_SSL {
 			}
 		}
 
-		return false;
+		return FALSE;
 	}
 }

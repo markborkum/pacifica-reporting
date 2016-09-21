@@ -58,7 +58,7 @@ class Requests_Cookie {
 		$default_flags = array(
 			'creation' => time(),
 			'last-access' => time(),
-			'persistent' => false,
+			'persistent' => FALSE,
 			'host-only' => true,
 		);
 		$this->flags = array_merge($default_flags, $flags);
@@ -74,15 +74,15 @@ class Requests_Cookie {
 	 */
 	public function uriMatches(Requests_IRI $uri) {
 		if (!$this->domainMatches($uri->host)) {
-			return false;
+			return FALSE;
 		}
 
 		if (!$this->pathMatches($uri->path)) {
-			return false;
+			return FALSE;
 		}
 
 		if (!empty($this->attributes['secure']) && $uri->scheme !== 'https') {
-			return false;
+			return FALSE;
 		}
 
 		return true;
@@ -110,30 +110,30 @@ class Requests_Cookie {
 		// If the cookie is marked as host-only and we don't have an exact
 		// match, reject the cookie
 		if ($this->flags['host-only'] === true) {
-			return false;
+			return FALSE;
 		}
 
 		if (strlen($string) <= strlen($domain_string)) {
 			// For obvious reasons, the string cannot be a suffix if the domain
 			// is shorter than the domain string
-			return false;
+			return FALSE;
 		}
 
 		if (substr($string, -1 * strlen($domain_string)) !== $domain_string) {
 			// The domain string should be a suffix of the string.
-			return false;
+			return FALSE;
 		}
 
 		$prefix = substr($string, 0, strlen($string) - strlen($domain_string));
 		if (substr($prefix, -1) !== '.') {
 			// The last character of the string that is not included in the
 			// domain string should be a %x2E (".") character.
-			return false;
+			return FALSE;
 		}
 
 		if (preg_match('#^(.+\.)\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$#', $string)) {
 			// The string should be a host name (i.e., not an IP address).
-			return false;
+			return FALSE;
 		}
 
 		return true;
@@ -181,7 +181,7 @@ class Requests_Cookie {
 			}
 		}
 
-		return false;
+		return FALSE;
 	}
 
 	/**
@@ -273,7 +273,7 @@ class Requests_Cookie {
 		if (!empty($name)) {
 			$value = $string;
 		}
-		elseif (strpos($kvparts, '=') === false) {
+		elseif (strpos($kvparts, '=') === FALSE) {
 			// Some sites might only have a value without the equals separator.
 			// Deviate from RFC 6265 and pretend it was actually a blank name
 			// (`=foo`)
@@ -293,7 +293,7 @@ class Requests_Cookie {
 
 		if (!empty($parts)) {
 			foreach ($parts as $part) {
-				if (strpos($part, '=') === false) {
+				if (strpos($part, '=') === FALSE) {
 					$part_key = $part;
 					$part_value = true;
 				}
@@ -329,7 +329,7 @@ class Requests_Cookie {
 			// Default domain/path attributes
 			if (empty($parsed->attributes['domain']) && !empty($origin)) {
 				$parsed->attributes['domain'] = $origin->host;
-				$parsed->flags['host-only'] = false;
+				$parsed->flags['host-only'] = FALSE;
 			}
 			else {
 				$parsed->flags['host-only'] = true;
