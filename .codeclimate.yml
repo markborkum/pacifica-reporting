@@ -1,0 +1,25 @@
+---
+engines:
+  duplication:
+    enabled: true
+    config:
+      languages:
+      - php
+      - javascript
+  eslint:
+    enabled: true
+  fixme:
+    enabled: true
+  radon:
+    enabled: true
+ratings:
+  paths:
+  - "**.php"
+  - "**.js"
+  - "**.inc"
+  - "**.css"
+exclude_paths:
+ - tests/
+ - system/
+ - websystem/
+ - resources/
