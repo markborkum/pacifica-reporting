@@ -58,8 +58,12 @@ class Baseline_controller extends CI_Controller
         $this->application_version = $this->config->item('application_version');
         $this->load->helper(array('user', 'url', 'html', 'myemsl', 'file_info'));
         define('ITEM_CACHE', 'item_time_cache_by_transaction');
-        $this->user_id = get_user();
-
+        if(getenv('CI_ENV') !== 'unit_testing') {
+            $this->user_id = get_user();
+        }else
+        {
+            $this->user_id = 43751;
+        }
         if (!$this->user_id) {
             //something is wrong with the authentication system or the user's log in
             $message = 'Unable to retrieve username from [REMOTE_USER]';

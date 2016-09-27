@@ -6,7 +6,7 @@ SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
-SET check_function_bodies = FALSE;
+SET check_function_bodies = false;
 SET client_min_messages = warning;
 
 --
@@ -36,7 +36,7 @@ ALTER FUNCTION website_prefs.set_updated_time() OWNER TO metadata_admins;
 
 SET default_tablespace = '';
 
-SET default_with_oids = FALSE;
+SET default_with_oids = false;
 
 --
 -- Name: reporting_object_group_option_defaults; Type: TABLE; Schema: website_prefs; Owner: metadata_admins; Tablespace: 

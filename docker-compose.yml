@@ -1,0 +1,10 @@
+reportingbackend:
+  build: .
+
+reportingauth:
+  build: .
+  dockerfile: Dockerfile.auth
+  links:
+   - reportingbackend:backend
+  ports:
+   - 8080:80

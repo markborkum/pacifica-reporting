@@ -360,7 +360,6 @@ class Group extends Baseline_controller
         else {
             $time_range = $options_list['time_range'];
         }
-
         $time_basis = !$time_basis ? $options_list['time_basis'] : $time_basis;
         $start_date = !$start_date || !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
         $end_date   = !$end_date || !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;

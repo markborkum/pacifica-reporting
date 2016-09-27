@@ -93,6 +93,7 @@ class Group_info_model extends CI_Model
 
             $group_info   = $query->row_array();
             $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+            // echo $DB_prefs->last_query();
             // var_dump($member_query->result_array());
             // echo "<br /><br />";
             if ($member_query && $member_query->num_rows() > 0) {
@@ -145,7 +146,7 @@ class Group_info_model extends CI_Model
             if ($end_time_obj > $latest_obj) {
                 $end_time_obj = clone $latest_obj;
                 $this->change_group_option($group_id, 'end_time', $end_time_obj->format('Y-m-d'));
-                if ($start_time_obj < $earliest_obj OR $start_time_obj > $latest_obj) {
+                if ($start_time_obj < $earliest_obj || $start_time_obj > $latest_obj) {
                     $start_time_obj = clone $latest_obj;
                     $start_time_obj->modify('-1 month');
                     $this->change_group_option($group_id, 'start_time', $start_time_obj->format('Y-m-d'));
@@ -153,7 +154,7 @@ class Group_info_model extends CI_Model
             } else if ($start_time_obj < $earliest_obj) {
                 $start_time_obj = clone $earliest_obj;
                 $this->change_group_option($group_id, 'start_time', $start_time_obj->format('Y-m-d'));
-                if ($end_time_obj < $start_time_obj OR $end_time_obj > $latest_obj) {
+                if ($end_time_obj < $start_time_obj || $end_time_obj > $latest_obj) {
                     $end_time_obj = clone $start_time_obj;
                     $end_time_obj->modify('+1 month');
                     $this->change_group_option($group_id, 'end_time', $end_time_obj->format('Y-m-d'));
@@ -644,7 +645,7 @@ class Group_info_model extends CI_Model
         );
         $query = $this->db->get(ITEM_CACHE);
         // echo $this->db->last_query();
-        if ($query && $query->num_rows() > 0 OR !empty($query->row()->latest_upload)) {
+        if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
             $row           = $query->row_array();
             $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : FALSE;
             $latest_time   = !empty($row['latest']) ? new DateTime($row['latest']) : FALSE;
@@ -740,7 +741,7 @@ class Group_info_model extends CI_Model
         $this->db->join('files f', 't.transaction = f.transaction');
         $query = $this->db->get();
 
-        if ($query && $query->num_rows() > 0 OR !empty($query->row()->latest_upload)) {
+        if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
             $row           = $query->row_array();
             $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : FALSE;
             $latest_time   = !empty($row['latest']) ? new DateTime($row['latest']) : FALSE;

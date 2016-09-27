@@ -182,7 +182,7 @@ class Summary_model extends CI_Model
         $end_date_obj    = new DateTime($end_date);
         $available_dates = $this->_generate_available_dates($start_date_obj, $end_date_obj);
 
-        if($group_type == 'instrument' OR $group_type == 'proposal') {
+        if($group_type == 'instrument' || $group_type == 'proposal') {
             $group_list_retrieval_fn_name = "get_{$group_type}_group_list";
             $group_collection = array();
             foreach ($id_list as $item_id) {
@@ -343,7 +343,7 @@ class Summary_model extends CI_Model
                     $results[$row->category][$row->group_name] = $row->item_count;
                 }
 
-                if($this->is_emsl_staff OR ($row->category == 'proposal' && in_array($row->group_name, $available_proposals))) {
+                if($this->is_emsl_staff || ($row->category == 'proposal' && in_array($row->group_name, $available_proposals))) {
                     $results[$row->category][$row->group_name] = $row->item_count;
                 }else if($row->category == 'proposal' && !in_array($row->group_name, $available_proposals)) {
                     if(!isset($results[$row->category]['Other'])) {
@@ -405,8 +405,8 @@ class Summary_model extends CI_Model
                                  "group_type"       => $group_type,
                                 );
         $this->db->where_in('group_id', $group_list)->where($subquery_where_array)->distinct();
-        $this->db->select('transaction')->from(ITEM_CACHE);
-        $subquery     = 'transaction in ('.$this->db->get_compiled_select().')';
+        $this->db->select('transaction')->from(ITEM_CACHE." ic");
+        $subquery     = '"i"."transaction" in ('.$this->db->get_compiled_select().')';
         $select_array = array(
                          "g.name as group_name",
                          "MIN(g.type) as group_type",
@@ -433,7 +433,7 @@ class Summary_model extends CI_Model
                     $results[$row->category][$row->group_name] = $row->item_count;
                 }
 
-                if($this->is_emsl_staff OR ($row->category == 'proposal' && in_array($row->group_name, $available_proposals))) {
+                if($this->is_emsl_staff || ($row->category == 'proposal' && in_array($row->group_name, $available_proposals))) {
                     $results[$row->category][$row->group_name] = $row->item_count;
                 }else if($row->category == 'proposal' && !in_array($row->group_name, $available_proposals)) {
                     if(!isset($results[$row->category]['Other'])) {

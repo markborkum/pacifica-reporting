@@ -1,0 +1,4 @@
+docker stop `docker ps -q`;docker rm myemsl-reporting
+docker build -t ci-stack .
+docker run --name myemsl-reporting -d ci-stack
+docker exec -i -t myemsl-reporting /bin/bash

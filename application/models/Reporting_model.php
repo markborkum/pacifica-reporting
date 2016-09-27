@@ -124,7 +124,7 @@ class Reporting_model extends CI_Model
             foreach($query->result_array() as $row){
                 $row['proposal_id']   = array_key_exists('proposal', $eus_lookup[$row['upload_id']]) ? $eus_lookup[$row['upload_id']]['proposal'] : "Unknown";
                 $row['instrument_id'] = array_key_exists('instrument', $eus_lookup[$row['upload_id']]) ? $eus_lookup[$row['upload_id']]['instrument'] : "Unknown";
-                if($this->is_emsl_staff OR in_array($row['proposal_id'], $available_proposals)) {
+                if($this->is_emsl_staff || in_array($row['proposal_id'], $available_proposals)) {
                     $results[$row['upload_id']] = $row;
                 }
             }
