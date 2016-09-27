@@ -1,10 +1,10 @@
 var hc_pie_options = {
-    credits: FALSE,
+    credits: false,
     chart: {
-        animation: FALSE,
+        animation: false,
         plotBackgroundColor: null,
         plotBorderWidth: null,
-        plotShadow: FALSE,
+        plotShadow: false,
         spacing: [10, 0, 0, 0],
         type: 'pie'
     },
@@ -29,7 +29,7 @@ var hc_pie_options = {
             allowPointSelect: true,
             cursor: 'pointer',
             dataLabels: {
-                enabled: FALSE,
+                enabled: false,
                 floating: true
             },
             showInLegend: true
@@ -37,12 +37,12 @@ var hc_pie_options = {
     },
     series: [{
         name: 'Uploads',
-        animation: FALSE,
+        animation: false,
     }]
 };
 
 var hc_timeline_options = {
-    credits: FALSE,
+    credits: false,
     chart: {
         animation: {
             duration: 250
@@ -59,7 +59,7 @@ var hc_timeline_options = {
         text: ''
     },
     legend: {
-        enabled: FALSE
+        enabled: false
     },
     tooltip: {
         pointFormat: '<strong>{point.name} {point.y}{valueSuffix}</strong>',
@@ -68,7 +68,7 @@ var hc_timeline_options = {
     plotOptions: {
         series: {
             marker: {
-                enabled: FALSE
+                enabled: false
             },
             animation: {
                 duration: 250
@@ -143,7 +143,7 @@ var get_transaction_info = function(el, transaction_list) {
         var posting = $.post(url, JSON.stringify(transaction_list), function(data) {
             details_container.html(data);
             disclosure_arrow.removeClass('dc_up').addClass('dc_down');
-            load_indicator.fadeOut().spin(FALSE);
+            load_indicator.fadeOut().spin(false);
             details_container.show();
         });
         posting.done(function() {
@@ -204,12 +204,12 @@ var timeline_load_new_data_check = function(timeline_obj, new_start, new_end) {
     // debugger;
     var chart = timeline_obj;
     var x_extremes = chart.xAxis[0].getExtremes();
-    if (new_end > x_extremes.dataMax OR new_start < x_extremes.dataMin) {
+    if (new_end > x_extremes.dataMax || new_start < x_extremes.dataMin) {
         //we're outside of our loaded data, need to request more
         return true;
     } else {
         //still inside our current bounds, just zoom
-        return FALSE;
+        return false;
     }
 };
 
@@ -220,8 +220,8 @@ var load_new_timeline_data = function(timeline_obj, object_type, object_id, star
     var tx_data = timeline_obj.series[1];
 
     var getter = $.get(url, function(data) {
-        fv_data.setData(data.file_volumes, FALSE);
-        tx_data.setData(data.transaction_counts, FALSE);
+        fv_data.setData(data.file_volumes, false);
+        tx_data.setData(data.transaction_counts, false);
         timeline_obj.redraw();
     });
 };
@@ -234,9 +234,9 @@ var load_new_group_timeline_data = function(timeline_obj, object_type, group_id,
     var tx_data = timeline_obj.series[1];
     $('#loading_blocker_' + group_id).spin().show();
     var getter = $.get(url, function(data) {
-        $('#loading_blocker_' + group_id).spin(FALSE).hide();
-        fv_data.setData(data.file_volumes, FALSE);
-        tx_data.setData(data.transaction_counts, FALSE);
+        $('#loading_blocker_' + group_id).spin(false).hide();
+        fv_data.setData(data.file_volumes, false);
+        tx_data.setData(data.transaction_counts, false);
         timeline_obj.redraw();
     });
 };
@@ -260,7 +260,7 @@ var load_results = function(object_type, object_id) {
     var url = base_url + 'item/get_reporting_info/' + object_type + '/' + object_id + '/' + time_range;
     var getter = $.get(url);
     getter.done(function(data, status) {
-        $('#loading_status_' + object_id).spin(FALSE);
+        $('#loading_status_' + object_id).spin(false);
         $('#object_body_container_' + object_id).replaceWith(data);
     });
 };
@@ -274,7 +274,7 @@ var load_group_results = function(object_type, group_id, item_list) {
     var url = base_url + 'group/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_basis + '/' + time_range;
     var getter = $.get(url);
     getter.done(function(data, status) {
-        $('#loading_status_' + group_id).spin(FALSE).hide();
+        $('#loading_status_' + group_id).spin(false).hide();
         $('#object_body_' + group_id + ' .info_message').hide();
         if ($('#object_body_container_' + group_id).length == 0) {
             $('#object_body_' + group_id).append(data);
@@ -470,7 +470,7 @@ $(function() {
             thousandsSep: ""
         },
         global: {
-            useUTC: FALSE
+            useUTC: false
         }
     });
 

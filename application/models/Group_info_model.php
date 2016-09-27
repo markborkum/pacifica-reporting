@@ -126,7 +126,7 @@ class Group_info_model extends CI_Model
      */
     public function get_group_info($group_id)
     {
-        $group_info['options_list'] = $this->get_group_options($group_id);
+        $group_info = $this->get_group_options($group_id);
 
         $earliest_latest = $this->earliest_latest_data_for_list(
             $group_info['group_type'],

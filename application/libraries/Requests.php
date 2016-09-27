@@ -181,7 +181,7 @@ class Requests {
 		if (self::$transport[$cap_string] === null) {
 			throw new Requests_Exception('No working transports found', 'notransport', self::$transports);
 		}
-		
+
 		return new self::$transport[$cap_string]();
 	}
 
@@ -591,7 +591,7 @@ class Requests {
 
 		$options['hooks']->dispatch('requests.before_redirect_check', array(&$return, $req_headers, $req_data, $options));
 
-		if ((in_array($return->status_code, array(300, 301, 302, 303, 307)) OR $return->status_code > 307 && $return->status_code < 400) && $options['follow_redirects'] === true) {
+		if ((in_array($return->status_code, array(300, 301, 302, 303, 307)) || $return->status_code > 307 && $return->status_code < 400) && $options['follow_redirects'] === true) {
 			if (isset($return->headers['location']) && $options['redirected'] < $options['redirects']) {
 				if ($return->status_code === 303) {
 					$options['type'] = Requests::GET;
@@ -669,7 +669,7 @@ class Requests {
 			$decoded .= $part = substr($encoded, $chunk_length, $length);
 			$encoded = substr($encoded, $chunk_length + $length + 2);
 
-			if (trim($encoded) === '0' OR empty($encoded)) {
+			if (trim($encoded) === '0' || empty($encoded)) {
 				return $decoded;
 			}
 		}

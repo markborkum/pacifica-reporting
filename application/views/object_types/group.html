@@ -31,7 +31,7 @@
       <?php $edit_display_tag = !empty($group_info['item_list']) ? ' style="display:none;"' : ""; ?>
       <div class="group_edit_section<?= $closed_tag ?>" id="group_edit_section_<?= $id ?>"<?= $edit_display_tag ?>>
         <div class="group_search_bar_container" id="group_search_bar_container_<?= $id ?>">
-          <form onsubmit="return FALSE;" id="group_search_form_<?= $id ?>" class="group_search_form">
+          <form onsubmit="return false;" id="group_search_form_<?= $id ?>" class="group_search_form">
             <h4 class="group_edit_section">Edit Group Name</h4>
             <div class="group_name_edit_container" id="group_name_edit_container_<?= $id ?>">
               <input type="text" class="group_name_editor flat_right_side" id="group_name_editor_<?= $id ?>" name="group_name_editor_<?= $id ?>" placeholder="<?= $group_info['group_name'] ?>" />
@@ -150,8 +150,8 @@
         //reload the object guts
       });
       var remove_dialog_<?= $id ?> = $('#confirm_removal_dialog_<?= $id ?>').dialog({
-        resizable:FALSE,
-        autoOpen:FALSE,
+        resizable:false,
+        autoOpen:false,
         modal:true,
         width:350,
         buttons: {
@@ -229,7 +229,7 @@
         startDate: '<?= $placeholder_info[$id]['times']['start_time_object']->format('m/d/Y'); ?>',
         endDate: '<?= $placeholder_info[$id]['times']['end_time_object']->format('m/d/Y'); ?>',
         autoUpdateInput: true,
-        linkedCalendars:FALSE,
+        linkedCalendars:false,
         drops:'up',
         ranges: {
           'Last 7 Days': [moment().subtract(6, 'days'), moment()],

@@ -90,7 +90,7 @@ class Ajax extends Baseline_controller
         if ($this->input->post()) {
               $group_name = $this->input->post('group_name');
         }
-        elseif ($this->input->is_ajax_request() OR $this->input->raw_input_stream) {
+        elseif ($this->input->is_ajax_request() || $this->input->raw_input_stream) {
             $post_info = json_decode($this->input->raw_input_stream, TRUE);
             // $post_info = $post_info[0];
             $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : FALSE;
@@ -129,7 +129,7 @@ class Ajax extends Baseline_controller
         if ($this->input->post()) {
             $new_group_name = $this->input->post('group_name');
         }
-        elseif ($this->input->is_ajax_request() OR file_get_contents('php://input')) {
+        elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
             $post_info = json_decode($http_raw_post_data, TRUE);
             if (array_key_exists('group_name', $post_info)) {
@@ -200,14 +200,14 @@ class Ajax extends Baseline_controller
             $option_type = $this->input->post('option_type');
             $option_value = $this->input->post('option_value');
         }
-        elseif ($this->input->is_ajax_request() OR $this->input->raw_input_stream) {
+        elseif ($this->input->is_ajax_request() || $this->input->raw_input_stream) {
             $http_raw_post_data = file_get_contents('php://input');
             $post_info = json_decode($http_raw_post_data, TRUE);
             // $post_info = $post_info[0];
             $option_type = array_key_exists('option_type', $post_info) ? $post_info['option_type'] : FALSE;
             $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : FALSE;
         }
-        if (!$option_type OR !$option_value) {
+        if (!$option_type || !$option_value) {
             $missing_types = array();
             $message = "Group option update information was incomplete (missing '";
             //$message .= !$option_type ? " 'option_type' "
@@ -321,7 +321,7 @@ class Ajax extends Baseline_controller
         if ($this->input->post()) {
             $object_list = $this->input->post();
         }
-        elseif ($this->input->is_ajax_request() OR file_get_contents('php://input')) {
+        elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
             $object_list = json_decode($http_raw_post_data, TRUE);
         }

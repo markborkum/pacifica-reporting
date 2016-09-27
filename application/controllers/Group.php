@@ -277,7 +277,7 @@ class Group extends Baseline_controller
         if ($this->input->post()) {
             $transaction_list = $this->input->post();
         }
-        else if ($this->input->is_ajax_request() OR file_get_contents('php://input')) {
+        else if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
             $transaction_list   = json_decode($http_raw_post_data, TRUE);
         }
@@ -362,8 +362,8 @@ class Group extends Baseline_controller
         }
 
         $time_basis = !$time_basis ? $options_list['time_basis'] : $time_basis;
-        $start_date = !$start_date OR !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
-        $end_date   = !$end_date OR !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;
+        $start_date = !$start_date || !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
+        $end_date   = !$end_date || !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;
 
         $object_id_list = array_values($item_list);
         $this->page_data['object_id_list']         = $object_id_list;
@@ -390,8 +390,8 @@ class Group extends Baseline_controller
         $valid_et = strtotime($end_date);
 
         $this->benchmark->mark('time_range_verify_start');
-        if (!$valid_tr OR ($valid_st && $valid_et)) {
-            if ($time_range === 'custom' OR ($valid_st && $valid_et)) {
+        if (!$valid_tr || ($valid_st && $valid_et)) {
+            if ($time_range === 'custom' || ($valid_st && $valid_et)) {
                 $earliest_available_object = new DateTime($available_time_range['earliest']);
                 $latest_available_object   = new DateTime($available_time_range['latest']);
                 $start_date_object         = new DateTime($start_date);
@@ -425,7 +425,7 @@ class Group extends Baseline_controller
             }//end if
         }
         else {
-            if (($valid_st OR $valid_et) && !($valid_st && $valid_et)) {
+            if (($valid_st || $valid_et) && !($valid_st && $valid_et)) {
                 $times = time_range_to_date_pair($time_range, $available_time_range, $start_date, $end_date);
             }
             else {

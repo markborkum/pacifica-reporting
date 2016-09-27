@@ -7,11 +7,11 @@ $(function () {
       thousandsSep: ""
     },
     global: {
-      useUTC: FALSE
+      useUTC: false
     }
   });
   var timeline_chart_<?= $object_id ?> = $('#object_timeline_<?= $object_id ?>').highcharts({
-    credits: FALSE,
+    credits: false,
     chart: {
       animation: {
         duration: 250
@@ -53,7 +53,7 @@ $(function () {
       text: ''
     },
     legend: {
-      enabled: FALSE
+      enabled: false
     },
     tooltip: {
       pointFormat: '<strong>{point.name} {point.y}{valueSuffix}</strong>',
@@ -62,7 +62,7 @@ $(function () {
     plotOptions: {
       series: {
         marker: {
-          enabled: FALSE
+          enabled: false
         },
         animation: {
           duration: 250

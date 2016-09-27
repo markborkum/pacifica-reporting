@@ -180,7 +180,7 @@ class Requests_IPv6
         list($ipv6, $ipv4) = self::split_v6_v4($ip);
         $ipv6 = explode(':', $ipv6);
         $ipv4 = explode('.', $ipv4);
-        if (count($ipv6) === 8 && count($ipv4) === 1 OR count($ipv6) === 6 && count($ipv4) === 4)
+        if (count($ipv6) === 8 && count($ipv4) === 1 || count($ipv6) === 6 && count($ipv4) === 4)
         {
             foreach ($ipv6 as $ipv6_part)
             {
@@ -199,7 +199,7 @@ class Requests_IPv6
 
                 // Check the value is valid
                 $value = hexdec($ipv6_part);
-                if (dechex($value) !== strtolower($ipv6_part) OR $value < 0 OR $value > 0xFFFF)
+                if (dechex($value) !== strtolower($ipv6_part) || $value < 0 || $value > 0xFFFF)
                     return FALSE;
             }
             if (count($ipv4) === 4)
@@ -207,7 +207,7 @@ class Requests_IPv6
                 foreach ($ipv4 as $ipv4_part)
                 {
                     $value = (int) $ipv4_part;
-                    if ((string) $value !== $ipv4_part OR $value < 0 OR $value > 0xFF)
+                    if ((string) $value !== $ipv4_part || $value < 0 || $value > 0xFF)
                         return FALSE;
                 }
             }
