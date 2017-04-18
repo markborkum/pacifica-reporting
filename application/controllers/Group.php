@@ -24,7 +24,7 @@
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
-require_once 'Baseline_controller.php';
+require_once 'Baseline_api_controller.php';
 
 /**
  *  Group is a CI controller class that extends Baseline_controller
@@ -49,7 +49,7 @@ require_once 'Baseline_controller.php';
  * @see    https://github.com/EMSL-MSC/pacifica-reporting
  * @access public
  */
-class Group extends Baseline_controller
+class Group extends Baseline_api_controller
 {
     /**
      * The timestamp when this file was last modified
@@ -67,10 +67,10 @@ class Group extends Baseline_controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Reporting_model', 'rep');
+        // $this->load->model('Reporting_model', 'rep');
         $this->load->model('Group_info_model', 'gm');
-        $this->load->model('Summary_model', 'summary');
-        $this->load->library('EUS', '', 'eus');
+        $this->load->model('Summary_api_model', 'summary');
+        // $this->load->library('EUS', '', 'eus');
         $this->load->helper(
             array(
              'network',
@@ -80,13 +80,15 @@ class Group extends Baseline_controller
              'item',
              'search_term',
              'cookie',
+             'proposal',
+             'myemsl_api'
             )
         );
         $this->last_update_time = get_last_update(APPPATH);
         $this->accepted_object_types = array(
                                         'instrument',
                                         'user',
-                                        'proposal',
+                                        'proposal'
                                        );
         $this->accepted_time_basis_types = array(
                                             'submit_time',
@@ -195,7 +197,7 @@ class Group extends Baseline_controller
                 $valid_date_range = $this->gm->earliest_latest_data_for_list(
                     $object_type, $group_info['item_list'], $time_basis
                 );
-                $my_times = $this->summary->fix_time_range(
+                $my_times = fix_time_range(
                     $time_range,
                     $my_start_date,
                     $my_end_date,
@@ -282,7 +284,7 @@ class Group extends Baseline_controller
             $transaction_list   = json_decode($http_raw_post_data, TRUE);
         }
 
-        $results = $this->rep->detailed_transaction_list($transaction_list);
+        $results = $this->summary->detailed_transaction_list($transaction_list);
         $this->page_data['transaction_info'] = $results;
 
         $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
@@ -305,9 +307,16 @@ class Group extends Baseline_controller
      *  @method get_reporting_info_list
      *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_reporting_info_list($object_type, $group_id, $time_basis = FALSE, $time_range = FALSE, $start_date = FALSE, $end_date = FALSE, $with_timeline = TRUE)
+    public function get_reporting_info_list(
+        $object_type, $group_id, $time_basis = FALSE,
+        $time_range = FALSE, $start_date = FALSE,
+        $end_date = FALSE, $with_timeline = TRUE
+    )
     {
-        $this->_get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date, $end_date, TRUE, FALSE);
+        $this->_get_reporting_info_list_base(
+            $object_type, $group_id, $time_basis, $time_range,
+            $start_date, $end_date, TRUE, FALSE
+        );
 
     }
 
@@ -325,9 +334,16 @@ class Group extends Baseline_controller
      * @return none  pushes to viewfile
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_reporting_info_list_no_timeline($object_type, $group_id, $time_basis = FALSE, $time_range = FALSE, $start_date = FALSE, $end_date = FALSE)
+    public function get_reporting_info_list_no_timeline(
+        $object_type, $group_id, $time_basis = FALSE,
+        $time_range = FALSE, $start_date = FALSE,
+        $end_date = FALSE
+    )
     {
-        $this->_get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date, $end_date, FALSE, FALSE);
+        $this->_get_reporting_info_list_base(
+            $object_type, $group_id, $time_basis, $time_range,
+            $start_date, $end_date, FALSE, FALSE
+        );
 
     }//end get_reporting_info_list_no_timeline()
 
@@ -347,13 +363,19 @@ class Group extends Baseline_controller
      * @method _get_reporting_info_list_base
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    private function _get_reporting_info_list_base($object_type, $group_id, $time_basis, $time_range, $start_date = FALSE, $end_date = FALSE, $with_timeline = TRUE, $full_object = FALSE)
+    private function _get_reporting_info_list_base(
+        $object_type, $group_id, $time_basis, $time_range,
+        $start_date = FALSE, $end_date = FALSE, $with_timeline = TRUE,
+        $full_object = FALSE
+    )
     {
         $this->benchmark->mark('get_group_info_start');
         $group_info = $this->gm->get_group_info($group_id);
         $this->benchmark->mark('get_group_info_end');
+
         $item_list    = $group_info['item_list'];
         $options_list = $group_info['options_list'];
+        $available_time_range = $group_info['time_list'];
         if ($time_range && $time_range !== $options_list['time_range']) {
             $this->gm->change_group_option($group_id, 'time_range', $time_range);
         }
@@ -370,10 +392,7 @@ class Group extends Baseline_controller
         $this->page_data['object_type']            = $object_type;
         $this->page_data['group_id'] = $group_id;
 
-        $this->benchmark->mark('get_earliest_latest_start');
-        $available_time_range = $this->gm->earliest_latest_data_for_list($object_type, $object_id_list, $time_basis);
         $latest_data          = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : FALSE;
-        $this->benchmark->mark('get_earliest_latest_end');
 
         if (!$latest_data) {
             $this->page_data['results_message'] = 'No Data Available for this group of '.plural(ucwords($object_type));
@@ -435,15 +454,20 @@ class Group extends Baseline_controller
 
         extract($times);
 
-        $transaction_retrieval_func = "summarize_uploads_by_{$object_type}_list";
-        $transaction_info           = array();
-        $this->benchmark->mark("{$transaction_retrieval_func}_start");
-        $transaction_info = $this->summary->$transaction_retrieval_func($object_id_list, $start_date, $end_date, $with_timeline, $time_basis);
-        unset($transaction_info['transaction_list']);
+        // $transaction_retrieval_func = "summarize_uploads_by_{$object_type}_list";
+        // $transaction_info           = array();
+        // $this->benchmark->mark("{$transaction_retrieval_func}_start");
+        // $transaction_info = $this->summary->$transaction_retrieval_func(
+        //     $object_id_list, $start_date, $end_date, $with_timeline, $time_basis
+        // );
+        $transaction_info = $this->summary->summarize_uploads(
+            $object_type, $object_id_list, $start_date, $end_date, $with_timeline, $time_basis
+        );
+        // unset($transaction_info['transaction_list']);
         $this->page_data['transaction_info'] = $transaction_info;
         $this->page_data['times']            = $times;
         $this->page_data['include_timeline'] = $with_timeline;
-        $this->benchmark->mark("{$transaction_retrieval_func}_end");
+        // $this->benchmark->mark("{$transaction_retrieval_func}_end");
 
         if ($with_timeline) {
             $this->load->view('object_types/group_body_insert.html', $this->page_data);
@@ -474,8 +498,10 @@ class Group extends Baseline_controller
         $group_info = $this->gm->get_group_info($group_id);
 
         $object_list    = $group_info['item_list'];
-        $retrieval_func = "summarize_uploads_by_{$object_type}_list";
-        $results        = $this->summary->$retrieval_func($object_list, $start_date, $end_date, TRUE, $group_info['options_list']['time_basis']);
+        $results        = $this->summary->summarize_uploads(
+            $object_type, $object_list, $start_date, $end_date, TRUE,
+            $group_info['options_list']['time_basis']
+        );
         $downselect     = $results['day_graph']['by_date'];
         $return_array   = array(
                            'file_volumes'       => array_values($downselect['file_volume_array']),
@@ -508,42 +534,4 @@ class Group extends Baseline_controller
         send_json_array($results);
 
     }//end get_proposals()
-
-
-    /**
-     * Set up hints that show what types of
-     * things make for acceptable search criteria
-     *
-     * @param string $object_type type of object to be hinted
-     *                            (instrument/proposal/user)
-     *
-     * @return array simple array with search criteria
-     *               descriptions for display
-     */
-    public function add_objects_instructions($object_type)
-    {
-        $object_examples = array(
-                            'instrument' => array(),
-                            'proposal'   => array(),
-                            'user'       => array(),
-                           );
-        $object_examples['instrument'] = array(
-                                          "'nmr' returns a list of all instruments with 'nmr' somewhere in the name or description",
-                                          "'34075' returns the instrument having an ID of '34075' in the EUS database",
-                                          "'nmr nittany' returns anything with 'nmr' and 'nittany' somewhere in the name or description",
-                                         );
-        $object_examples['proposal']   = array(
-                                          "'phos' returns a list of all proposals having the term 'phos' somewhere in the title or description",
-                                          "'49164' returns a proposal having an ID of '49164' in the EUS database",
-                                         );
-        $object_examples['user']       = array(
-                                          "'jones' returns a list of EUS users having 'jones' somewhere in their first name, last name or email",
-                                          "'36846' returns a user having the ID of '36846' in the EUS database",
-                                         );
-
-        return $object_examples[$object_type];
-
-    }//end add_objects_instructions()
-
-
 }//end class

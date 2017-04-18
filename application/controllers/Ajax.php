@@ -24,7 +24,7 @@
  */
 
 defined('BASEPATH') OR exit('No direct script access allowed');
-require_once 'Baseline_controller.php';
+require_once 'Baseline_api_controller.php';
 
 /**
  *  Ajax is a CI controller class that extends Baseline_controller
@@ -46,7 +46,7 @@ require_once 'Baseline_controller.php';
  * @see    https://github.com/EMSL-MSC/pacifica-reporting
  * @access public
  */
-class Ajax extends Baseline_controller
+class Ajax extends Baseline_api_controller
 {
     /**
      * Contains the timestamp when this file was last modified
@@ -63,12 +63,13 @@ class Ajax extends Baseline_controller
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('Reporting_model', 'rep');
+        // $this->load->model('Reporting_model', 'rep');
         $this->load->model('Group_info_model', 'gm');
-        $this->load->model('Summary_model', 'summary');
-        $this->load->library('EUS', '', 'eus');
+        $this->load->model('Myemsl_model', 'myemsl');
+        // $this->load->model('Summary_model', 'summary');
+        // $this->load->library('EUS', '', 'eus');
         // $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
-        $this->load->helper(array('network','search_term','inflector'));
+        $this->load->helper(array('network','search_term','inflector','time', 'myemsl'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
         $this->local_resources_folder = $this->config->item('local_resources_folder');
@@ -87,21 +88,18 @@ class Ajax extends Baseline_controller
      */
     public function make_new_group($object_type)
     {
-        if ($this->input->post()) {
-              $group_name = $this->input->post('group_name');
-        }
-        elseif ($this->input->is_ajax_request() || $this->input->raw_input_stream) {
-            $post_info = json_decode($this->input->raw_input_stream, TRUE);
+        if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
+            $http_raw_post_data = file_get_contents('php://input');
+            $post_info = json_decode($http_raw_post_data, TRUE);
             // $post_info = $post_info[0];
             $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : FALSE;
-        }
             $group_info = $this->gm->make_new_group($object_type, $this->user_id, $group_name);
-        if ($group_info && is_array($group_info)) {
-            send_json_array($group_info);
-        }
-        else {
-            $this->output->set_status_header(500, "Could not make a new group called '{$group_name}'");
-
+            if ($group_info && is_array($group_info)) {
+                send_json_array($group_info);
+            }
+            else {
+                $this->output->set_status_header(500, "Could not make a new group called '{$group_name}'");
+            }
             return;
         }
     }
@@ -196,16 +194,16 @@ class Ajax extends Baseline_controller
 
             return;
         }
-        if ($this->input->post()) {
-            $option_type = $this->input->post('option_type');
-            $option_value = $this->input->post('option_value');
-        }
-        elseif ($this->input->is_ajax_request() || $this->input->raw_input_stream) {
+        if ($this->input->is_ajax_request() || $this->input->raw_input_stream) {
             $http_raw_post_data = file_get_contents('php://input');
             $post_info = json_decode($http_raw_post_data, TRUE);
             // $post_info = $post_info[0];
             $option_type = array_key_exists('option_type', $post_info) ? $post_info['option_type'] : FALSE;
             $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : FALSE;
+        }
+        elseif ($this->input->post()) {
+            $option_type = $this->input->post('option_type');
+            $option_value = $this->input->post('option_value');
         }
         if (!$option_type || !$option_value) {
             $missing_types = array();
@@ -256,6 +254,11 @@ class Ajax extends Baseline_controller
     public function get_group_container($object_type, $group_id, $time_range = FALSE, $start_date = FALSE, $end_date = FALSE, $time_basis = FALSE)
     {
         $group_info = $this->gm->get_group_info($group_id);
+        if(empty($group_info)) {
+            $this->output->set_status_header(404, "Group ID {$group_id} was not found");
+            send_json_array(array());
+            return;
+        }
         $options_list = $group_info['options_list'];
         $item_list = $group_info['item_list'];
         $time_range = !empty($time_range) ? $time_range : $options_list['time_range'];
@@ -267,7 +270,7 @@ class Ajax extends Baseline_controller
         $accepted_object_types = array('instrument', 'proposal', 'user');
 
         $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
-        $my_times = $this->summary->fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
+        $my_times = fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
         $latest_available_date = new DateTime($valid_date_range['latest']);
         $earliest_available_date = new DateTime($valid_date_range['earliest']);
 
@@ -300,7 +303,7 @@ class Ajax extends Baseline_controller
             $this->page_data['examples'] = add_objects_instructions($object_type);
         }
         else {
-            $this->page_data['placeholder_info'][$group_id]['times'] = $this->summary->fix_time_range($time_range, $start_date, $end_date);
+            $this->page_data['placeholder_info'][$group_id]['times'] = fix_time_range($time_range, $start_date, $end_date);
         }
         $this->load->view('object_types/group.html', $this->page_data);
     }
@@ -390,13 +393,14 @@ class Ajax extends Baseline_controller
             $my_objects[$object_type] = array();
         }
         $filter = parse_search_term($filter);
-        $results = $this->eus->get_object_list($object_type, $filter, $my_objects[$object_type]);
-        $this->page_data['results'] = $results;
+        $results = $this->myemsl->get_object_list($object_type, $filter, $my_objects[$object_type]);
+        $this->page_data['results'] = $results['results'];
         $this->page_data['object_type'] = $object_type;
         $this->page_data['filter_text'] = $filter;
         $this->page_data['my_objects'] = $my_objects[$object_type];
+        // var_dump($this->page_data);
         $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
-        if (!empty($results)) {
+        if (!empty($results['results'])) {
             $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
         }
         else {

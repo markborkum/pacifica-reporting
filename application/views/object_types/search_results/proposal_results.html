@@ -1,20 +1,16 @@
 <?php
-  $categorized_results = array();
-  $my_category_name = " my proposals";
-  foreach($results as $object_id => $object_info){
-    $year = $object_info['category'];
-    if(array_key_exists($object_id, $my_objects)){
-      $categorized_results[$my_category_name][$object_id] = $object_info;
-    }else{
-      if(!is_string($year)){
-        $year = $year->format('Y');
-      }
-      $categorized_results[$year][$object_id] = $object_info;
+    $categorized_results = array();
+    $my_category_name = " my proposals";
+    foreach($results as $object_info){
+        $object_id = $object_info['id'];
+        $year = $object_info['category'];
+        if(array_key_exists($object_id, $my_objects)){
+          $categorized_results[$my_category_name][$object_id] = $object_info;
+        }else{
+          $categorized_results[$year][$object_id] = $object_info;
+        }
     }
-
-//    $categorized_results[$year][$object_id] = $object_info;
-  }
-  krsort($categorized_results);
+    krsort($categorized_results);
 ?>
 
 <?php foreach($categorized_results as $category => $type_items): ?>

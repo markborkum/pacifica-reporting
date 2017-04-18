@@ -1,13 +1,13 @@
 <?php
   $categorized_results = array();
   $my_category_name = " this group";
-  foreach($results as $object_id => $object_info){
-    if(array_key_exists($object_id, $my_objects)){
-      $categorized_results[$my_category_name][$object_id] = $object_info;
-    }else{
-      $categorized_results[$object_info['category']][$object_id] = $object_info;
-    }
+  foreach($results as $object_info){
+      $object_id = $object_info['id'];
+      $name = $object_info['name'];
+      $category = $object_info['category'];
+      $categorized_results[$category][$object_id] = $object_info;
   }
+
   ksort($categorized_results);
 ?>
 <?php foreach($categorized_results as $category => $type_items): ?>

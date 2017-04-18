@@ -36,3 +36,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 |
 */
 $config['log_threshold'] = 0;
+
+$hostname = "reporting.my.emsl.pnl.gov";
+$config['base_url']    = "https://{$hostname}";
+$config['base_dir'] = '';

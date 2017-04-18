@@ -23,7 +23,7 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 defined('BASEPATH') or exit('No direct script access allowed');
-require_once 'Baseline_controller.php';
+require_once 'Baseline_api_controller.php';
 
 /**
  *  Testing is a CI controller class that extends Baseline_controller.
@@ -40,7 +40,7 @@ require_once 'Baseline_controller.php';
  *
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
-class Testing extends Baseline_controller
+class Testing extends Baseline_api_controller
 {
     public $last_update_time;
     public $accepted_object_types;
@@ -57,9 +57,10 @@ class Testing extends Baseline_controller
     {
         parent::__construct();
         $this->load->model('Group_info_model', 'gm');
-        $this->load->model('Summary_model', 'summary');
+        // $this->load->model('Summary_model', 'summary');
+        $this->load->model('Summary_api_model', 'summary');
         $this->load->model('Myemsl_model', 'myemsl');
-        $this->load->library('EUS', '', 'eus');
+        // $this->load->library('EUS', '', 'eus');
         $this->load->helper(array('network', 'file_info', 'inflector', 'time', 'item', 'search_term', 'cookie'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
@@ -97,9 +98,9 @@ class Testing extends Baseline_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function test_get_uploads_for_user($eus_person_id, $start_date = FALSE, $end_date = FALSE)
+    public function get_uploads_for_user($eus_person_id, $start_date = FALSE, $end_date = FALSE)
     {
-        $results = $this->summary->summarize_uploads_by_user($eus_person_id, $start_date, $end_date);
+        $results = $this->summary->summarize_uploads('user', $eus_person_id, $start_date, $end_date, TRUE, 'modified_time');
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -195,8 +196,8 @@ class Testing extends Baseline_controller
      */
     public function test_get_object_list($object_type, $filter = '')
     {
-        $filter = parse_search_term($filter);
-        $results = $this->eus->get_object_list($object_type, $filter);
+        // $filter = parse_search_term($filter);
+        $results = $this->myemsl->get_object_list($object_type, $filter);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';

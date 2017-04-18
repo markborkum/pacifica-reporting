@@ -40,9 +40,28 @@ if(!defined('BASEPATH')) {
  */
 function get_user()
 {
-    $user = FALSE;
+    $req_headers = apache_request_headers();
+    $user = '(unknown)';
+    $CI =& get_instance();
+    $CI->load->library('PHPRequests');
+    $md_url = $CI->metadata_url_base;
     if(isset($_SERVER["REMOTE_USER"])) {
-        $user = strtolower(str_replace('@PNL.GOV', '', $_SERVER["REMOTE_USER"]));
+        $user = str_replace('@PNL.GOV', '', $_SERVER["REMOTE_USER"]);
+    } else if (isset($_SERVER["PHP_AUTH_USER"])) {
+        $user = str_replace('@PNL.GOV', '', $_SERVER["PHP_AUTH_USER"]);
+    } else if (array_key_exists('X-Remote-User', $req_headers) && isset($req_headers['X-Remote-User'])) {
+        $user = $req_headers['X-Remote-User'];
     }
-    return $user;
+    $url_args_array = array(
+       'network_id' => $user
+    );
+    $query_url = "{$md_url}/users?";
+    $query_url .= http_build_query($url_args_array, '', '&');
+    $query = Requests::get($query_url, array('Accept' => 'application/json'));
+    $results_body = $query->body;
+    $results_json = json_decode($results_body, TRUE);
+    //  echo "<pre>";
+    //  var_dump($query);
+    //  echo "</pre>";
+    return strtolower($results_json[0]['_id']);
 }

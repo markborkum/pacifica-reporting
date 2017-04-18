@@ -58,55 +58,19 @@
 | the active record class
 */
 
-$active_group = 'default';
-// $active_record = TRUE;
-$query_builder = TRUE;
-
-// $ini_file_name = stristr($_SERVER['SERVER_NAME'], 'dev1.my') === FALSE ? 'general.ini' : 'general_dpp.ini';
-$ini_file_name = 'general.ini';
-$myemsl_array = parse_ini_file("/etc/myemsl/".$ini_file_name, TRUE);
 
 $db['default'] = array(
-  'hostname' => $myemsl_array['metadata']['host'],
-  'username' => $myemsl_array['metadata']['user'],
-  'password' => $myemsl_array['metadata']['password'],
-  'database' => $myemsl_array['metadata']['database'],
+  'hostname' => getenv('PREFSDB_ADDR'),
+  'username' => getenv('PREFSDB_USER'),
+  'password' => getenv('PREFSDB_PASSWORD'),
+  'database' => getenv('PREFSDB_DB_NAME'),
   'dbdriver' => "postgre",
-  'dbprefix' => "myemsl.",
-  'pconnect' => TRUE,
+  'dbprefix' => "",
+  'pconnect' => FALSE,
   'db_debug' => TRUE,
   'cache_on' => FALSE,
   'cachedir' => ""
 );
 
-
-$db['eus_for_myemsl'] = array(
-  'hostname' => $myemsl_array['metadata']['host'],
-  'username' => $myemsl_array['metadata']['user'],
-  'password' => $myemsl_array['metadata']['password'],
-  'database' => $myemsl_array['metadata']['database'],
-  'dbdriver' => "postgre",
-  'dbprefix' => "eus.",
-  'pconnect' => TRUE,
-  'db_debug' => TRUE,
-  'cache_on' => FALSE,
-  'cachedir' => ""
-);
-
-
-$db['website_prefs'] = array(
-  'hostname' => $myemsl_array['metadata']['host'],
-  'username' => $myemsl_array['metadata']['user'],
-  'password' => $myemsl_array['metadata']['password'],
-  'database' => $myemsl_array['metadata']['database'],
-  'dbdriver' => "postgre",
-  'dbprefix' => "website_prefs.",
-  'pconnect' => TRUE,
-  'db_debug' => TRUE,
-  'cache_on' => FALSE,
-  'cachedir' => ""
-);
-
-
-/* End of file database.php */
-/* Location: ./application/config/database.php */
+// $active_record = TRUE;
+$query_builder = TRUE;

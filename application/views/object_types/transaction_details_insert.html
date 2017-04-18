@@ -1,42 +1,42 @@
 <div class="form_container">
-  <table>
-    <thead>
-    <tr>
-      <th>Upload ID</th>
-      <th>Upload Time</th>
-      <th>File Date(s)</th>
-      <th>Proposal ID</th>
-      <th>Instrument ID</th>
-      <th>Uploaded By</th>
-      <th>Bundle Size</th>
-      <th>File Count</th>
-    </tr>
-    </thead>
-    <tbody>
-        <?php ksort($transaction_info); ?>
-      <?php foreach($transaction_info as $id => $item): ?>
-      <?php
-      $ul_time = new DateTime($item['upload_datetime']);
-      $ul_latest_mod = new DateTime($item['file_date_end']);
-      $ul_earliest_mod = new DateTime($item['file_date_start']);
-      $ul_mod_string = $ul_latest_mod->format('m/d/Y') != $ul_earliest_mod->format('m/d/Y') ?
-       "{$ul_earliest_mod->format('m/d/Y')}&ndash;{$ul_latest_mod->format('m/d/Y')}" :
-       $ul_earliest_mod->format('m/d/Y');
-      $ul_user_info = $this->eus->get_name_from_eus_id($item['uploaded_by_id']);
-      $ul_user = $ul_user_info['display_name'];
-      $friendly_file_size = format_bytes($item['bundle_size']);
-      ?>
-      <tr>
-        <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>" target="_blank"><?= $id ?></a></td>
-        <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
-        <td><?= $ul_mod_string ?></td>
-        <td><?= array_key_exists('proposal_id',$item) && !empty($item['proposal_id']) ? $item['proposal_id'] : "N/A" ?></td>
-        <td><?= array_key_exists('instrument_id',$item) && !empty($item['instrument_id']) ? $item['instrument_id'] : "N/A" ?></td>
-        <td><?= $ul_user ?></td>
-        <td><?= $friendly_file_size ?></td>
-        <td><?= $item['file_count'] ?></td>
-      </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+    <table>
+        <thead>
+            <tr>
+                <th>Upload ID</th>
+                <th>Upload Time</th>
+                <th>File Date(s)</th>
+                <th>Proposal ID</th>
+                <th>Instrument ID</th>
+                <th>Uploaded By</th>
+                <th>Bundle Size</th>
+                <th>File Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php ksort($transaction_info); ?>
+            <?php foreach($transaction_info as $id => $item): ?>
+            <?php
+                $ul_time = new DateTime($item['upload_datetime']);
+                $ul_latest_mod = new DateTime($item['file_date_end']);
+                $ul_earliest_mod = new DateTime($item['file_date_start']);
+                $ul_mod_string = $ul_latest_mod->format('m/d/Y') != $ul_earliest_mod->format('m/d/Y') ?
+                "{$ul_earliest_mod->format('m/d/Y')}&ndash;{$ul_latest_mod->format('m/d/Y')}" :
+                $ul_earliest_mod->format('m/d/Y');
+                $ul_user_info = get_user_details($item['uploaded_by_id']);
+                $ul_user = $ul_user_info['simple_display_name'];
+                $friendly_file_size = format_bytes($item['bundle_size']);
+            ?>
+            <tr>
+                <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>" target="_blank"><?= $id ?></a></td>
+                <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
+                <td><?= $ul_mod_string ?></td>
+                <td><?= array_key_exists('proposal_id',$item) && !empty($item['proposal_id']) ? $item['proposal_id'] : "N/A" ?></td>
+                <td><?= array_key_exists('instrument_id',$item) && !empty($item['instrument_id']) ? $item['instrument_id'] : "N/A" ?></td>
+                <td><?= $ul_user ?></td>
+                <td><?= $friendly_file_size ?></td>
+                <td><?= $item['file_count'] ?></td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
 </div>

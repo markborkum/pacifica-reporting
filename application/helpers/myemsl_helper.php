@@ -123,7 +123,6 @@ function generate_cart_token($item_list,$eus_person_id)
 
 }
 
-
 /**
  * Set up hints that show what types of
  * things make for acceptable search criteria
@@ -137,25 +136,24 @@ function generate_cart_token($item_list,$eus_person_id)
 function add_objects_instructions($object_type)
 {
     $object_examples = array(
-    'instrument' => array(),
-    'proposal' => array(),
-    'user' => array()
-    );
+                        'instrument' => array(),
+                        'proposal'   => array(),
+                        'user'       => array(),
+                       );
     $object_examples['instrument'] = array(
-    "'nmr' returns a list of all instruments with 'nmr' somewhere in the name or description",
-    "'34075' returns the instrument having an ID of '34075' in the EUS database",
-    "'nmr nittany' returns anything with 'nmr' and 'nittany' somewhere in the name or description"
-    );
-    $object_examples['proposal'] = array(
-    "'phos' returns a list of all proposals having the term 'phos' somewhere in the title or description",
-    "'49164' returns a proposal having an ID of '49164' in the EUS database"
-    );
-    $object_examples['user'] = array(
-    "'jones' returns a list of EUS users having 'jones' somewhere in their first name, last name or email",
-    "'36846' returns a user having the ID of '36846' in the EUS database"
-    );
+                                      "'nmr' returns a list of all instruments with 'nmr' somewhere in the name or description",
+                                      "'34075' returns the instrument having an ID of '34075' in the EUS database",
+                                      "'nmr nittany' returns anything with 'nmr' and 'nittany' somewhere in the name or description",
+                                     );
+    $object_examples['proposal']   = array(
+                                      "'phos' returns a list of all proposals having the term 'phos' somewhere in the title or description",
+                                      "'49164' returns a proposal having an ID of '49164' in the EUS database",
+                                     );
+    $object_examples['user']       = array(
+                                      "'jones' returns a list of EUS users having 'jones' somewhere in their first name, last name or email",
+                                      "'36846' returns a user having the ID of '36846' in the EUS database",
+                                     );
+
     return $object_examples[$object_type];
-}
 
-
-?>
+}//end add_objects_instructions()

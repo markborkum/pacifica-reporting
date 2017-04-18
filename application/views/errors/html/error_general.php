@@ -37,7 +37,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
         <link rel="stylesheet" type="text/css" href="/resources/stylesheets/local.css">
         <link rel="stylesheet" href="/resources/stylesheets/emsl_chrome.css">
-        <link rel="stylesheet" type="text/css" href="https://dev1.my.emsl.pnl.gov/myemsl/reporting/application/resources/stylesheets/reporting.css">
+        <link rel="stylesheet" type="text/css" href="/project_resources/stylesheets/reporting.css">
 </head>
 
 

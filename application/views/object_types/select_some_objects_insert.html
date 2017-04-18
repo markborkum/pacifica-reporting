@@ -1,14 +1,18 @@
 <div class="info_container">
-  <div class="info_message">
-    Use the search bar above to add some <?= plural($my_object_type) ?> to your list.
-  </div>
-  <div class="info_instructions">
-    <p>You can use lots of different terms to search for your favorite <?= plural($my_object_type) ?>.</p>
-    <p>Try things like...</p>
-    <ul>
-      <?php foreach($examples as $item): ?>
-        <li><?= $item ?></li>
-      <?endforeach; ?>
-    </ul>
-  </div>
+    <div class="info_message">
+        Use the search bar above to add some
+        <?= plural($my_object_type) ?> to your list.
+    </div>
+    <div class="info_instructions">
+        <p>You can use lots of different terms to search for your favorite
+            <?= plural($my_object_type) ?>.</p>
+        <p>Try things like...</p>
+        <ul>
+            <?php foreach($examples as $item): ?>
+            <li>
+                <?= $item ?>
+            </li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
 </div>

@@ -1,10 +1,242 @@
-reportingbackend:
-  build: .
+version: '2'
+services:
+# Nginx proxy pass frontends
+    proxyfrontend:
+        container_name: proxyfrontend
+        build:
+            context: .
+            dockerfile: Dockerfile.proxy
+        links:
+            - uploadstatus:statusbackend
+            - reporting:reportingbackend
+            - archiveinterface:archiveinterface
+            - proxyserver:proxyserver
+        ports:
+            - 80:80
+            - 443:443
+        environment:
+            UPLOAD_STATUS_ADDR: statusbackend
+            UPLOAD_STATUS_PORT: 80
+            REPORTING_ADDR: reportingbackend
+            REPORTING_PORT: 80
+            FILE_REDIRECT_ADDR: archiveinterface
+            FILE_REDIRECT_PORT: 8080
+            PROXY_ADDR: proxyserver
+            PROXY_PORT: 8180
 
-reportingauth:
-  build: .
-  dockerfile: Dockerfile.auth
-  links:
-   - reportingbackend:backend
-  ports:
-   - 8080:80
+    archiveinterface:
+        image: pacifica/archiveinterface
+        container_name: archiveinterface
+        ports:
+            - 8080:8080
+        volumes:
+            # - /srv:/srv
+            - /Users/d3k857/Downloads/srv:/srv
+
+    proxyserver:
+        container_name: proxyserver
+        build:
+            context: ../proxy
+        links:
+            - metadataserver:metadata
+            - archiveinterface:archiveinterface
+        ports:
+            - 8180:8180
+        environment:
+            NGINX_ACCEL: 'True'
+            METADATA_PORT: tcp://metadata:8121
+            ARCHIVEI_PORT: tcp://archiveinterface:8080
+
+
+
+    # Reporting services
+    reporting:
+        container_name: reporting
+        build:
+            context: .
+        volumes:
+            - ./:/var/www/html
+        links:
+            - metadataserver:metadata
+            - policyserver:policy
+            - reportingprefsdb:prefsdb
+        environment:
+            METADATA_PORT: tcp://metadata:8121
+            POLICY_PORT: tcp://policy:8181
+            PREFSDB_ADDR: prefsdb
+            PREFSDB_PORT: 5432
+            PREFSDB_USER: pacifica
+            PREFSDB_PASSWORD: pacifica
+            PREFSDB_DB_NAME: pacifica_reporting
+            SITE_NAME: reporting.local
+
+    reportingprefsdb:
+        container_name: reportingprefsdb
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: pacifica
+            POSTGRES_DB: pacifica_reporting
+            POSTGRES_USER: pacifica
+        ports:
+            - 55432:5432
+
+
+# Upload status
+    uploadstatus:
+        container_name: uploadstatus
+        build:
+            context: ../upload-status
+            dockerfile: Dockerfile.dev
+        volumes:
+            - ./:/var/www/html
+        links:
+            - metadataserver:metadata
+            - policyserver:policy
+            #- cartserver:cart
+            - uploadstatusdb:cartdb
+            - archiveinterface:archivei
+        environment:
+            METADATA_PORT: tcp://metadata:8121
+            POLICY_PORT: tcp://policy:8181
+            ARCHIVE_PORT: tcp://archivei:8080
+            CART_PORT: tcp://cart:8081
+            CARTDB_ADDR: cartdb
+            CARTDB_PORT: 5432
+            CARTDB_USER: pacifica
+            CARTDB_PASSWORD: pacifica
+            CARTDB_DB_NAME: pacifica_upload_status
+            CARTDB_DBDRIVER: postgre
+            CART_DOWNLOAD_PORT: tcp://cartng.emsl.pnl.gov:8443
+            FILE_DOWNLOAD_PORT: tcp://filesng.emsl.pnl.gov:8443
+            SITE_NAME: status.local
+
+    uploadstatusdb:
+        container_name: uploadstatusdb
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: pacifica
+            POSTGRES_DB: pacifica_upload_status
+            POSTGRES_USER: pacifica
+        ports:
+            - 45432:5432
+
+
+    metadataserver:
+        build:
+            context: ../metadata
+            dockerfile: Dockerfile
+        container_name: metadataserver
+        links:
+            - metadatadb:postgres
+            - elasticdb
+        ports:
+            - 8121:8121
+        environment:
+            ELASTICDB_PORT: tcp://elasticdb:9200
+            POSTGRES_ENV_POSTGRES_DB: pacifica_metadata
+            POSTGRES_ENV_POSTGRES_USER: pacifica
+            POSTGRES_PORT_5432_TCP_ADDR: postgres
+            POSTGRES_PORT_5432_TCP_PORT: 5432
+            POSTGRES_ENV_POSTGRES_PASSWORD: pacifica
+
+    policyserver:
+        build:
+            context: ../policy
+            dockerfile: Dockerfile
+        container_name: policyserver
+        restart: unless-stopped
+        links:
+            - metadataserver:metadata
+        ports:
+            - 8181:8181
+        environment:
+            METADATA_PORT: tcp://metadata:8121
+
+    elasticdb:
+        image: elasticsearch:2.4
+        container_name: elasticdb
+        ports:
+            - 9200:9200
+
+    metadatadb:
+        image: postgres
+        container_name: metadatadb
+        environment:
+            POSTGRES_PASSWORD: pacifica
+            POSTGRES_DB: pacifica_metadata
+            POSTGRES_USER: pacifica
+        ports:
+            - 5432:5432
+
+    # cartrabbit:
+    #     image: rabbitmq
+    #     container_name: cartrabbit
+    #     ports:
+    #         - 5672:5672
+    #
+    # cartmysql:
+    #     image: mysql
+    #     container_name: cartmysql
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    #         MYSQL_DATABASE: pacifica_cart
+    #         MYSQL_USER: cartd
+    #         MYSQL_PASSWORD: cartd
+    #     ports:
+    #         - 3306:3306
+
+    #
+    #
+    # cartworkers:
+    #     container_name: cartworkers
+    #     build:
+    #         context: ../cartd
+    #         dockerfile: Dockerfile
+    #     links:
+    #         - cartrabbit:amqp
+    #         - cartmysql:mysql
+    #         - archiveinterface:archivei
+    #     volumes:
+    #         # - /shared:/shared
+    #         - /Users/d3k857/Downloads/shared:/shared
+    #
+    #     environment:
+    #         VOLUME_PATH: /shared/
+    #         LRU_BUFFER_TIME: 0
+    #         # ARCHIVE_INTERFACE_URL: http://archivei:8080
+    #         ARCHIVEI_PORT_8080_TCP_ADDR: archivei
+    #         ARCHIVEI_PORT_8080_TCP_PORT: 8080
+    #         AMQP_PORT_5672_TCP_ADDR: amqp
+    #         AMQP_PORT_5672_TCP_PORT: 5672
+    #         MYSQL_PORT_3306_TCP_ADDR: mysql
+    #         MYSQL_PORT_3306_TCP_PORT: 3306
+    #         MYSQL_ENV_MYSQL_DATABASE: pacifica_cart
+    #         MYSQL_ENV_MYSQL_USER: cartd
+    #         MYSQL_ENV_MYSQL_PASSWORD: cartd
+    #
+    # cartserver:
+    #     container_name: cartserver
+    #     build:
+    #         context: ../cartd
+    #         dockerfile: Dockerfile.wsgi
+    #     ports:
+    #         - 8081:8081
+    #     links:
+    #         - cartrabbit:amqp
+    #         - cartmysql:mysql
+    #         - archiveinterface:archivei
+    #     volumes:
+    #         # - /shared:/shared
+    #         - /Users/d3k857/Downloads/shared:/shared
+    #     environment:
+    #         VOLUME_PATH: /shared/
+    #         LRU_BUFFER_TIME: 0
+    #         ARCHIVEI_PORT_8080_TCP_ADDR: archivei
+    #         ARCHIVEI_PORT_8080_TCP_PORT: 8080
+    #         AMQP_PORT_5672_TCP_ADDR: amqp
+    #         AMQP_PORT_5672_TCP_PORT: 5672
+    #         MYSQL_PORT_3306_TCP_ADDR: mysql
+    #         MYSQL_PORT_3306_TCP_PORT: 3306
+    #         MYSQL_ENV_MYSQL_DATABASE: pacifica_cart
+    #         MYSQL_ENV_MYSQL_USER: cartd
+    #         MYSQL_ENV_MYSQL_PASSWORD: cartd

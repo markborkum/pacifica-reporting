@@ -1,0 +1,8 @@
+from nginx
+
+COPY ./auth/htpasswd /etc/nginx/.htpasswd
+COPY ./auth/proxy.template /etc/nginx/conf.d/proxy.template
+COPY ./auth/codeigniter.template /etc/nginx/conf.d/codeigniter.template
+COPY ./auth/proxyentrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT /entrypoint.sh

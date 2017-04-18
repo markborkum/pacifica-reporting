@@ -23,8 +23,6 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
- require_once APPPATH.'libraries/Requests.php';
-
  /**
   *  MyEMSL Model
   *
@@ -58,9 +56,7 @@ class Myemsl_model extends CI_Model
     {
         parent::__construct();
         $this->load->helper('myemsl');
-        Requests::register_autoloader();
-        $this->myemsl_ini = read_myemsl_config_file('general');
-
+        $this->load->library('PHPRequests');
     }//end __construct()
 
     /**
@@ -140,6 +136,53 @@ class Myemsl_model extends CI_Model
         return $user_info;
 
     }//end get_user_info()
+
+    /**
+     * Grab a list of objects by search term from the md api
+     *
+     * @param string $object_type  what type of object to return
+     * @param string $search_terms filters
+     * @param array  $my_objects   collection of objects to exclude
+     *
+     * @return array array of objects
+     *
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     */
+    function get_object_list($object_type, $search_terms, $my_objects = FALSE)
+    {
+        $acceptable_object_types = array(
+            'instrument' => 'instruments',
+            'proposal' => 'proposals',
+            'user' => 'users'
+        );
+        $results_json = array(
+            'success' => FALSE,
+            'message' => '',
+            'results' => array()
+        );
+        if(!array_key_exists($object_type, $acceptable_object_types)) {
+            return array();
+        }
+        if(is_array($search_terms)) {
+            $search_term_string = implode('+', $search_terms);
+        }else{
+            $search_term_string = $search_terms;
+        }
+        $policy_url = "{$this->policy_url_base}/status";
+        $query_url = "{$policy_url}/{$acceptable_object_types[$object_type]}/search/";
+        $query_url .= "{$search_term_string}?";
+        $url_args_array = array(
+           'user' => $this->user_id
+        );
+        $query_url .= http_build_query($url_args_array, '', '&');
+        $query = Requests::get($query_url, array('Accept' => 'application/json'));
+        $results_body = $query->body;
+        if($query->status_code == 200) {
+            $results_json['results'] = json_decode($results_body, TRUE);
+            $results_json['success'] = TRUE;
+        }
+        return $results_json;
+    }
 
 
 }//end class

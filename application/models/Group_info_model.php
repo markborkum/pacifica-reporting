@@ -56,9 +56,12 @@ class Group_info_model extends CI_Model
     {
         parent::__construct();
         $this->load->helper(array('item'));
-        $this->load->library('EUS', '', 'eus');
+        // $this->load->library('EUS', '', 'eus');
         $this->debug = $this->config->item('debug_enabled');
-
+        $this->load->database('website_prefs');
+        $this->load->library('PHPRequests');
+        $this->metadata_url_base = $this->config->item('metadata_server_base_url');
+        $this->policy_url_base = $this->config->item('policy_server_base_url');
     }//end __construct()
 
     /**
@@ -80,11 +83,12 @@ class Group_info_model extends CI_Model
     public function get_group_options($group_id)
     {
         $option_defaults = $this->get_group_option_defaults();
-        $DB_prefs        = $this->load->database('website_prefs', TRUE);
-        $query           = $DB_prefs->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
+        // $DB_prefs        = $this->load->database('website_prefs', TRUE);
+        $query           = $this->db->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
         $options         = array();
+        $group_info = FALSE;
         if ($query && $query->num_rows() > 0) {
-            $options_query = $DB_prefs->get_where('reporting_object_group_options', array('group_id' => $group_id));
+            $options_query = $this->db->get_where('reporting_object_group_options', array('group_id' => $group_id));
             if ($options_query && $options_query->num_rows() > 0) {
                 foreach ($options_query->result() as $option_row) {
                     $options[$option_row->option_type] = $option_row->option_value;
@@ -92,7 +96,7 @@ class Group_info_model extends CI_Model
             }
 
             $group_info   = $query->row_array();
-            $member_query = $DB_prefs->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+            $member_query = $this->db->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
             // echo $DB_prefs->last_query();
             // var_dump($member_query->result_array());
             // echo "<br /><br />";
@@ -129,6 +133,9 @@ class Group_info_model extends CI_Model
     {
         $group_info = $this->get_group_options($group_id);
 
+        if(!$group_info) {
+            return array();
+        }
         $earliest_latest = $this->earliest_latest_data_for_list(
             $group_info['group_type'],
             $group_info['item_list'],
@@ -180,8 +187,8 @@ class Group_info_model extends CI_Model
      */
     public function get_group_option_defaults()
     {
-        $DB_prefs = $this->load->database('website_prefs', TRUE);
-        $query    = $DB_prefs->get('reporting_object_group_option_defaults');
+        // $DB_prefs = $this->load->database('website_prefs', TRUE);
+        $query    = $this->db->get('reporting_object_group_option_defaults');
         $defaults = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
@@ -216,9 +223,9 @@ class Group_info_model extends CI_Model
      */
     public function get_items_for_group($group_id)
     {
-        $DB_prefs = $this->load->database('website_prefs', TRUE);
-        $DB_prefs->select(array('item_type', 'item_id'));
-        $query   = $DB_prefs->get_where('reporting_selection_prefs', array('group_id' => $group_id));
+        // $DB_prefs = $this->load->database('website_prefs', TRUE);
+        $this->db->select(array('item_type', 'item_id'));
+        $query   = $this->db->get_where('reporting_selection_prefs', array('group_id' => $group_id));
         $results = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
@@ -248,7 +255,7 @@ class Group_info_model extends CI_Model
      */
     public function make_new_group($object_type, $eus_person_id, $group_name = FALSE)
     {
-        $DB_prefs   = $this->load->database('website_prefs', TRUE);
+        // $DB_prefs   = $this->load->database('website_prefs', TRUE);
         $table_name = 'reporting_object_groups';
         // check the name and make sure it's unique for this user_id
         if (!$group_name) {
@@ -259,7 +266,7 @@ class Group_info_model extends CI_Model
                         'person_id'  => $eus_person_id,
                         'group_name' => $group_name,
                        );
-        $check_query = $DB_prefs->where($where_array)->get($table_name);
+        $check_query = $this->db->where($where_array)->get($table_name);
         if ($check_query && $check_query->num_rows() > 0) {
             $d           = new DateTime();
             $group_name .= ' ['.$d->format('Y-m-d H:i:s').']';
@@ -269,10 +276,13 @@ class Group_info_model extends CI_Model
                         'person_id'  => $eus_person_id,
                         'group_name' => $group_name,
                         'group_type' => $object_type,
+                        'ordering' => 0,
+                        'created' => 'now()',
+                        'updated' => 'now()'
                        );
-        $DB_prefs->insert($table_name, $insert_data);
-        if ($DB_prefs->affected_rows() > 0) {
-            $group_id   = $DB_prefs->insert_id();
+        $this->db->insert($table_name, $insert_data);
+        if ($this->db->affected_rows() > 0) {
+            $group_id   = $this->db->insert_id();
             $group_info = $this->get_group_info($group_id);
 
             return $group_info;
@@ -296,11 +306,11 @@ class Group_info_model extends CI_Model
     public function change_group_name($group_id, $group_name)
     {
         $new_group_info = FALSE;
-        $DB_prefs       = $this->load->database('website_prefs', TRUE);
+        // $DB_prefs       = $this->load->database('website_prefs', TRUE);
         $update_array   = array('group_name' => $group_name);
-        $DB_prefs->where('group_id', $group_id)->set('group_name', $group_name);
-        $DB_prefs->update('reporting_object_groups', $update_array);
-        if ($DB_prefs->affected_rows() > 0) {
+        $this->db->where('group_id', $group_id)->set('group_name', $group_name);
+        $this->db->update('reporting_object_groups', $update_array);
+        if ($this->db->affected_rows() > 0) {
             $new_group_info = $this->get_group_info($group_id);
         }
 
@@ -322,21 +332,21 @@ class Group_info_model extends CI_Model
      */
     public function change_group_option($group_id, $option_type, $value)
     {
-        $DB_prefs     = $this->load->database('website_prefs', TRUE);
+        // $DB_prefs     = $this->load->database('website_prefs', TRUE);
         $table_name   = 'reporting_object_group_options';
         $where_array  = array(
                          'group_id'    => $group_id,
                          'option_type' => $option_type,
                         );
-        $update_array = array('option_value' => $value);
-        $query        = $DB_prefs->where($where_array)->get($table_name);
+        $update_array = array('option_value' => $value, 'updated' => 'now()');
+        $query        = $this->db->where($where_array)->get($table_name);
         if ($query && $query->num_rows() > 0) {
-            $DB_prefs->where($where_array)->update($table_name, $update_array);
+            $this->db->where($where_array)->update($table_name, $update_array);
         } else {
-            $DB_prefs->insert($table_name, ($update_array + $where_array));
+            $this->db->insert($table_name, ($update_array + $where_array));
         }
 
-        if ($DB_prefs->affected_rows() > 0) {
+        if ($this->db->affected_rows() > 0) {
             return ($update_array + $where_array);
         }
 
@@ -359,33 +369,23 @@ class Group_info_model extends CI_Model
      */
     public function get_selected_objects($eus_person_id, $restrict_type = FALSE, $group_id = FALSE)
     {
-        $DB_prefs = $this->load->database('website_prefs', TRUE);
-        $DB_prefs->select(array('eus_person_id', 'item_type', 'item_id', 'group_id'));
-        $DB_prefs->where('deleted is null');
+        // $DB_prefs = $this->load->database('website_prefs', TRUE);
+        $this->db->select(array('eus_person_id', 'item_type', 'item_id', 'group_id'));
+        $this->db->where('deleted is null');
         if (!empty($group_id)) {
-            $DB_prefs->where('group_id', $group_id);
+            $this->db->where('group_id', $group_id);
         }
 
         if (!empty($restrict_type)) {
-            $DB_prefs->where('item_type', $restrict_type);
+            $this->db->where('item_type', $restrict_type);
         }
 
-        $DB_prefs->order_by('item_type');
-        $query   = $DB_prefs->get_where('reporting_selection_prefs', array('eus_person_id' => $eus_person_id));
+        $this->db->order_by('item_type');
+        $query   = $this->db->get_where('reporting_selection_prefs', array('eus_person_id' => $eus_person_id));
         $results = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
-                switch ($row->item_type) {
-                case 'instrument':
-                    $group_list = $this->get_instrument_group_list($row->item_id);
-                    break;
-                case 'proposal':
-                    $group_list = $this->get_proposal_group_list($row->item_id);
-                    break;
-                default:
-                    $group_list = $row->item_id;
-                }
-
+                $group_list = $row->item_id;
                 $item_id = strval($row->item_id);
                 $results[$row->item_type][$item_id] = $group_list;
             }
@@ -413,17 +413,17 @@ class Group_info_model extends CI_Model
     {
         $this->benchmark->mark('get_selected_groups_start');
         $results  = array();
-        $DB_prefs = $this->load->database('website_prefs', TRUE);
-        $DB_prefs->select('g.group_id');
+        // $DB_prefs = $this->load->database('website_prefs', TRUE);
+        $this->db->select('g.group_id');
         $person_array = array($eus_person_id);
-        $DB_prefs->where_in('g.person_id', $person_array);
-        $DB_prefs->where('g.deleted is NULL');
+        $this->db->where_in('g.person_id', $person_array);
+        $this->db->where('g.deleted is NULL');
         if ($restrict_type) {
-            $DB_prefs->where('g.group_type', $restrict_type);
+            $this->db->where('g.group_type', $restrict_type);
         }
 
-        $DB_prefs->order_by('ordering ASC');
-        $query         = $DB_prefs->get('reporting_object_groups g');
+        $this->db->order_by('ordering ASC');
+        $query         = $this->db->get('reporting_object_groups g');
         $group_id_list = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
@@ -465,15 +465,15 @@ class Group_info_model extends CI_Model
                          'reporting_selection_prefs',
                          'reporting_object_groups',
                         );
-        $DB_prefs     = $this->load->database('website_prefs', TRUE);
+        // $DB_prefs     = $this->load->database('website_prefs', TRUE);
         $where_clause = array('group_id' => $group_id);
 
         if ($full_delete) {
-            $DB_prefs->delete($tables, $where_clause);
+            $this->db->delete($tables, $where_clause);
         } else {
             // just update deleted_at column
             foreach ($tables as $table_name) {
-                $DB_prefs->update($table_name, array('deleted' => 'now()'), $where_clause);
+                $this->db->update($table_name, array('deleted' => 'now()'), $where_clause);
             }
         }
 
@@ -495,7 +495,6 @@ class Group_info_model extends CI_Model
     public function update_object_preferences($object_type, $object_list, $group_id)
     {
         $table        = 'reporting_selection_prefs';
-        $DB_prefs     = $this->load->database('website_prefs', TRUE);
         $additions    = array();
         $removals     = array();
         $existing     = array();
@@ -508,8 +507,8 @@ class Group_info_model extends CI_Model
             $where_clause['group_id'] = $group_id;
         }
 
-        $DB_prefs->select('item_id');
-        $check_query = $DB_prefs->get_where($table, $where_clause);
+        $this->db->select('item_id');
+        $check_query = $this->db->get_where($table, $where_clause);
         if ($check_query && $check_query->num_rows() > 0) {
             foreach ($check_query->result() as $row) {
                 $existing[] = $row->item_id;
@@ -530,15 +529,17 @@ class Group_info_model extends CI_Model
             $removals  = array_intersect($removals, $existing);
 
             if (!empty($additions)) {
+                $now_utc = gmstrftime('%F %T');
                 foreach ($additions as $object_id) {
                     $insert_object = array(
                                       'eus_person_id' => $this->user_id,
                                       'item_type'     => $object_type,
                                       'item_id'       => strval($object_id),
                                       'group_id'      => $group_id,
+                                      'updated'       => $now_utc
                                      );
-                    $DB_prefs->insert($table, $insert_object);
-                    if($DB_prefs->affected_rows() > 0) {
+                    $this->db->insert($table, $insert_object);
+                    if($this->db->affected_rows() > 0) {
                         $status = TRUE;
                     }
                 }
@@ -548,8 +549,8 @@ class Group_info_model extends CI_Model
                 $my_where = $where_clause;
                 foreach ($removals as $object_id) {
                     $my_where['item_id'] = strval($object_id);
-                    $DB_prefs->where($my_where)->delete($table);
-                    if($DB_prefs->affected_rows() > 0) {
+                    $this->db->where($my_where)->delete($table);
+                    if($this->db->affected_rows() > 0) {
                         $status = TRUE;
                     }
                 }
@@ -577,40 +578,6 @@ class Group_info_model extends CI_Model
      */
     public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
     {
-        $group_list_retrieval_fn_name = "get_{$object_type}_group_list";
-        $time_basis = str_replace('_time', '_date', $time_basis);
-
-        $spread = $this->_available_item_spread_general(
-            $object_id_list,
-            $time_basis,
-            $object_type,
-            $group_list_retrieval_fn_name
-        );
-
-        return $spread;
-
-    }//end earliest_latest_data_for_list()
-
-
-    /**
-     * Private worker function to get the earliest/latest items
-     * in a given list of objects
-     *
-     * @param array  $object_id_list               [description]
-     * @param string $time_basis                   one of created_date, modified_date
-     *                                             submitted_date
-     * @param string $group_type                   instrument/proposal/user
-     * @param string $group_list_retrieval_fn_name the name of the function to calls
-     *                                             upon to get the myemsl internal
-     *                                             groups associated with a given
-     *                                             object
-     *
-     * @return array
-     *
-     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
-     */
-    private function _available_item_spread_general($object_id_list, $time_basis, $group_type, $group_list_retrieval_fn_name = FALSE)
-    {
         $return_array = FALSE;
         if (empty($object_id_list)) {
             return FALSE;
@@ -618,147 +585,20 @@ class Group_info_model extends CI_Model
 
         $latest_time   = FALSE;
         $earliest_time = FALSE;
-        if (in_array($group_type, array('instrument', 'proposal'))) {
-            $group_collection = array();
-            // echo "\n* * * * * * * group_list * * * * * * \n\n";
-            foreach ($object_id_list as $object_id) {
-                $group_collection += $this->$group_list_retrieval_fn_name($object_id);
-                // var_dump($group_collection);
-            }
 
-            $group_list = array_keys($group_collection);
-            if(empty($group_list)) {
-                return FALSE;
-            }
-
-            $this->db->where_in('group_id', $group_list);
-        } else if ($group_type == 'user') {
-            $this->db->where_in('submitter', $object_id_list);
-        }
-
-        $this->db->select(
-            array(
-            // "'2000-01-01' as earliest",
-             "MIN({$time_basis}) as earliest",
-             "MAX({$time_basis}) as latest",
-            )
+        $el_url = "{$this->metadata_url_base}/fileinfo/earliest_latest/{$object_type}/{$time_basis}";
+        $header_list = array(
+            'Content-Type' => 'application/json',
+            'Accept' => 'application/json',
         );
-        $query = $this->db->get(ITEM_CACHE);
-        // echo $this->db->last_query();
-        if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
-            $row           = $query->row_array();
-            $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : FALSE;
-            $latest_time   = !empty($row['latest']) ? new DateTime($row['latest']) : FALSE;
-            if (!$earliest_time && !$latest_time) {
-                return FALSE;
-            }
-
-            $return_array = array(
-                             'earliest' => $earliest_time->format('Y-m-d H:i'),
-                             'latest'   => $latest_time->format('Y-m-d H:i'),
-                            );
+        $query = Requests::post($el_url, $header_list, json_encode($object_id_list));
+        if ($query->status_code == 200 && intval($query->headers['content-length']) > 0) {
+            $return_array = json_decode($query->body, TRUE);
         }
 
         return $return_array;
 
-    }//end _available_item_spread_general()
-
-
-    /**
-     * Helper function to get the earliest/latest
-     * spread for a given set of instruments.
-     *
-     * @param array  $object_id_list list of instruments to scan
-     * @param string $time_basis     one of created_date, modified_date
-     *                                submitted_date
-     *
-     * @uses   Group_info_model::_available_item_spread_general
-     * @return array
-     *
-     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
-     */
-    private function _available_instrument_data_spread($object_id_list, $time_basis)
-    {
-        $group_list_retrieval_fn_name = 'get_instrument_group_list';
-
-        return $this->_available_item_spread_general($object_id_list, $time_basis, 'instrument', $group_list_retrieval_fn_name);
-
-    }//end _available_instrument_data_spread()
-
-
-    /**
-     * Helper function to get the earliest/latest
-     * spread for a given set of proposals.
-     *
-     * @param array  $object_id_list list of proposals to scan
-     * @param string $time_basis     one of created_date, modified_date
-     *                                submitted_date
-     *
-     * @uses   Group_info_model::_available_item_spread_general
-     * @return array
-     *
-     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
-     */
-    private function _available_proposal_data_spread($object_id_list, $time_basis)
-    {
-        $group_list_retrieval_fn_name = 'get_proposal_group_list';
-
-        return $this->_available_item_spread_general($object_id_list, $time_basis, 'proposal', $group_list_retrieval_fn_name);
-
-    }//end _available_proposal_data_spread()
-
-
-    /**
-     * Helper function to get the earliest/latest
-     * spread for a given set of users.
-     *
-     * @param array  $object_id_list list of users to scan
-     * @param string $time_basis     one of created_date, modified_date
-     *                                submitted_date
-     *
-     * @uses   Group_info_model::_available_item_spread_general
-     * @return array
-     *
-     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
-     */
-    private function _available_user_data_spread($object_id_list, $time_basis)
-    {
-        $return_array = FALSE;
-        if (empty($object_id_list)) {
-            return FALSE;
-        }
-
-        $this->db->select(
-            array(
-             "earliest_{$time_basis} as earliest",
-             "latest_{$time_basis} as latest",
-            )
-        );
-
-        $this->db->where('t.stime is not null');
-        $this->db->where_in('submitter', $object_id_list);
-        $this->db->from('transactions t')->limit(1);
-        $this->db->join('files f', 't.transaction = f.transaction');
-        $query = $this->db->get();
-
-        if ($query && $query->num_rows() > 0 || !empty($query->row()->latest_upload)) {
-            $row           = $query->row_array();
-            $earliest_time = !empty($row['earliest']) ? new DateTime($row['earliest']) : FALSE;
-            $latest_time   = !empty($row['latest']) ? new DateTime($row['latest']) : FALSE;
-            if (!$earliest_time && !$latest_time) {
-                return FALSE;
-            }
-
-            $return_array = array(
-                             'earliest' => $earliest_time->format('Y-m-d H:i'),
-                             'latest'   => $latest_time->format('Y-m-d H:i'),
-                            );
-        }
-
-        return $return_array;
-
-    }//end _available_user_data_spread()
-
+    }//end earliest_latest_data_for_list()
 
     /**
      * Retrieve a list of pertinent Myemsl internal groups
@@ -771,42 +611,42 @@ class Group_info_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_proposal_group_list($proposal_id_filter = '')
-    {
-        $is_emsl_staff = $this->is_emsl_staff;
-        $DB_myemsl = $this->load->database('default', TRUE);
-        $DB_myemsl->select(array('group_id', 'name as proposal_id'))->where('type', 'proposal');
-        $proposals_available = FALSE;
-        if(!$is_emsl_staff) {
-            $proposals_available = $this->eus->get_proposals_for_user($this->user_id);
-        }
-
-        if (!empty($proposal_id_filter)) {
-            if (is_array($proposal_id_filter)) {
-                $DB_myemsl->where_in('name', $proposal_id_filter);
-            } else {
-                $DB_myemsl->where('name', $proposal_id_filter);
-            }
-        }
-
-        $query = $DB_myemsl->get('groups');
-
-        $results_by_proposal = array();
-        if ($query && $query->num_rows()) {
-            foreach ($query->result() as $row) {
-                if(!$is_emsl_staff && in_array($row->proposal_id, $proposals_available)) {
-                    $results_by_proposal[$row->group_id] = $row->proposal_id;
-                }else if($is_emsl_staff) {
-                    $results_by_proposal[$row->group_id] = $row->proposal_id;
-                }
-            }
-        }
-
-        $this->group_id_list = $results_by_proposal;
-
-        return $results_by_proposal;
-
-    }//end get_proposal_group_list()
+    // public function get_proposal_group_list($proposal_id_filter = '')
+    // {
+    //     $is_emsl_staff = $this->is_emsl_staff;
+    //     $DB_myemsl = $this->load->database('default', TRUE);
+    //     $DB_myemsl->select(array('group_id', 'name as proposal_id'))->where('type', 'proposal');
+    //     $proposals_available = FALSE;
+    //     if(!$is_emsl_staff) {
+    //         $proposals_available = $this->eus->get_proposals_for_user($this->user_id);
+    //     }
+    //
+    //     if (!empty($proposal_id_filter)) {
+    //         if (is_array($proposal_id_filter)) {
+    //             $DB_myemsl->where_in('name', $proposal_id_filter);
+    //         } else {
+    //             $DB_myemsl->where('name', $proposal_id_filter);
+    //         }
+    //     }
+    //
+    //     $query = $DB_myemsl->get('groups');
+    //
+    //     $results_by_proposal = array();
+    //     if ($query && $query->num_rows()) {
+    //         foreach ($query->result() as $row) {
+    //             if(!$is_emsl_staff && in_array($row->proposal_id, $proposals_available)) {
+    //                 $results_by_proposal[$row->group_id] = $row->proposal_id;
+    //             }else if($is_emsl_staff) {
+    //                 $results_by_proposal[$row->group_id] = $row->proposal_id;
+    //             }
+    //         }
+    //     }
+    //
+    //     $this->group_id_list = $results_by_proposal;
+    //
+    //     return $results_by_proposal;
+    //
+    // }//end get_proposal_group_list()
 
 
     /**
@@ -820,50 +660,23 @@ class Group_info_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_instrument_group_list($inst_id_filter = '')
-    {
-        // $e = new Exception();
-        // var_dump($e->getTraceAsString());
-        $DB_myemsl = $this->load->database('default', TRUE);
-        $DB_myemsl->select(array('group_id', 'name', 'type'));
-        if (!empty($inst_id_filter)) {
-            $where_clause = array(
-                             'type' => 'omics.dms.instrument_id',
-                             'name' => $inst_id_filter,
-                            );
-            $DB_myemsl->where($where_clause);
-            $DB_myemsl->or_where('type', "Instrument.{$inst_id_filter}");
-        } else {
-            $where_clause = "(type = 'omics.dms.instrument_id' or type ilike 'instrument.%') and name not in ('foo')";
-            $DB_myemsl->where($where_clause);
-        }
-
-        $query = $DB_myemsl->order_by('name')->get('groups');
-        $results_by_inst_id = array();
-        if ($query && $query->num_rows() > 0) {
-            foreach ($query->result() as $row) {
-                if ($row->type == 'omics.dms.instrument_id') {
-                    $inst_id = intval($row->name);
-                } else if (strpos($row->type, 'Instrument.') >= 0) {
-                    $inst_id = intval(str_replace('Instrument.', '', $row->type));
-                } else {
-                    continue;
-                }
-
-                $results_by_inst_id[$inst_id][$row->group_id] = $row->name;
-            }
-        }
-
-        if (!empty($inst_id_filter) && is_numeric($inst_id_filter) && array_key_exists($inst_id_filter, $results_by_inst_id)) {
-            $results = $results_by_inst_id[$inst_id_filter];
-        } else {
-            $results = $results_by_inst_id;
-        }
-
-        $this->group_id_list = $results;
-
-        return $results;
-
-    }//end get_instrument_group_list()
+    // public function get_instrument_group_list($inst_id)
+    // {
+    //     $DB_myemsl = $this->load->database('default', TRUE);
+    //     $DB_myemsl->select(array('group_id', 'name', 'type'));
+    //     $results_by_inst_id = array();
+    //     $results_by_inst_id[$inst_id] = $inst_id;
+    //
+    //     if (!empty($inst_id_filter) && is_numeric($inst_id_filter) && array_key_exists($inst_id_filter, $results_by_inst_id)) {
+    //         $results = $results_by_inst_id[$inst_id_filter];
+    //     } else {
+    //         $results = $results_by_inst_id;
+    //     }
+    //
+    //     $this->group_id_list = $results;
+    //
+    //     return $results;
+    //
+    // }//end get_instrument_group_list()
 
 }//end class

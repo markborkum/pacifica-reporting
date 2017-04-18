@@ -139,5 +139,3 @@ function shorten_string($text, $maxchars)
     }
     return $text;
 }
-
-?>

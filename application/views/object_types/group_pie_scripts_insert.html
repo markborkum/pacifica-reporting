@@ -14,7 +14,7 @@
     $proposal_data = array();
     foreach($summary_totals['upload_stats']['proposal'] as $proposal_id => $proposal_count){
       $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['total_file_count'],2));
-      $proposal_name = $this->eus->get_proposal_name($proposal_id);
+      $proposal_name = $transaction_info['proposal'][$proposal_id];
       if(!$proposal_name){
           $proposal_name = "Unknown Proposal";
       }
@@ -70,14 +70,11 @@
     };
     var proposal_chart_<?= $group_id ?> = $('#proposal_stats_graph_<?= $group_id ?>').highcharts($.extend(true, {}, hc_pie_options,proposal_options_<?= $group_id ?>));
 
-
-
-
     <?php
     $user_data = array();
     foreach($summary_totals['upload_stats']['user'] as $person_id => $trans_count){
-      $user_info = $this->eus->get_name_from_eus_id($person_id);
-      $user_data[] = array('name' => $user_info['display_name'], 'y' => round($trans_count / $summary_totals['total_file_count'],2));
+      $user_info = get_user_details($person_id);
+      $user_data[] = array('name' => $user_info['first_name'].' '.$user_info['last_name'], 'y' => round($trans_count / $summary_totals['total_file_count'],2));
     }
     ?>
 
@@ -104,7 +101,7 @@
     <?php
     $instrument_data = array();
     foreach($summary_totals['upload_stats']['instrument'] as $instrument_id => $trans_count){
-      $instrument_info = $this->eus->get_instrument_name($instrument_id);
+      $instrument_info = get_instrument_details($instrument_id);
       $instrument_lookup[$instrument_id] = $instrument_info;
       $instrument_data[] = array('name' => $instrument_id, 'y' => round($trans_count / $summary_totals['total_file_count'],2));
     }

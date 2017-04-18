@@ -151,7 +151,7 @@ class Reporting_model extends CI_Model
      */
     private function _get_files_for_user_list($eus_user_id_list, $start_date, $end_date, $time_basis, $unfiltered = FALSE)
     {
-        extract($this->canonicalize_date_range($start_date, $end_date));
+        extract(canonicalize_date_range($start_date, $end_date));
         switch ($time_basis) {
         case 'create_time':
             $time_field = 'f.ctime';

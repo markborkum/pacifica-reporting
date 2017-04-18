@@ -1,15 +1,16 @@
 <?php
-  $categorized_results = array();
-  $my_category_name = " my users";
-  foreach($results as $object_id => $object_info){
-    $alpha_group = strtolower(substr($object_info['order_field'],0,1));
-    if(array_key_exists($object_id, $my_objects)){
-      $categorized_results[$my_category_name][$object_id] = $object_info;
-    }else{
-      $categorized_results[$alpha_group][$object_id] = $object_info;
+    $categorized_results = array();
+    $my_category_name = " my users";
+    foreach($results as $object_info){
+        $object_id = $object_info['person_id'];
+        $alpha_group = $object_info['category'];
+        if(array_key_exists($object_id, $my_objects)){
+          $categorized_results[$my_category_name][$object_id] = $object_info;
+        }else{
+          $categorized_results[$alpha_group][$object_id] = $object_info;
+        }
     }
-  }
-  ksort($categorized_results);
+    ksort($categorized_results);
 ?>
 <?php foreach($categorized_results as $category => $type_items): ?>
   <?php $category = strtolower(trim($category)); ?>
@@ -20,9 +21,9 @@
   <?php foreach($type_items as $object_id => $object_info): ?>
     <?php $checked = array_key_exists($object_id,$my_objects) ? "checked='checked' " : ""; ?>
   <li>
-    <input type="checkbox" class='object_selection_checkbox' id="proposal_id_<?= $object_id ?>" <?= $checked ?>name="proposal_id_<?= $object_id ?>" />
+    <input type="checkbox" class='object_selection_checkbox' id="user_id_<?= $object_id ?>" <?= $checked ?>name="user_id_<?= $object_id ?>" />
     <input type="hidden" class="item_category" value="<?= $category ?>" />
-    <span id="proposal_<?= $object_id ?>" name="proposal_name_<?= $object_id ?>">
+    <span id="user_<?= $object_id ?>" name="user_name_<?= $object_id ?>">
       <?= $object_info['display_name'] ?>
     </span>
   </li>
