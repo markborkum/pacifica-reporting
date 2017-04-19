@@ -9,5 +9,3 @@ install:
 - phpenv rehash
 script:
  - bash -xe test-everything.sh
- - phpunit --coverage-clover build/logs/clover.xml tests
- - ./vendor/bin/test-reporter
