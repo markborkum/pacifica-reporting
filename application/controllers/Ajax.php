@@ -95,7 +95,7 @@ class Ajax extends Baseline_api_controller
             $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : FALSE;
             $group_info = $this->gm->make_new_group($object_type, $this->user_id, $group_name);
             if ($group_info && is_array($group_info)) {
-                send_json_array($group_info);
+                transmit_array_with_json_header($group_info);
             }
             else {
                 $this->output->set_status_header(500, "Could not make a new group called '{$group_name}'");
@@ -124,10 +124,10 @@ class Ajax extends Baseline_api_controller
 
             return;
         }
-        if ($this->input->post()) {
-            $new_group_name = $this->input->post('group_name');
-        }
-        elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
+        // if ($this->input->post()) {
+        //     $new_group_name = $this->input->post('group_name');
+        // }
+        if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
             $post_info = json_decode($http_raw_post_data, TRUE);
             if (array_key_exists('group_name', $post_info)) {
@@ -141,7 +141,7 @@ class Ajax extends Baseline_api_controller
         }
         if ($new_group_name) {
             //check for authorization
-            if ($this->user_id !== $group_info['person_id']) {
+            if ($this->user_id != $group_info['person_id']) {
                 $this->output->set_status_header(401, 'You are not allowed to alter this group');
 
                 return;
@@ -155,7 +155,7 @@ class Ajax extends Baseline_api_controller
 
             $new_group_info = $this->gm->change_group_name($group_id, $new_group_name);
             if ($new_group_info && is_array($new_group_info)) {
-                send_json_array($new_group_info);
+                transmit_array_with_json_header($new_group_info);
             }
             else {
                 $this->output->set_status_header(500, 'A database error occurred during the update process');
@@ -224,7 +224,7 @@ class Ajax extends Baseline_api_controller
 
         $success = $this->gm->change_group_option($group_id, $option_type, $option_value);
         if ($success && is_array($success)) {
-            send_json_array($success);
+            transmit_array_with_json_header($success);
         }
         else {
             $message = "Could not set options for group ID {$group_id}";
@@ -256,7 +256,7 @@ class Ajax extends Baseline_api_controller
         $group_info = $this->gm->get_group_info($group_id);
         if(empty($group_info)) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
-            send_json_array(array());
+            transmit_array_with_json_header(array());
             return;
         }
         $options_list = $group_info['options_list'];
@@ -361,8 +361,8 @@ class Ajax extends Baseline_api_controller
 
             return;
         }
-        if ($this->user_id !== $group_info['person_id']) {
-            $this->output->set_status_header(401, "User {$this->eus_person_id} is not the owner of Group ID {$group_id}");
+        if ($this->user_id != $group_info['person_id']) {
+            $this->output->set_status_header(401, "User {$this->user_id} is not the owner of Group ID {$group_id}");
 
             return;
         }

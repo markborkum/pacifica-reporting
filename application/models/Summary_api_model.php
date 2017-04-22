@@ -163,7 +163,6 @@ class Summary_api_model extends CI_Model
             $transaction_url = "{$this->policy_url_base}/reporting/transaction_summary/{$time_basis}/";
             $transaction_url .= "{$group_type}/".$start_date->format('Y-m-d H:i:s')."/";
             $transaction_url .= $end_date->format('Y-m-d H:i:s')."?user={$this->user_id}";
-            // echo $transaction_url;
             $query = Requests::post(
                 $transaction_url,
                 array('Content-Type' => 'application/json'),

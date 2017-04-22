@@ -511,7 +511,7 @@ class Group extends Baseline_api_controller
         $end_date_obj   = new DateTime($end_date);
         $this->gm->change_group_option($group_id, 'start_time', $start_date_obj->format('Y-m-d'));
         $this->gm->change_group_option($group_id, 'end_time', $end_date_obj->format('Y-m-d'));
-        send_json_array($return_array);
+        transmit_array_with_json_header($return_array);
 
     }//end get_group_timeline_data()
 
@@ -531,7 +531,7 @@ class Group extends Baseline_api_controller
     public function get_proposals($proposal_name_fragment, $active = 'active')
     {
         $results = $this->eus->get_proposals_by_name($proposal_name_fragment, $active);
-        send_json_array($results);
+        transmit_array_with_json_header($results);
 
     }//end get_proposals()
 }//end class

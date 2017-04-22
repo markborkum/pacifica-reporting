@@ -257,6 +257,8 @@ class Group_info_model extends CI_Model
     {
         // $DB_prefs   = $this->load->database('website_prefs', TRUE);
         $table_name = 'reporting_object_groups';
+        $dt_now = new DateTime();
+        $dt_string = $dt_now->format('Y-m-d H:i:s');
         // check the name and make sure it's unique for this user_id
         if (!$group_name) {
             $group_name = 'New '.ucwords($object_type).' Group';
@@ -269,16 +271,15 @@ class Group_info_model extends CI_Model
         $check_query = $this->db->where($where_array)->get($table_name);
         if ($check_query && $check_query->num_rows() > 0) {
             $d           = new DateTime();
-            $group_name .= ' ['.$d->format('Y-m-d H:i:s').']';
+            $group_name .= " [{$dt_string}]";
         }
-
         $insert_data = array(
                         'person_id'  => $eus_person_id,
                         'group_name' => $group_name,
                         'group_type' => $object_type,
                         'ordering' => 0,
-                        'created' => 'now()',
-                        'updated' => 'now()'
+                        'created' => $dt_string,
+                        'updated' => $dt_string
                        );
         $this->db->insert($table_name, $insert_data);
         if ($this->db->affected_rows() > 0) {

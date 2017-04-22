@@ -68,17 +68,19 @@ class System_setup_model extends CI_Model
      */
     private function _check_and_create_database($db_name)
     {
-        if(!$this->dbutil->database_exists($db_name)) {
-            log_message('info', 'Attempting to create database structure...');
-            //db doesn't already exist, so make it
-            if($this->dbforge->create_database($db_name)) {
-                log_message('info', "Created {$db_name} database instance");
-            }else{
-                log_message('error', "Could not create database instance.");
-                $this->output->set_status_header(500);
+        if($this->db->platform() != 'sqlite3') {
+            if(!$this->dbutil->database_exists($db_name)) {
+                log_message('info', 'Attempting to create database structure...');
+                //db doesn't already exist, so make it
+                if($this->dbforge->create_database($db_name)) {
+                    log_message('info', "Created {$db_name} database instance");
+                }else{
+                    log_message('error', "Could not create database instance.");
+                    $this->output->set_status_header(500);
+                }
             }
         }else{
-
+            log_message('info', 'DB Type is sqlite3, so we don\'t have to explicitly make the db file');
         }
     }
 
@@ -98,6 +100,8 @@ class System_setup_model extends CI_Model
 
         $this->_check_and_create_database($this->statusdb_name);
 
+        $dt_now = new DateTime();
+        $dt_string = $dt_now->format('Y-m-d H:i:s');
         //ok, the database should be there now. Let's make some tables
         $db_create_object = array(
             'keys' => array(
@@ -111,37 +115,38 @@ class System_setup_model extends CI_Model
                     array(
                         'option_type' => 'time_range',
                         'option_default' => '3-months',
-                        'created' => 'now()',
-                        'updated' => 'now()',
+                        'created' => $dt_string,
+                        'updated' => $dt_string,
                     ),
                     array(
                         'option_type' => 'start_time',
                         'option_default' => 0,
-                        'created' => 'now()',
-                        'updated' => 'now()',
+                        'created' => $dt_string,
+                        'updated' => $dt_string,
                     ),
                     array(
                         'option_type' => 'end_time',
                         'option_default' => 0,
-                        'created' => 'now()',
-                        'updated' => 'now()',
+                        'created' => $dt_string,
+                        'updated' => $dt_string,
                     ),
                     array(
                         'option_type' => 'time_basis',
                         'option_default' => 'modified_time',
-                        'created' => 'now()',
-                        'updated' => 'now()',
+                        'created' => $dt_string,
+                        'updated' => $dt_string,
                     )
                 )
             ),
             'tables' => array(
                 'reporting_object_groups' => array(
                     'group_id' => array(
-                        'type' => 'NUMERIC',
-                        'auto_increment' => TRUE
+                        'type' => 'INTEGER',
+                        'auto_increment' => TRUE,
+                        'unsigned' => TRUE
                     ),
                     'person_id' => array(
-                        'type' => 'INT'
+                        'type' => 'INTEGER'
                     ),
                     'group_name' => array(
                         'type' => 'VARCHAR'
