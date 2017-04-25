@@ -154,11 +154,12 @@ class Group extends Baseline_api_controller
         $this->page_data['page_header'] = 'Aggregated MyEMSL Uploads by '.ucwords($object_type).' Grouping';
         $this->page_data['my_object_type'] = $object_type;
         $this->page_data['css_uris'] = array(
-            '/resources/stylesheets/status_style.css',
+            // '/resources/stylesheets/status_style.css',
             '/resources/scripts/select2/select2.css',
             '/resources/scripts/bootstrap/css/bootstrap.css',
             '/resources/scripts/bootstrap-daterangepicker/daterangepicker.css',
-            base_url().'project_resources/stylesheets/reporting.css',
+            '/project_resources/stylesheets/reporting.css',
+            '/project_resources/stylesheets/combined.css'
         );
         $this->page_data['script_uris'] = array(
             '/resources/scripts/spinner/spin.min.js',

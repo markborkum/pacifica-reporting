@@ -22,8 +22,8 @@
     <script src="/resources/scripts/jquery-cookie/jquery.cookie.js" type="text/javascript"></script>
 
     <!-- local css files -->
-    <link rel="stylesheet" type="text/css" href="/resources/stylesheets/local.css" />
-    <link rel="stylesheet" href="/resources/stylesheets/emsl_chrome.css">
+    <!-- <link rel="stylesheet" type="text/css" href="/resources/stylesheets/local.css" /> -->
+    <!-- <link rel="stylesheet" href="/resources/stylesheets/emsl_chrome.css"> -->
 
     <link rel="stylesheet" type="text/css" href="/resources/fonts/opensans/opensans.css" />
 
