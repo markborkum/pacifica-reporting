@@ -174,7 +174,7 @@ class Summary_api_model extends CI_Model
 
         $results['day_graph']['by_date']['available_dates'] = $available_dates;
         $results['day_graph']['by_date'] = $this->_temp_stats_to_output($results['day_graph']['by_date']);
-
+        $results['summary_totals']['total_size_string'] = format_bytes($results['summary_totals']['total_size_bytes']);
         return $results;
     }
 
@@ -199,7 +199,6 @@ class Summary_api_model extends CI_Model
         if(!isset($transactions_by_day)) {
             $transactions_by_day = array();
         }
-
         foreach($available_dates as $date_key => $date_string){
             $date_timestamp = (intval(strtotime($date_key)) * 1000);
             if(array_key_exists($date_key, $temp_results['file_count'])) {

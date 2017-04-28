@@ -398,15 +398,8 @@ class Ajax extends Baseline_api_controller
         $this->page_data['object_type'] = $object_type;
         $this->page_data['filter_text'] = $filter;
         $this->page_data['my_objects'] = $my_objects[$object_type];
-        // var_dump($this->page_data);
         $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
-        if (!empty($results['results'])) {
-            $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
-        }
-        else {
-            $filter_string = implode("' '", $filter);
-            echo "<div class='info_message' style='margin-bottom:1.5em;'>No Results Returned for '{$filter_string}'</div>";
-        }
+        $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
     }
 
 }

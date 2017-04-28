@@ -339,7 +339,8 @@ class Group_info_model extends CI_Model
                          'group_id'    => $group_id,
                          'option_type' => $option_type,
                         );
-        $update_array = array('option_value' => $value, 'updated' => 'now()');
+        $now_time = new DateTime();
+        $update_array = array('option_value' => $value, 'updated' => $now_time->format('Y-m-d H:i:s'));
         $query        = $this->db->where($where_array)->get($table_name);
         if ($query && $query->num_rows() > 0) {
             $this->db->where($where_array)->update($table_name, $update_array);
@@ -468,13 +469,13 @@ class Group_info_model extends CI_Model
                         );
         // $DB_prefs     = $this->load->database('website_prefs', TRUE);
         $where_clause = array('group_id' => $group_id);
-
+        $now_time = new DateTime();
         if ($full_delete) {
             $this->db->delete($tables, $where_clause);
         } else {
             // just update deleted_at column
             foreach ($tables as $table_name) {
-                $this->db->update($table_name, array('deleted' => 'now()'), $where_clause);
+                $this->db->update($table_name, array('deleted' => $now_time->format('Y-m-d H:i:s'), $where_clause));
             }
         }
 

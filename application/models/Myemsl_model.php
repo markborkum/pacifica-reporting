@@ -168,6 +168,9 @@ class Myemsl_model extends CI_Model
         }else{
             $search_term_string = $search_terms;
         }
+        if($my_objects) {
+            $results_json['results'] = $this->get_my_objects_list($object_type, $my_objects);
+        }
         $policy_url = "{$this->policy_url_base}/status";
         $query_url = "{$policy_url}/{$acceptable_object_types[$object_type]}/search/";
         $query_url .= "{$search_term_string}?";
@@ -178,10 +181,33 @@ class Myemsl_model extends CI_Model
         $query = Requests::get($query_url, array('Accept' => 'application/json'));
         $results_body = $query->body;
         if($query->status_code == 200) {
-            $results_json['results'] = json_decode($results_body, TRUE);
+            $results_json['results'] = array_merge($results_json['results'], json_decode($results_body, TRUE));
             $results_json['success'] = TRUE;
         }
         return $results_json;
+    }
+
+    /**
+     * Get full details on the objects already in this collection
+     *
+     * @param string $object_type The object type to search
+     * @param array  $id_list     objects in this collection already
+     *
+     * @return array
+     *
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     */
+    function get_my_objects_list($object_type, $id_list)
+    {
+        $metadata_url = "{$this->metadata_url_base}/{$object_type}info/by_{$object_type}_id/";
+        $results = array();
+        foreach($id_list as $id){
+            $query = Requests::get($metadata_url.$id, array('Accept' => 'application/json'));
+            if($query->status_code == 200) {
+                $results[] = json_decode($query->body, TRUE);
+            }
+        }
+        return $results;
     }
 
 

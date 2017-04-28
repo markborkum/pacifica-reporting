@@ -18,6 +18,7 @@ $config['local_timezone'] = 'America/Los_Angeles';
 $config['application_config_file_path'] = '/etc/myemsl/';
 
 $config['template'] = 'emsl';
+$config['theme_name'] = 'myemsl';
 $config['site_color'] = 'orange';
 $config['jquery_script'] = "jquery-1.11.2.js";
 

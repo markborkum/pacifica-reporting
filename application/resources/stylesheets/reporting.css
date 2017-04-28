@@ -2,14 +2,84 @@ footer.short {
     height: 40px;
 }
 
+/* reporting object containers */
 .reporting_object_container .object_name a {
     font-size: 0.8em;
     text-decoration: none;
     color: #fff;
 }
 
+.reporting_object_container {
+    margin-bottom: 1em;
+    margin-top: 1em;
+}
+
+.reporting_object_container>.object_header {
+    padding: 3px 10px 3px 10px;
+    font-size: 1em;
+    font-weight: bold;
+    background-color: #999;
+    color: #fff;
+    border-radius: 5px 5px 0px 0px;
+    transition: all 0.25s ease-in-out;
+}
+
+.reporting_object_container>.object_header.closed {
+    border-radius: 5px;
+    /*margin-bottom:2em;*/
+}
+
+.reporting_object_container .object_body {
+    position: relative;
+    padding: 8px;
+    padding-bottom: 15px;
+    font-size: 1.0em;
+    min-height: 60px;
+    border: 1px solid #ccc;
+}
+
+.reporting_object_container .object_body_container {
+    position: relative;
+}
+
+.reporting_object_container .group_edit_section {
+    position: relative;
+    background-color: #fafafa;
+}
+
 .reporting_object_container .object_name a:hover {
     text-decoration: underline;
+}
+
+.object_body_container>.transaction_details_notifier {
+    text-align: center;
+    font-weight: bold;
+    font-size: 1.05em;
+    color: #444444;
+    padding: 0.5em;
+}
+
+.object_body_container>.totals_container {
+    position: absolute;
+    top: 0px;
+    right: 5px;
+    width: auto;
+    text-align: center;
+}
+
+.object_body_container>.totals_container ul {
+    margin: 0;
+    padding: 0 0.5em 0.5em 0.5em;
+}
+
+.object_body_container>.totals_container li {
+    list-style: none;
+    text-align: right;
+}
+
+.object_footer .edit_grouping_container {
+    margin-top: 5px;
+    margin-left: 5px;
 }
 
 header.secondary .page_header {
@@ -45,6 +115,10 @@ header.secondary .page_header {
     color: white;
 }
 
+.form-control {
+    border: 1px solid #ccc;
+}
+
 .input-sm {
     font-size: 1em;
     height: 30px;
@@ -56,10 +130,6 @@ header.secondary .page_header {
     position: relative;
     display: table;
     border-collapse: separate;
-}
-
-.form-control {
-    border: 1px solid #ccc;
 }
 
 .input-daterange input {
@@ -96,7 +166,7 @@ header.secondary .page_header {
 #search_bar_container {
     color: #fefefe;
     padding: 0.5em;
-    background-color: #53692b;
+    background-color: rgb(61, 101, 149);
     margin-top: 0;
     font-weight: normal;
     border-radius: 0 0 8px 8px;
@@ -105,9 +175,10 @@ header.secondary .page_header {
 }
 
 .group_search_bar_container {
-    /*color: #fefefe;*/
-    padding: 0 1em;
+    padding: 1em;
     margin-top: 0;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
     font-weight: normal;
 }
 
@@ -181,7 +252,8 @@ header.secondary .page_header {
 */
 
 .search_results_display {
-    margin-top: 0.5em;
+    border-left: 1px solid #ccc;
+    border-right: 1px solid #ccc;
 }
 
 .search_results_display ul.search_results_list {
@@ -240,7 +312,9 @@ header.secondary .page_header {
 
 .edit_button {
     font-size: 0.95em;
+    padding: 1px 9px;
     border-radius: 2px;
+    margin-bottom: 5px;
     border: 1px solid #666;
     background-color: #ddd;
     font-weight: bold;
@@ -444,7 +518,6 @@ h1.underline {
     padding: 3px 5px 3px 5px;
     margin-top: -1px;
     position: relative;
-    height: 3em;
 }
 
 .reporting_object_container .object_body_container {
