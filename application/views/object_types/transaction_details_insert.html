@@ -27,7 +27,7 @@
                 $friendly_file_size = format_bytes($item['bundle_size']);
             ?>
             <tr>
-                <td><a href="/myemsl/status/index.php/status/view/t/<?= $id ?>" target="_blank"><?= $id ?></a></td>
+                <td><a href="<?= $status_site_base_url ?>/view/<?= $id ?>" target="_blank"><?= $id ?></a></td>
                 <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
                 <td><?= $ul_mod_string ?></td>
                 <td><?= array_key_exists('proposal_id',$item) && !empty($item['proposal_id']) ? $item['proposal_id'] : "N/A" ?></td>

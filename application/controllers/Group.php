@@ -97,7 +97,7 @@ class Group extends Baseline_api_controller
                                            );
         $this->local_resources_folder = $this->config->item('local_resources_folder');
         $this->debug = $this->config->item('debug_enabled');
-
+        $this->status_site_base_url = $this->config->item('status_server_base_url');
     }
 
     /**
@@ -287,6 +287,7 @@ class Group extends Baseline_api_controller
 
         $results = $this->summary->detailed_transaction_list($transaction_list);
         $this->page_data['transaction_info'] = $results;
+        $this->page_data['status_site_base_url'] = $this->status_site_base_url;
 
         $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
 
