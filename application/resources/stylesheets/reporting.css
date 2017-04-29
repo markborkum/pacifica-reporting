@@ -646,32 +646,32 @@ h1.underline {
     padding-right: 13px;
     margin-left: 6px;
     vertical-align: middle;
-    background-image: url(/resources/images/disclosure_symbols.png);
+    background-image: url(/project_resources/images/disclosure/blue/disclosure_blue.png);
     background-repeat: no-repeat;
     background-size: 32px 48px;
 }
 
-.dc_up {
+.transaction_details_notifier .dc_up {
     background-position: 0px 0px;
 }
 
-.dc_down {
+.transaction_details_notifier .dc_down {
     background-position: -16px 0px;
 }
 
-.dc_up:hover {
+.transaction_details_notifier .dc_up:hover {
     background-position: -0px -16px;
 }
 
-.dc_down:hover {
+.transaction_details_notifier .dc_down:hover {
     background-position: -16px -16px;
 }
 
-.dc_up:active {
+.transaction_details_notifier .dc_up:active {
     background-position: 0px -32px;
 }
 
-.dc_down:active {
+.transaction_details_notifier .dc_down:active {
     background-position: -16px -32px;
 }
 
@@ -858,7 +858,7 @@ span.container_name {
 
 @media only screen and (-o-min-device-pixel-ratio: 5/4), only screen and (-webkit-min-device-pixel-ratio: 1.25), only screen and (min-device-pixel-ratio: 1.25), only screen and (min-resolution: 1.25dppx) {
     .disclosure_arrows {
-        background-image: url(/resources/images/disclosure_symbols@2x.png);
+        background-image: url(/project_resources/images/disclosure/blue/disclosure_blue@2x.png);
     }
     .remove_icon {
         background-image: url(/resources/images/remove_icons@2x.png);
@@ -882,7 +882,7 @@ span.container_name {
 
 @media only screen and (-o-min-device-pixel-ratio: 9/4), only screen and (-webkit-min-device-pixel-ratio: 2.25), only screen and (min-device-pixel-ratio: 2.25), only screen and (min-resolution: 2.25dppx) {
     .disclosure_arrows {
-        background-image: url(/resources/images/disclosure_symbols@3x.png);
+        background-image: url(/project_resources/images/disclosure/blue/disclosure_blue@3x.png);
     }
     .remove_icon {
         background-image: url(/resources/images/remove_icons@3x.png);
