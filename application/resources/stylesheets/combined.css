@@ -212,6 +212,10 @@ button:hover, .buttons input[type="button"]:hover {
     position: relative;
 }
 
+.graphic_logo {
+    display:none;
+}
+
 .text_logo {
     color: white;
     font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -236,6 +240,7 @@ button:hover, .buttons input[type="button"]:hover {
 .page_content {
     margin-left: auto;
     margin-right: auto;
+    margin-bottom: 10em;
     width: 960px;
 }
 
@@ -488,7 +493,6 @@ footer a:hover {
 .folder_size_summary {
     font-size: 0.75em;
     font-style: italic;
-    color: #666;
 }
 
 .transaction_container h3 {
