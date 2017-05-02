@@ -267,7 +267,11 @@ var load_results = function(object_type, object_id) {
 
 
 var load_group_results = function(object_type, group_id, item_list) {
-    $('#loading_status_' + group_id).spin().show();
+    if($('#loading_status_' + group_id).length !== 0){
+        $('#loading_status_' + group_id).spin().show();
+    }else{
+        $('#loading_blocker_' + group_id).spin().show();
+    }
     var obj_footer = $('#object_footer_' + group_id);
     var time_basis = $('#time_basis_selector_' + group_id).val();
     obj_footer.disable();
@@ -275,6 +279,7 @@ var load_group_results = function(object_type, group_id, item_list) {
     var getter = $.get(url);
     getter.done(function(data, status) {
         $('#loading_status_' + group_id).spin(false).hide();
+        $('#loading_blocker_' + group_id).spin(false).hide();
         $('#object_body_' + group_id + ' .info_message').hide();
         if ($('#object_body_container_' + group_id).length == 0) {
             $('#object_body_' + group_id).append(data);
