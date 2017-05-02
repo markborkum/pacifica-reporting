@@ -14,7 +14,7 @@
     $proposal_data = array();
     foreach($summary_totals['upload_stats']['proposal'] as $proposal_id => $proposal_count){
       $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['total_file_count'],2));
-      $proposal_name = $transaction_info['proposal'][$proposal_id];
+      $proposal_name = strtolower($proposal_id) != "other" ? $transaction_info['proposal'][$proposal_id] : "Other";
       if(!$proposal_name){
           $proposal_name = "Unknown Proposal";
       }
