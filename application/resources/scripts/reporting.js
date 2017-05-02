@@ -88,7 +88,7 @@ var hc_timeline_options = {
     },
     yAxis: [{ //transaction count axis
         type: 'logarithmic',
-        min: 1,
+        min: 0.1,
         title: {
             text: 'Total File Count',
             style: {
