@@ -27,4 +27,4 @@ $config['debug_enabled'] = TRUE;
 
 $config['metadata_server_base_url'] = str_replace('tcp://', 'http://', getenv('METADATA_PORT'));
 $config['policy_server_base_url'] = str_replace('tcp://', 'http://', getenv('POLICY_PORT'));
-$config['status_server_base_url'] = getenv('STATUS_SITE_NAME') ? getenv('STATUS_SITE_NAME') : "http://status.local";
+$config['status_server_base_url'] = getenv('STATUS_SITE_NAME') ? getenv('STATUS_SITE_NAME') : "http://statusdev.my.emsl.pnl.gov";
