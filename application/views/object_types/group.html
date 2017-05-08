@@ -50,6 +50,8 @@
               <input type="hidden" id="group_name_<?= $id ?>" name="group_name_<?= $id ?>" class="group_name" value="<?= $group_info['group_name'] ?>" />
               <input type="hidden" id="group_id_<?= $id ?>" name="group_id_<?= $id ?>" class="group_id" value="<?= $id ?>" />
               <input type="hidden" id="object_type_<?= $id ?>" name="object_type_<?= $id ?>" class="object_type" value="<?= $my_object_type ?>" />
+              <input type="hidden" id="start_time_<?= $id ?>" name="start_time_<? $id ?>" class="start_time" value="<?= $placeholder_info[$id]['times']['start_time_object']->format('Y-m-d'); ?>" />
+              <input type="hidden" id="end_time_<?= $id ?>" name="end_time_<? $id ?>" class="end_time" value="<?= $placeholder_info[$id]['times']['end_time_object']->format('Y-m-d'); ?>" />
             </div>
             <div id="search_instructions_container_<?= $id ?>" class="search_instructions_container">
             <?php
@@ -231,11 +233,15 @@
         autoUpdateInput: true,
         linkedCalendars:false,
         ranges: {
-          'Last 7 Days': [moment().subtract(6, 'days'), moment()],
-          'Last 30 Days': [moment().subtract(29, 'days'), moment()],
-          'Last 3 Months': [moment().subtract(3, 'months'), moment()],
-          'Last 6 Months': [moment().subtract(6, 'months'), moment()],
-          'Last Year': [moment().subtract(12, 'months'), moment()],
+          'Last 7 Days': [moment().startOf('day').subtract(6, 'days'), moment().endOf('day')],
+          'Last 30 Days': [moment().startOf('day').subtract(1, 'months'), moment().endOf('day')],
+          'Last 3 Months': [moment().startOf('day').subtract(3, 'months'), moment().endOf('day')],
+          'Last 6 Months': [moment().startOf('day').subtract(6, 'months'), moment().endOf('day')],
+          'Last Year': [moment().startOf('day').subtract(12, 'months'), moment().endOf('day')],
+          'All Available': [
+              moment('<?= $placeholder_info[$id]['times']['earliest_available_object']->format('Y-m-d'); ?>').startOf('day'),
+              moment('<?= $placeholder_info[$id]['times']['latest_available_object']->format('Y-m-d'); ?>').endOf('day')
+          ]
         }
       }, cb);
 
@@ -248,6 +254,9 @@
             'option_type' : 'start_time',
             'option_value' : picker.startDate.format('YYYY-MM-DD HH:mm:ss')
           };
+          $(this).parents('.reporting_object_container').find('.start_time').val(
+              picker.startDate.format('YYYY-MM-DD')
+          );
           var posterStart = $.post(update_url, JSON.stringify(update_list));
         }
 
@@ -256,6 +265,9 @@
             'option_type' : 'end_time',
             'option_value' : picker.endDate.format('YYYY-MM-DD HH:mm:ss')
           };
+          $(this).parents('.reporting_object_container').find('.end_time').val(
+              picker.endDate.format('YYYY-MM-DD')
+          );
           var posterEnd = $.post(update_url, JSON.stringify(update_list));
         }
       });

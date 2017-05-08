@@ -275,7 +275,14 @@ var load_group_results = function(object_type, group_id, item_list) {
     var obj_footer = $('#object_footer_' + group_id);
     var time_basis = $('#time_basis_selector_' + group_id).val();
     obj_footer.disable();
-    var url = base_url + 'group/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_basis + '/' + time_range;
+    start_time = $('#start_time_' + group_id).val();
+    end_time = $('#end_time_' + group_id).val();
+    var url_parts = [
+        'group', 'get_reporting_info_list', object_type,
+        group_id, time_basis, time_range, start_time, end_time
+    ];
+    var url = base_url + url_parts.join('/');
+    // var url = base_url + 'group/get_reporting_info_list/' + object_type + '/' + group_id + '/' + time_basis + '/' + time_range;
     var getter = $.get(url);
     getter.done(function(data, status) {
         $('#loading_status_' + group_id).spin(false).hide();

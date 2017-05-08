@@ -580,7 +580,10 @@ class Group_info_model extends CI_Model
      */
     public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
     {
-        $return_array = FALSE;
+        $return_array = array(
+            'earliest' => FALSE,
+            'latest' => FALSE
+        );
         if (empty($object_id_list)) {
             return FALSE;
         }
