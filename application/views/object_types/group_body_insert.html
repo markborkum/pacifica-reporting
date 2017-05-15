@@ -58,6 +58,84 @@
   </div>
   <div id="transaction_details_container_<?= $group_id ?>" class="transaction_details_container" style="display:none;"></div>
   <div id="dialog-confirm"></div>
+  <script>
+  //<![CDATA[
+  $(function(){
+
+
+
+
+
+        function cb(start, end) {
+          $('#time_range_container_<?= $group_id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
+          var tl_obj = $('#object_timeline_<?= $group_id ?>').highcharts();
+          var start_timestamp = start.toDate().getTime();
+          var end_timestamp = end.toDate().getTime();
+
+          if(tl_obj){
+            if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
+              load_new_group_timeline_data(tl_obj, object_type,'<?= $group_id ?>',start.format('YYYY-MM-DD'),end.format('YYYY-MM-DD'));
+            }else{
+              tl_obj.xAxis[0].update({
+                min: start_timestamp,
+                max: end_timestamp
+              });
+            }
+          }
+        }
+        cb(moment(correctTZ(new Date('<?= $times['start_date_object']->format('Y-m-d'); ?>'))), moment(correctTZ(new Date('<?= $times['end_date_object']->format('Y-m-d'); ?>'))));
+
+        $('#time_range_container_<?= $group_id ?>').daterangepicker({
+          parentEl: '#object_footer_<?= $group_id ?>',
+          minDate: '<?= $times['earliest_available_object']->format('m/d/Y'); ?>',
+          maxDate: '<?= $times['latest_available_object']->format('m/d/Y'); ?>',
+          startDate: '<?= $times['start_date_object']->format('m/d/Y'); ?>',
+          endDate: '<?= $times['end_date_object']->format('m/d/Y'); ?>',
+          autoUpdateInput: true,
+          linkedCalendars:false,
+          ranges: {
+            'Last 7 Days': [moment().startOf('day').subtract(6, 'days'), moment().endOf('day')],
+            'Last 30 Days': [moment().startOf('day').subtract(1, 'months'), moment().endOf('day')],
+            'Last 3 Months': [moment().startOf('day').subtract(3, 'months'), moment().endOf('day')],
+            'Last 6 Months': [moment().startOf('day').subtract(6, 'months'), moment().endOf('day')],
+            'Last Year': [moment().startOf('day').subtract(12, 'months'), moment().endOf('day')],
+            'All Available': [
+                moment('<?= $times['earliest_available_object']->format('Y-m-d'); ?>').startOf('day'),
+                moment('<?= $times['latest_available_object']->format('Y-m-d'); ?>').endOf('day')
+            ]
+          }
+        }, cb);
+
+        $('#time_range_container_<?= $group_id ?>').on('apply.daterangepicker', function(event, picker){
+          //look at the dates and upload the changes
+          var update_url = base_url + 'ajax/change_group_option/<?= $group_id ?>';
+          var update_list = {};
+          if(picker.oldStartDate != picker.startDate){
+            update_list = {
+              'option_type' : 'start_time',
+              'option_value' : picker.startDate.format('YYYY-MM-DD HH:mm:ss')
+            };
+            $(this).parents('.reporting_object_container').find('.start_time').val(
+                picker.startDate.format('YYYY-MM-DD')
+            );
+            var posterStart = $.post(update_url, JSON.stringify(update_list));
+          }
+
+          if(picker.oldEndDate != picker.endDate){
+            update_list = {
+              'option_type' : 'end_time',
+              'option_value' : picker.endDate.format('YYYY-MM-DD HH:mm:ss')
+            };
+            $(this).parents('.reporting_object_container').find('.end_time').val(
+                picker.endDate.format('YYYY-MM-DD')
+            );
+            var posterEnd = $.post(update_url, JSON.stringify(update_list));
+          }
+        });
+
+  });
+  //]]>
+  </script>
 
   <?php else: ?>
   <div class='info_message'><?= $results_message ?></div>

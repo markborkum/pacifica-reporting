@@ -59,31 +59,31 @@
 */
 
 
-// $db['default'] = array(
-//   'hostname' => getenv('PREFSDB_ADDR'),
-//   'username' => getenv('PREFSDB_USER'),
-//   'password' => getenv('PREFSDB_PASSWORD'),
-//   'database' => getenv('PREFSDB_DB_NAME'),
-//   'dbdriver' => "postgre",
-//   'dbprefix' => "",
-//   'pconnect' => FALSE,
-//   'db_debug' => TRUE,
-//   'cache_on' => FALSE,
-//   'cachedir' => ""
-// );
-
 $db['default'] = array(
-  'hostname' => "",
-  'username' => "",
-  'password' => "",
-  'database' => "/tmp/reporting.sqlite3",
-  'dbdriver' => "sqlite3",
+  'hostname' => getenv('PREFSDB_ADDR'),
+  'username' => getenv('PREFSDB_USER'),
+  'password' => getenv('PREFSDB_PASSWORD'),
+  'database' => getenv('PREFSDB_DB_NAME'),
+  'dbdriver' => "postgre",
   'dbprefix' => "",
-  'pconnect' => TRUE,
-  'db_debug' => FALSE,
+  'pconnect' => FALSE,
+  'db_debug' => TRUE,
   'cache_on' => FALSE,
   'cachedir' => ""
 );
+
+// $db['default'] = array(
+//   'hostname' => "",
+//   'username' => "",
+//   'password' => "",
+//   'database' => "/tmp/reporting.sqlite3",
+//   'dbdriver' => "sqlite3",
+//   'dbprefix' => "",
+//   'pconnect' => TRUE,
+//   'db_debug' => FALSE,
+//   'cache_on' => FALSE,
+//   'cachedir' => ""
+// );
 
 
 // $active_record = TRUE;

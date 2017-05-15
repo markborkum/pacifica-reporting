@@ -160,11 +160,10 @@ class System_setup_model extends CI_Model
                     ),
                     'created' => array(
                         'type' => 'TIMESTAMP',
-                        'default' => "datetime('now', localtime)"
+                        'default' => 'now()'
                     ),
                     'updated' => array(
-                        'type' => 'TIMESTAMP',
-                        'default' => "datetime('now', localtime)"
+                        'type' => 'TIMESTAMP'
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',
@@ -187,8 +186,7 @@ class System_setup_model extends CI_Model
                     ),
                     'created' => array(
                         'type' => 'TIMESTAMP',
-                        'default' => "datetime('now', localtime)"
-
+                        'default' => 'now()'
                     ),
                     'updated' => array(
                         'type' => 'TIMESTAMP'
@@ -207,11 +205,10 @@ class System_setup_model extends CI_Model
                     ),
                     'created' => array(
                         'type' => 'TIMESTAMP',
-                        'default' =>"datetime('now', localtime)"
+                        'default' => 'now()'
                     ),
                     'updated' => array(
-                        'type' => 'TIMESTAMP',
-                        'default' =>"datetime('now', localtime)"
+                        'type' => 'TIMESTAMP'
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',
@@ -230,11 +227,10 @@ class System_setup_model extends CI_Model
                     ),
                     'created' => array(
                         'type' => 'TIMESTAMP',
-                        'default' =>"datetime('now', localtime)"
+                        'default' => 'now()'
                     ),
                     'updated' => array(
-                        'type' => 'TIMESTAMP',
-                        'default' =>"datetime('now', localtime)"                        
+                        'type' => 'TIMESTAMP'
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',

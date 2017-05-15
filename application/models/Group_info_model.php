@@ -97,9 +97,6 @@ class Group_info_model extends CI_Model
 
             $group_info   = $query->row_array();
             $member_query = $this->db->select('item_id')->get_where('reporting_selection_prefs', array('group_id' => $group_id));
-            // echo $DB_prefs->last_query();
-            // var_dump($member_query->result_array());
-            // echo "<br /><br />";
             if ($member_query && $member_query->num_rows() > 0) {
                 foreach ($member_query->result() as $row) {
                     $group_info['item_list'][] = $row->item_id;
