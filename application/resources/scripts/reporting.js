@@ -237,6 +237,7 @@ var load_new_group_timeline_data = function(timeline_obj, object_type, group_id,
         $('#loading_blocker_' + group_id).spin(false).hide();
         fv_data.setData(data.file_volumes, false);
         tx_data.setData(data.transaction_counts, false);
+        timeline_obj.xAxis[0].setExtremes(moment(start_date).startOf('day'),moment(end_date).endOf('day'), true, false);
         timeline_obj.redraw();
     });
 };

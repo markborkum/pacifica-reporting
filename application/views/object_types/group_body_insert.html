@@ -60,17 +60,14 @@
   <div id="dialog-confirm"></div>
   <script>
   //<![CDATA[
+  var start_timestamp;
+  var end_timestamp;
   $(function(){
-
-
-
-
-
         function cb(start, end) {
           $('#time_range_container_<?= $group_id ?> span').html(start.format('MM/DD/YYYY') + ' - ' + end.format('MM/DD/YYYY'));
           var tl_obj = $('#object_timeline_<?= $group_id ?>').highcharts();
-          var start_timestamp = start.toDate().getTime();
-          var end_timestamp = end.toDate().getTime();
+          start_timestamp = start.toDate().getTime();
+          end_timestamp = end.toDate().getTime();
 
           if(tl_obj){
             if(timeline_load_new_data_check(tl_obj,start_timestamp,end_timestamp)){
@@ -83,7 +80,7 @@
             }
           }
         }
-        cb(moment(correctTZ(new Date('<?= $times['start_date_object']->format('Y-m-d'); ?>'))), moment(correctTZ(new Date('<?= $times['end_date_object']->format('Y-m-d'); ?>'))));
+        cb(moment(correctTZ(new Date(start.format('YYYY-MM-DD')))), moment(correctTZ(new Date(end.format('YYYY-MM-DD')))));
 
         $('#time_range_container_<?= $group_id ?>').daterangepicker({
           parentEl: '#object_footer_<?= $group_id ?>',
