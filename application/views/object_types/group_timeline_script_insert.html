@@ -13,8 +13,8 @@ var time_line_options_<?= $group_id ?> = {
         var time_basis_<?= $group_id ?> = $('#time_basis_selector_<?= $group_id ?>').val();
         var details_notifier = $('#transaction_details_notifier_<?= $group_id ?>');
         var details_container = $('#transaction_details_container_<?= $group_id ?>');
-        var new_start = moment('<?= $times['start_date_object']->format('Y-m-d') ?>').startOf('day').format('YYYY-MM-DD');
-        var new_end = moment('<?= $times['end_date_object']->format('Y-m-d') ?>').endOf('day').format('YYYY-MM-DD');
+        var new_start = moment(userMin).startOf('day').format('YYYY-MM-DD');
+        var new_end = moment(userMax).endOf('day').format('YYYY-MM-DD');
         $('#graph_loading_blocker_<?= $group_id ?>').spin().show();
         current_transaction_list_<?= $group_id ?> = get_transaction_list_for_date_range(this,new_start,new_end, transaction_list_<?= $group_id ?>);
         var url = base_url + 'group/get_reporting_info_list_no_timeline/<?= $object_type ?>/<?= $group_id ?>/' + time_basis_<?= $group_id ?> + '/custom/';
@@ -53,9 +53,9 @@ var time_line_options_<?= $group_id ?> = {
     data: <?= json_encode(array_values($day_graph_info['transaction_count_array'])); ?>
   }]
 };
-
+var timeline_chart_<?= $group_id ?>;
 $(function () {
   current_transaction_list_<?= $group_id ?> = get_transaction_list_for_date_range(this, false, false, transaction_list_<?= $group_id ?>);
-  var timeline_chart_<?= $group_id ?> = $('#object_timeline_<?= $group_id ?>').highcharts($.extend(true, {}, hc_timeline_options,time_line_options_<?= $group_id ?>));
+  timeline_chart_<?= $group_id ?> = $('#object_timeline_<?= $group_id ?>').highcharts($.extend(true, {}, hc_timeline_options,time_line_options_<?= $group_id ?>));
 });
 </script>

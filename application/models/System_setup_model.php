@@ -45,7 +45,7 @@ class System_setup_model extends CI_Model
     {
         parent::__construct();
 
-        $this->statusdb_name = 'pacifica_reporting';
+        $this->statusdb_name = 'reporting';
         //quickly assess the current system status
         try {
             $this->setup_db_structure();

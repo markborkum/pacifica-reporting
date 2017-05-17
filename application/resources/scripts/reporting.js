@@ -213,32 +213,17 @@ var timeline_load_new_data_check = function(timeline_obj, new_start, new_end) {
     }
 };
 
-var load_new_timeline_data = function(timeline_obj, object_type, object_id, start_date, end_date) {
-    var url = base_url + "item/get_timeline_data/" + object_type + "/" + object_id + "/";
-    url += start_date + "/" + end_date;
-    var fv_data = timeline_obj.series[0];
-    var tx_data = timeline_obj.series[1];
-
-    var getter = $.get(url, function(data) {
-        fv_data.setData(data.file_volumes, false);
-        tx_data.setData(data.transaction_counts, false);
-        timeline_obj.redraw();
-    });
-};
-
 var load_new_group_timeline_data = function(timeline_obj, object_type, group_id, start_date, end_date) {
     // debugger;
     var url = base_url + "group/get_group_timeline_data/" + object_type + "/" + group_id + "/";
     url += start_date + "/" + end_date;
-    var fv_data = timeline_obj.series[0];
-    var tx_data = timeline_obj.series[1];
+    var time_line_options = eval('time_line_options_' + group_id);
     $('#loading_blocker_' + group_id).spin().show();
     var getter = $.get(url, function(data) {
         $('#loading_blocker_' + group_id).spin(false).hide();
-        fv_data.setData(data.file_volumes, false);
-        tx_data.setData(data.transaction_counts, false);
-        timeline_obj.xAxis[0].setExtremes(moment(start_date).startOf('day'),moment(end_date).endOf('day'), true, false);
-        timeline_obj.redraw();
+        time_line_options.series[0].data = data.file_volumes;
+        time_line_options.series[1].data = data.transaction_counts;
+        $('#object_timeline_' + group_id).highcharts($.extend(true, {}, hc_timeline_options,time_line_options);
     });
 };
 
@@ -255,17 +240,6 @@ var remove_empty_uls = function() {
         }
     });
 };
-
-var load_results = function(object_type, object_id) {
-    $('#loading_status_' + object_id).spin();
-    var url = base_url + 'item/get_reporting_info/' + object_type + '/' + object_id + '/' + time_range;
-    var getter = $.get(url);
-    getter.done(function(data, status) {
-        $('#loading_status_' + object_id).spin(false);
-        $('#object_body_container_' + object_id).replaceWith(data);
-    });
-};
-
 
 var load_group_results = function(object_type, group_id, item_list) {
     if($('#loading_status_' + group_id).length !== 0){

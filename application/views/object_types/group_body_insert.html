@@ -84,8 +84,8 @@
 
         $('#time_range_container_<?= $group_id ?>').daterangepicker({
           parentEl: '#object_footer_<?= $group_id ?>',
-          minDate: '<?= $times['earliest_available_object']->format('m/d/Y'); ?>',
-          maxDate: '<?= $times['latest_available_object']->format('m/d/Y'); ?>',
+          minDate: moment('<?= $times['earliest_available_object']->format('Y-m-d'); ?>').startOf('day'),
+          maxDate: moment('<?= $times['latest_available_object']->format('Y-m-d'); ?>').endOf('day'),
           startDate: '<?= $times['start_date_object']->format('m/d/Y'); ?>',
           endDate: '<?= $times['end_date_object']->format('m/d/Y'); ?>',
           autoUpdateInput: true,
