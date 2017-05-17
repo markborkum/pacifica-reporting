@@ -3,35 +3,40 @@
 <script type="text/javascript">
 var transaction_list_<?= $group_id ?> = <?= json_encode($day_graph['by_date']['transactions_by_day']) ?>;
 var current_transaction_list_<?= $group_id ?> = [];
+
+var reload_pie_chart = function (chart) {
+  var new_extremes = chart.series[0].xAxis.getExtremes();
+  var userMin = new_extremes.userMin != undefined ? new_extremes.userMin : new_extremes.min;
+  var userMax = new_extremes.userMax != undefined ? new_extremes.userMax : new_extremes.max;
+  var time_basis_<?= $group_id ?> = $('#time_basis_selector_<?= $group_id ?>').val();
+  var details_notifier = $('#transaction_details_notifier_<?= $group_id ?>');
+  var details_container = $('#transaction_details_container_<?= $group_id ?>');
+  var new_start = moment(userMin).startOf('day').format('YYYY-MM-DD');
+  var new_end = moment(userMax).endOf('day').format('YYYY-MM-DD');
+  $('#graph_loading_blocker_<?= $group_id ?>').spin().show();
+  current_transaction_list_<?= $group_id ?> = get_transaction_list_for_date_range(chart, new_start,new_end, transaction_list_<?= $group_id ?>);
+  var url = base_url + 'group/get_reporting_info_list_no_timeline/<?= $object_type ?>/<?= $group_id ?>/' + time_basis_<?= $group_id ?> + '/custom/';
+  url += new_start + '/' + new_end;
+  $('#stats_graph_container_<?= $group_id ?> .stats_graph').addClass('loading_new_graphics');
+  var getter = $.get(url);
+  getter.done(function(data,status){
+    if(details_notifier.find('.disclosure_arrows').hasClass('dc_down')){
+      //switch arrow state
+      details_notifier.find('.disclosure_arrows').removeClass('dc_down').addClass('dc_up');
+    }
+    details_container.html('');
+    //update the date pickers
+    $('#pie_scripts_container_<?= $group_id ?>').html(data);
+    $('#stats_graph_container_<?= $group_id ?> .stats_graph').removeClass('loading_new_graphics');
+    $('#graph_loading_blocker_<?= $group_id ?>').spin(false).hide();
+  });
+};
+
 var time_line_options_<?= $group_id ?> = {
   chart: {
     events: {
       redraw: function () {
-        var new_extremes = this.series[0].xAxis.getExtremes();
-        var userMin = new_extremes.userMin != undefined ? new_extremes.userMin : new_extremes.min;
-        var userMax = new_extremes.userMax != undefined ? new_extremes.userMax : new_extremes.max;
-        var time_basis_<?= $group_id ?> = $('#time_basis_selector_<?= $group_id ?>').val();
-        var details_notifier = $('#transaction_details_notifier_<?= $group_id ?>');
-        var details_container = $('#transaction_details_container_<?= $group_id ?>');
-        var new_start = moment(userMin).startOf('day').format('YYYY-MM-DD');
-        var new_end = moment(userMax).endOf('day').format('YYYY-MM-DD');
-        $('#graph_loading_blocker_<?= $group_id ?>').spin().show();
-        current_transaction_list_<?= $group_id ?> = get_transaction_list_for_date_range(this,new_start,new_end, transaction_list_<?= $group_id ?>);
-        var url = base_url + 'group/get_reporting_info_list_no_timeline/<?= $object_type ?>/<?= $group_id ?>/' + time_basis_<?= $group_id ?> + '/custom/';
-        url += new_start + '/' + new_end;
-        $('#stats_graph_container_<?= $group_id ?> .stats_graph').addClass('loading_new_graphics');
-        var getter = $.get(url);
-        getter.done(function(data,status){
-          if(details_notifier.find('.disclosure_arrows').hasClass('dc_down')){
-            //switch arrow state
-            details_notifier.find('.disclosure_arrows').removeClass('dc_down').addClass('dc_up');
-          }
-          details_container.html('');
-          //update the date pickers
-          $('#pie_scripts_container_<?= $group_id ?>').html(data);
-          $('#stats_graph_container_<?= $group_id ?> .stats_graph').removeClass('loading_new_graphics');
-          $('#graph_loading_blocker_<?= $group_id ?>').spin(false).hide();
-        });
+        reload_pie_chart(this);
       }
     }
   },
