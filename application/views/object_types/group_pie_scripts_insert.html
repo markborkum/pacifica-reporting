@@ -5,7 +5,7 @@
     $('#file_count_<?= $group_id ?>').html('<?= $summary_totals["total_file_count"] ?>');
     $('#file_volume_<?= $group_id ?>').html('<?= $summary_totals["total_size_string"] ?>');
     my_transactions_<?= $group_id ?> = <?= json_encode(array_keys($transaction_info['transaction'])); ?>;
-    $('#transaction_details_notifier_<?= $group_id ?>').click(function(){
+    $('#transaction_details_notifier_<?= $group_id ?>').unbind().click(function(){
       get_transaction_info(this, current_transaction_list_<?= $group_id ?>);
     });
     // Build the chart

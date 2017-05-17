@@ -223,7 +223,7 @@ var load_new_group_timeline_data = function(timeline_obj, object_type, group_id,
         $('#loading_blocker_' + group_id).spin(false).hide();
         time_line_options.series[0].data = data.file_volumes;
         time_line_options.series[1].data = data.transaction_counts;
-        $('#object_timeline_' + group_id).highcharts($.extend(true, {}, hc_timeline_options,time_line_options);
+        $('#object_timeline_' + group_id).highcharts($.extend(true, {}, hc_timeline_options,time_line_options));
     });
 };
 

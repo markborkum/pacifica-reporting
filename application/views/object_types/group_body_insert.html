@@ -80,7 +80,7 @@
             }
           }
         }
-        cb(moment(correctTZ(new Date(start.format('YYYY-MM-DD')))), moment(correctTZ(new Date(end.format('YYYY-MM-DD')))));
+        cb(moment(correctTZ(new Date('<?= $times['start_date_object']->format('Y-m-d'); ?>'))), moment(correctTZ(new Date('<?= $times['end_date_object']->format('Y-m-d'); ?>'))));
 
         $('#time_range_container_<?= $group_id ?>').daterangepicker({
           parentEl: '#object_footer_<?= $group_id ?>',
