@@ -284,12 +284,15 @@ class Group extends Baseline_api_controller
             $http_raw_post_data = file_get_contents('php://input');
             $transaction_list   = json_decode($http_raw_post_data, TRUE);
         }
+        if($transaction_list) {
+            $results = $this->summary->detailed_transaction_list($transaction_list);
+            $this->page_data['transaction_info'] = $results;
+            $this->page_data['status_site_base_url'] = $this->status_site_base_url;
 
-        $results = $this->summary->detailed_transaction_list($transaction_list);
-        $this->page_data['transaction_info'] = $results;
-        $this->page_data['status_site_base_url'] = $this->status_site_base_url;
-
-        $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
+            $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
+        }else{
+            echo "";
+        }
 
     }
 
