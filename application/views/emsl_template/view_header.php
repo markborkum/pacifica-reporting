@@ -40,25 +40,9 @@
         <meta  name="description" content="" />
         <meta name="keywords" content="" />
         <?php $this->load->view("{$this->template_version}_template/globals"); ?>
+        <?= $script_uris ?>
+        <?= $css_uris ?>
 
-<?php if(isset($script_uris) && sizeof($script_uris) > 0) : ?>
-
-    <!-- begin page-wise javascript loads -->
-    <?php foreach($script_uris as $uri): ?>
-    <script type="text/javascript" src="<?php echo $uri ?>"></script>
-    <?php endforeach; ?>
-  <!-- end page-wise javascript loads -->
-
-<?php endif; ?>
-<?php if(isset($css_uris) && sizeof($css_uris) > 0) : ?>
-
-    <!-- begin page-wise css loads -->
-    <?php foreach($css_uris as $css): ?>
-    <link rel="stylesheet" type="text/css" href="<?php echo $css ?>" />
-    <?php endforeach; ?>
-  <!-- end page-wise css loads -->
-
-<?php endif; ?>
         <script type="text/javascript">
             var base_url = "<?php echo rtrim(base_url().$index_page, '/').'/' ?>";
         </script>

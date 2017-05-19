@@ -1,0 +1,156 @@
+.page_header {
+  width:100%;
+  height:96px;
+  background-color: #719500;
+  padding-top:20px;
+  position:relative;
+}
+
+header.secondary .page_header{
+  height:36px;
+}
+
+.graphic_logo {
+    display:block;
+}
+
+.text_logo {
+    display:none;
+}
+
+.underline {
+  color:#fefefe;
+  padding:0.25em;
+  background-color: #53682B;
+  margin-top:0;
+  font-weight:normal;
+  border-radius:0 0 8px 8px;
+  font-size:1.35em;
+}
+
+.loading_status span {
+    color: #216a38;
+    font-size: 1.3em;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.logo_container {
+  height:73px;
+  max-width:174px;
+  margin-left:15px;
+  margin-right:10px;
+}
+
+header.secondary .logo_container {
+    height: 36px;
+    width: 87px;
+    margin-left: 15px;
+    margin-right: 10px;
+    position: absolute;
+    top: 8px;
+    left:0;
+}
+
+.logo_image {
+    width: 100%;
+    height: 100%;
+    background: url("/resources/images/emsl_logos/emsl_logo_white.png") 0% 0% / 87px 36px no-repeat;
+    /*background-size: 174px 73px;*/
+}
+
+.text_logo {
+    display:none;
+}
+
+.site_slogan {
+  position:absolute;
+  left:210px;
+  top:48px;
+  color:#FDA508;
+  text-transform:uppercase;
+  font-size:0.9em;
+  font-weight:bold;
+  padding-left: 0;
+}
+
+header.secondary .site_slogan {
+    left: 100px;
+    top: 32px;
+}
+
+div.buttons button, div.buttons input[type="button"], div.buttons input[type="reset"], div.buttons input[type="submit"], div.buttons a {
+  color:#ffffff;
+  float:right;
+  background-color:rgb(213,117,0);
+  display:block;
+  border:1px solid #8c440e;
+  line-height:130%;
+  font-size:0.9em;
+  font-weight:bold;
+  border-radius: 5px;
+  box-shadow: rgba(0, 0, 0, 0.597656) 0 0 2px;
+  transition: all 0.25s;
+}
+div.buttons button{
+  width:auto;
+  overflow:visible;
+  padding:4px 10px 3px 7px; /* IE6 */
+}
+
+div.buttons button[type]{
+  padding:5px 10px 5px 7px; /* Firefox */
+ line-height:17px; /* Safari */
+}
+
+*:first-child+html button[type] {
+  padding:4px 10px 3px 7px; /* IE7 */
+}
+div.buttons img, div.buttons a img {
+  margin: 0 3px -3px 0;
+  padding:0;
+  border:none;
+  width:16px;
+  height:16px;
+}
+button:hover, .buttons input[type="button"]:hover, .buttons a:hover{
+  background-color:#b15611;
+  text-decoration:none;
+}
+
+.buttons a {
+  padding: 4px 10px 3px 7px;
+}
+
+
+.logo_container {
+    background: url("/resources/images/emsl_logos/emsl-doe_combined.png") left top / 346px 107px no-repeat;
+    position: absolute;
+    top: 10px;
+    height: 107px;
+    width: 346px;
+    right: 20px;
+    background-size: 346px 107px;
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .logo_container {
+        background: url("/resources/images/emsl_logos/emsl-doe_combined@2x.png") left top / 346px 107px no-repeat;
+        background-size: 346px 107px;
+    }
+    .logo_image {
+        background: url("/resources/images/emsl_logos/emsl_logo_white@2x.png") 0% 0% / 87px 36px no-repeat;
+        /*background-size: 174px 73px;*/
+    }
+}
+
+@media (-webkit-min-device-pixel-ratio: 3), (min-resolution: 288dpi) {
+    .logo_container {
+        background: url("/resources/images/emsl_logos/emsl-doe_combined@3x.png") left top / 346px 107px no-repeat;
+        background-size: 346px 107px;
+    }
+    .logo_image {
+        background: url("/resources/images/emsl_logos/emsl_logo_white@3x.png") 0% 0% / 87px 36px no-repeat;
+        /*background-size: 174px 73px;*/
+    }
+}

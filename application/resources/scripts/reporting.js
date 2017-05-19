@@ -429,8 +429,9 @@ $(function() {
     // Make monochrome colors and set them as default for all pies
     Highcharts.getOptions().plotOptions.pie.colors = (function() {
         var colors = [],
-            // base = Highcharts.getOptions().colors[2],
-            base = '#4b7eba',
+            // base = Highcharts.getOptions().colors[0],   //blues
+            base = Highcharts.getOptions().colors[7],   //greens
+            // base = '#dddddd',
             i;
         for (i = 0; i < 10; i += 1) {
             // Start out with a darkened base color (negative brighten), and end
@@ -442,8 +443,9 @@ $(function() {
 
     Highcharts.getOptions().plotOptions.spline.colors = (function() {
         var colors = [],
-            // base = Highcharts.getOptions().colors[2],
-            base = '#4b7eba',
+        // base = Highcharts.getOptions().colors[0],   //blues
+        base = Highcharts.getOptions().colors[7],   //greens
+            // base = '#dddddd',
             i;
         for (i = 0; i < 10; i += 1) {
             // Start out with a darkened base color (negative brighten), and end

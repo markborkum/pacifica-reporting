@@ -81,7 +81,8 @@ class Group extends Baseline_api_controller
              'search_term',
              'cookie',
              'proposal',
-             'myemsl_api'
+             'myemsl_api',
+             'theme'
             )
         );
         $this->last_update_time = get_last_update(APPPATH);
@@ -153,24 +154,29 @@ class Group extends Baseline_api_controller
 
         $this->page_data['page_header'] = 'Aggregated MyEMSL Uploads by '.ucwords($object_type).' Grouping';
         $this->page_data['my_object_type'] = $object_type;
-        $this->page_data['css_uris'] = array(
-            // '/resources/stylesheets/status_style.css',
-            '/resources/scripts/select2/select2.css',
-            '/resources/scripts/bootstrap/css/bootstrap.css',
-            '/resources/scripts/bootstrap-daterangepicker/daterangepicker.css',
-            '/project_resources/stylesheets/reporting.css',
-            '/project_resources/stylesheets/combined.css'
-        );
-        $this->page_data['script_uris'] = array(
-            '/resources/scripts/spinner/spin.min.js',
-            '/resources/scripts/spinner/jquery.spin.js',
-            '/resources/scripts/moment.min.js',
-            '/resources/scripts/select2/select2.min.js',
-            '/resources/scripts/bootstrap-daterangepicker/daterangepicker.js',
-            '/resources/scripts/jquery-typewatch/jquery.typewatch.js',
-            '/resources/scripts/highcharts/js/highcharts.js',
-            base_url().'project_resources/scripts/reporting.js',
-        );
+        $this->page_data['css_uris']
+            = load_stylesheets(
+                array(
+                '/resources/scripts/select2/select2.css',
+                '/resources/scripts/bootstrap/css/bootstrap.css',
+                '/resources/scripts/bootstrap-daterangepicker/daterangepicker.css',
+                '/project_resources/stylesheets/reporting.css',
+                '/project_resources/stylesheets/combined.css'
+                )
+            );
+        $this->page_data['script_uris']
+            = load_scripts(
+                array(
+                '/resources/scripts/spinner/spin.min.js',
+                '/resources/scripts/spinner/jquery.spin.js',
+                '/resources/scripts/moment.min.js',
+                '/resources/scripts/select2/select2.min.js',
+                '/resources/scripts/bootstrap-daterangepicker/daterangepicker.js',
+                '/resources/scripts/jquery-typewatch/jquery.typewatch.js',
+                '/resources/scripts/highcharts/js/highcharts.js',
+                '/project_resources/scripts/reporting.js',
+                )
+            );
         $my_groups = $this->gm->get_selected_groups($this->user_id, $object_type);
 
         if (empty($my_groups)) {
