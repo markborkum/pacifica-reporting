@@ -6,6 +6,7 @@
       $('#file_count_<?= $object_id ?>').html('<?= $summary_totals["total_file_count"] ?>');
       $('#file_volume_<?= $object_id ?>').html('<?= $summary_totals["total_size_string"] ?>');
       my_transactions_<?= $object_id ?> = <?= json_encode(array_keys($transactions)); ?>;
+      transaction_list_<?= $object_id ?> = <?= json_encode($day_graph['by_date']['transactions_by_day']) ?>;
       $('#transaction_details_notifier_<?= $object_id ?>').click(function(){
         get_transaction_info(this, my_transactions_<?= $object_id ?>);
       });

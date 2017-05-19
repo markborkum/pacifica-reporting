@@ -146,9 +146,6 @@ var get_transaction_info = function(el, transaction_list) {
             load_indicator.fadeOut().spin(false);
             details_container.show();
         });
-        posting.done(function() {
-
-        });
     } else if (disclosure_arrow.hasClass('dc_up') && details_container.html().length > 0) {
         //filled, but hidden so just show
         disclosure_arrow.removeClass('dc_up').addClass('dc_down');
@@ -391,8 +388,8 @@ var get_group_objects = function(el, filter_text) {
 var get_transaction_list_for_date_range = function(el, start_date, end_date, full_txn_list){
     var date_key = '';
     var output_txn_list = [];
-    var current_moment = moment(start_date);
-    var end_moment = moment(end_date);
+    var current_moment = moment(start_date, "YYYY-MM-DD");
+    var end_moment = moment(end_date, "YYYY-MM-DD");
     if(start_date && end_date){
         while(current_moment <= end_moment){
             date_key = current_moment.format('YYYY-MM-DD');
@@ -426,6 +423,9 @@ function GetUnique(inputArray)
 
 
 $(function() {
+    $.ajaxSetup({
+        contentType: 'application/json'
+    });
     // Make monochrome colors and set them as default for all pies
     Highcharts.getOptions().plotOptions.pie.colors = (function() {
         var colors = [],
