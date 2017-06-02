@@ -45,7 +45,6 @@ class System_setup_model extends CI_Model
     {
         parent::__construct();
 
-        $this->statusdb_name = 'reporting';
         //quickly assess the current system status
         try {
             $this->setup_db_structure();
@@ -98,7 +97,7 @@ class System_setup_model extends CI_Model
         $this->load->dbforge();
         $this->load->dbutil();
 
-        $this->_check_and_create_database($this->statusdb_name);
+        $this->_check_and_create_database($this->db->database);
 
         $dt_now = new DateTime();
         $dt_string = $dt_now->format('Y-m-d H:i:s');
