@@ -40,7 +40,6 @@ if(!defined('BASEPATH')) {
  */
 function get_user()
 {
-    // $req_headers = apache_request_headers();
     $user = '(unknown)';
     $CI =& get_instance();
     $CI->load->library('PHPRequests');
@@ -50,16 +49,17 @@ function get_user()
     } else if (isset($_SERVER["PHP_AUTH_USER"])) {
         $user = str_replace('@PNL.GOV', '', $_SERVER["PHP_AUTH_USER"]);
     }
-    $query_url = "{$md_url}/userinfo/search/{$user}";
+    $user = strtolower($user);
+    $url_args_array = array(
+       'network_id' => $user
+    );
+    $query_url = "{$md_url}/users?";
+    $query_url .= http_build_query($url_args_array, '', '&');
     $query = Requests::get($query_url, array('Accept' => 'application/json'));
     $results_body = $query->body;
     $results_json = json_decode($results_body, TRUE);
     if($query->status_code == 200) {
-        if($results_json[0]['network_id'] == $user) {
-            return strtolower($results_json[0]['person_id']);
-        }else{
-            return FALSE;
-        }
+        return strtolower($results_json[0]['_id']);
     }else{
         return FALSE;
     }
