@@ -102,7 +102,8 @@ class Summary_api_model extends CI_Model
         $query = Requests::post(
             $transaction_url,
             array('Content-Type' => 'application/json'),
-            json_encode($transaction_list)
+            json_encode($transaction_list),
+            array('timeout' => 240)
         );
         $results = json_decode($query->body, TRUE);
         return $results;
@@ -166,7 +167,8 @@ class Summary_api_model extends CI_Model
             $query = Requests::post(
                 $transaction_url,
                 array('Content-Type' => 'application/json'),
-                json_encode($id_list)
+                json_encode($id_list),
+                array('timeout' => 240)
             );
             $results = json_decode($query->body, TRUE);
         }
