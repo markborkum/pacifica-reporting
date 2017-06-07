@@ -1,10 +1,14 @@
-<?php extract($transaction_info); ?>
+<?php
+    extract($transaction_info);
+    $my_transaction_list = array_unique(call_user_func_array('array_merge', array_values($day_graph['by_date']['transactions_by_day'])));
+    sort($my_transaction_list);
+?>
 <script type="text/javascript">
   $(function () {
     $('#message_container_<?= $group_id ?>').html('<?= $results_message ?>');
     $('#file_count_<?= $group_id ?>').html('<?= $summary_totals["total_file_count"] ?>');
     $('#file_volume_<?= $group_id ?>').html('<?= $summary_totals["total_size_string"] ?>');
-    my_transactions_<?= $group_id ?> = <?= json_encode(array_keys($transaction_info['transaction'])); ?>;
+    my_transactions_<?= $group_id ?> = <?= json_encode($my_transaction_list) ?>;
     transaction_list_<?= $group_id ?> = <?= json_encode($day_graph['by_date']['transactions_by_day']) ?>;
     $('#transaction_details_notifier_<?= $group_id ?>').unbind().click(function(){
       get_transaction_info(this, my_transactions_<?= $group_id ?>);

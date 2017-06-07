@@ -14,6 +14,7 @@
         </thead>
         <tbody>
             <?php ksort($transaction_info); ?>
+            <?php $user_cache = array(); ?>
             <?php foreach($transaction_info as $id => $item): ?>
             <?php
                 $ul_time = new DateTime($item['upload_datetime']);
@@ -22,7 +23,12 @@
                 $ul_mod_string = $ul_latest_mod->format('m/d/Y') != $ul_earliest_mod->format('m/d/Y') ?
                 "{$ul_earliest_mod->format('m/d/Y')}&ndash;{$ul_latest_mod->format('m/d/Y')}" :
                 $ul_earliest_mod->format('m/d/Y');
-                $ul_user_info = get_user_details($item['uploaded_by_id']);
+                if(!array_key_exists($item['uploaded_by_id'], $user_cache)){
+                    $ul_user_info = get_user_details($item['uploaded_by_id']);
+                    $user_cache[$item['uploaded_by_id']] = $ul_user_info;
+                }else{
+                    $ul_user_info = $user_cache[$item['uploaded_by_id']];
+                }
                 $ul_user = $ul_user_info['simple_display_name'];
                 $friendly_file_size = format_bytes($item['bundle_size']);
             ?>
