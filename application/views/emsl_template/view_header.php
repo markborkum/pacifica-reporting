@@ -52,7 +52,7 @@
             <header class="secondary">
                 <div class="page_header">
                     <div class="text_logo">
-                        Pacifica<span class="site_slogan">Data Management for Science</span>
+                        <?= $site_identifier ?><span class="site_slogan">Data Management for Science</span>
                     </div>
                     <div id="tab_selector_container" class="tab_selector">
                         <nav>
