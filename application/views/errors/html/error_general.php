@@ -30,7 +30,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 <html lang="en">
     <head>
         <meta charset="utf-8">
-        <title>MyEMSL - Error Report</title>
+        <title><?= ucwords($site_identifier) ?> - Error Report</title>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
         <meta  name="description" content="" />
         <meta name="keywords" content="" />
