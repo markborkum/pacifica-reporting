@@ -4,7 +4,7 @@ php:
 env:
   - CI_ENV=unit_testing CI_ROOTED=true
 install:
-- pyrus install pear/PHP_CodeSniffer
+- pyrus install pear/PHP_CodeSniffer-2.9.1
 - composer require codeclimate/php-test-reporter --dev
 - phpenv rehash
 script:
