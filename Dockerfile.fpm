@@ -10,6 +10,7 @@ RUN apt-get update && \
 RUN docker-php-ext-install pgsql
 RUN docker-php-ext-enable pgsql
 
+RUN echo date.timezone = "UTC" > /usr/local/etc/php/conf.d/timezone.ini
 COPY websystem/system /var/www/html/system
 COPY websystem/index.php /var/www/html/
 COPY resources /var/www/html/resources
