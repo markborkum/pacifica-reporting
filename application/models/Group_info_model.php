@@ -142,9 +142,16 @@ class Group_info_model extends CI_Model
         if ($earliest_latest) {
             extract($earliest_latest);
             $earliest_obj = new DateTime($earliest);
+            $today_minus_30 = new DateTime();
+            $today_minus_30->modify("-30 days");
             $latest_obj   = new DateTime($latest);
+            if($today_minus_30 > $latest_obj) {
+                $today_minus_30 = clone($latest_obj);
+                $today_minus_30->modify("-30 days");
+            }
             $group_info['time_list'] = $earliest_latest;
-            $start_time_obj          = strtotime($group_info['options_list']['start_time']) ? new DateTime($group_info['options_list']['start_time']) : clone $earliest_obj;
+            $start_time_obj          = strtotime($group_info['options_list']['start_time']) ? new DateTime($group_info['options_list']['start_time']) : $today_minus_30;
+            // $start_time_obj          = strtotime($group_info['options_list']['start_time']) ? new DateTime($group_info['options_list']['start_time']) : clone $earliest_obj;
             $end_time_obj            = strtotime($group_info['options_list']['end_time']) ? new DateTime($group_info['options_list']['end_time']) : clone $latest_obj;
 
             if ($end_time_obj > $latest_obj) {
