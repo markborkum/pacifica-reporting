@@ -10,8 +10,9 @@
     $('#file_volume_<?= $group_id ?>').html('<?= $summary_totals["total_size_string"] ?>');
     my_transactions_<?= $group_id ?> = <?= json_encode($my_transaction_list) ?>;
     transaction_list_<?= $group_id ?> = <?= json_encode($day_graph['by_date']['transactions_by_day']) ?>;
+    // debugger;
     $('#transaction_details_notifier_<?= $group_id ?>').unbind().click(function(){
-      get_transaction_info(this, my_transactions_<?= $group_id ?>);
+      show_transaction_info(this, my_transactions_<?= $group_id ?>);
     });
     // Build the chart
 

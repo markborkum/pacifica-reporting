@@ -57,6 +57,7 @@ footer.short {
     font-size: 1.05em;
     color: #444444;
     padding: 0.5em;
+    position: relative;
 }
 
 .object_body_container>.totals_container {
@@ -524,14 +525,6 @@ h1.underline {
     position: relative;
 }
 
-.object_body_container>.transaction_details_notifier {
-    text-align: center;
-    font-weight: bold;
-    font-size: 1.05em;
-    color: #444444;
-    padding: 0.5em;
-}
-
 .object_body_container>.totals_container {
     position: absolute;
     top: 0px;
@@ -651,27 +644,27 @@ h1.underline {
     background-size: 32px 48px;
 }
 
-.transaction_details_notifier .dc_up {
+.transaction_details_notifier .dc_down {
     background-position: 0px 0px;
 }
 
-.transaction_details_notifier .dc_down {
+.transaction_details_notifier .dc_up {
     background-position: -16px 0px;
 }
 
-.transaction_details_notifier .dc_up:hover {
+.transaction_details_notifier .dc_down:hover {
     background-position: -0px -16px;
 }
 
-.transaction_details_notifier .dc_down:hover {
+.transaction_details_notifier .dc_up:hover {
     background-position: -16px -16px;
 }
 
-.transaction_details_notifier .dc_up:active {
+.transaction_details_notifier .dc_down:active {
     background-position: 0px -32px;
 }
 
-.transaction_details_notifier .dc_down:active {
+.transaction_details_notifier .dc_up:active {
     background-position: -16px -32px;
 }
 
@@ -710,6 +703,7 @@ span.container_name {
 
 .transaction_details_loader {
     font-weight: bold;
+    position: absolute;
     font-size: 1.1em;
     color: #fefefe;
     border: 2px solid #666;
@@ -717,11 +711,12 @@ span.container_name {
     text-align: center;
     padding: 3px 0px 3px 15px;
     width: 15%;
-    margin: 0px auto;
+    right: 0px;
+    top: 5px;
     background-color: #769f19;
-    margin-right: 0;
-    margin-top: -33px;
 }
+
+
 
 .transaction_details_container {
     margin-top: 0.5em;
