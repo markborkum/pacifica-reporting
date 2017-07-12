@@ -99,8 +99,10 @@ class Group extends Baseline_api_controller
         $this->local_resources_folder = $this->config->item('local_resources_folder');
         $this->debug = $this->config->item('debug_enabled');
         $this->page_data['site_identifier'] = $this->config->item('site_identifier');
+        $this->page_data['site_slogan'] = $this->config->item('site_slogan');
         $this->status_site_base_url = $this->config->item('status_server_base_url');
         $this->site_identifier = $this->config->item('site_identifier');
+        $this->site_slogan = $this->config->item('site_slogan');
     }
 
     /**

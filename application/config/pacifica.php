@@ -20,6 +20,7 @@ $config['application_config_file_path'] = '/etc/myemsl/';
 $config['template'] = 'emsl';
 $config['theme_name'] = 'myemsl';
 $config['site_identifier'] = 'pacifica';
+$config['site_slogan'] = 'Data Management for Science';
 // $config['theme_name'] = 'pacifica';
 // $config['site_identifier'] = 'dēmos';
 $config['site_color'] = 'orange';

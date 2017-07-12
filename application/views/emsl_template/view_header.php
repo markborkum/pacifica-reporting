@@ -35,7 +35,7 @@
 ?>
 <html>
     <head>
-        <title>MyEMSL Reporting - <?php echo $title ?></title>
+        <title><?= ucwords($site_identifier) ?> Reporting - <?php echo $title ?></title>
         <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
         <meta  name="description" content="" />
         <meta name="keywords" content="" />
@@ -51,8 +51,14 @@
         <div class="page_content">
             <header class="secondary">
                 <div class="page_header">
+                    <div class="graphic_logo">
+                        <div class="logo_container" >
+                            <div class="logo_image">&nbsp;</div>
+                        </div>
+                        <div class="site_slogan"><?= $site_slogan ?></div>
+                    </div>
                     <div class="text_logo">
-                        <?= $site_identifier ?><span class="site_slogan">Data Management for Science</span>
+                        <?= $site_identifier ?><span class="site_slogan"><?= $this->config->item('site_slogan') ?></span>
                     </div>
                     <div id="tab_selector_container" class="tab_selector">
                         <nav>
