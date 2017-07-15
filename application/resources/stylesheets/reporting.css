@@ -89,6 +89,7 @@ header.secondary .page_header {
     box-sizing: content-box;
 }
 
+
 #last_update_timestamp {
     float: right;
     margin-right: 20px;
@@ -979,4 +980,11 @@ span.container_name {
     .stats_list>li {
         text-align: center !important;
     }
+}
+
+.disabled_button{
+  color:#aaaaaa;
+  background-color: #efefef !important;
+  border-color: #aaaaaa !important;
+  box-shadow: none;
 }

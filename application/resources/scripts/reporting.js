@@ -165,14 +165,6 @@ var get_transaction_info = function(el, transaction_list) {
         // disclosure_arrow.removeClass("dc_up").addClass("dc_down");
         load_indicator.fadeOut().spin(false);
     });
-    // if (disclosure_arrow.hasClass("dc_up")) {
-    //     //filled, but hidden so just show
-    //     disclosure_arrow.removeClass("dc_up").addClass("dc_down");
-    //     details_container.show();
-    // } else {
-    //     disclosure_arrow.removeClass("dc_down").addClass("dc_up");
-    //     details_container.hide();
-    // }
 };
 
 var submit_group_change_worker = function(el, object_type, object_id, action) {
@@ -426,6 +418,16 @@ var get_transaction_list_for_date_range = function(el, start_date, end_date, ful
     return output_txn_list;
 };
 
+var check_pane_refresh_status = function(group_edit_section){
+    var checked_count = group_edit_section.find(".object_selection_checkbox:checked").length;
+    var rfdb = group_edit_section.find(".refresh_data_button");
+    if(checked_count !== 0){
+        rfdb.enable();
+    }else{
+        rfdb.disable();
+    }
+};
+
 function GetUnique(inputArray)
 {
     var outputArray = [];
@@ -483,6 +485,5 @@ $(function() {
 
 
     $(".select2-search").hide();
-
-
+    $(".refresh_data_button").disable();
 });

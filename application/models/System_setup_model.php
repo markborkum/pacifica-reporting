@@ -39,7 +39,7 @@ class System_setup_model extends CI_Model
     /**
      *  Class constructor.
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function __construct()
     {
@@ -59,11 +59,11 @@ class System_setup_model extends CI_Model
     /**
      *  Create the initial database entry
      *
-     *  @param string $db_name The name of the db to create
+     * @param string $db_name The name of the db to create
      *
-     *  @return [type]   [description]
+     * @return [type]   [description]
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _check_and_create_database($db_name)
     {
@@ -86,9 +86,9 @@ class System_setup_model extends CI_Model
     /**
      *  Configure the table structures in the database
      *
-     *  @return void
+     * @return void
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function setup_db_structure()
     {

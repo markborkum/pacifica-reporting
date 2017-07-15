@@ -48,7 +48,7 @@ class Summary_api_model extends CI_Model
     /**
      *  Class constructor
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function __construct()
     {
@@ -185,11 +185,11 @@ class Summary_api_model extends CI_Model
      *  into a more easily-parseable array block that also
      *  fills in any missing dates with zeroed out data
      *
-     *  @param array $temp_results sparse gathered results
+     * @param array $temp_results sparse gathered results
      *
-     *  @return array partial collection of stats
+     * @return array partial collection of stats
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _temp_stats_to_output($temp_results)
     {
@@ -245,12 +245,12 @@ class Summary_api_model extends CI_Model
      *  Given a starting and ending date, generate all of the
      *  available dates between them, inclusive
      *
-     *  @param string $start_date starting date (YYYY-MM-DD)
-     *  @param string $end_date   ending date (YYYY-MM-DD)
+     * @param string $start_date starting date (YYYY-MM-DD)
+     * @param string $end_date   ending date (YYYY-MM-DD)
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _generate_available_dates($start_date, $end_date)
     {

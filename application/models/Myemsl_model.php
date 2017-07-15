@@ -48,9 +48,9 @@ class Myemsl_model extends CI_Model
     /**
      *  Class constructor
      *
-     *  @method __construct
+     * @method __construct
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     function __construct()
     {
@@ -63,11 +63,11 @@ class Myemsl_model extends CI_Model
      *  Retrieve an array of information about the current
      *  user from the MyEMSL user API
      *
-     *  @method get_user_info
+     * @method get_user_info
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     function get_user_info()
     {

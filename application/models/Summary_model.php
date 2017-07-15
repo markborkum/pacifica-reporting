@@ -47,7 +47,7 @@ class Summary_model extends CI_Model
     /**
      *  Class constructor
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function __construct()
     {
@@ -90,18 +90,18 @@ class Summary_model extends CI_Model
      *  Helper function to retrieve aggregated data grouped
      *  by person_id of a user
      *
-     *  @param array   $eus_person_id_list list of users to aggregate over
-     *  @param string  $start_date         starting date (YYYY-MM-DD)
-     *  @param string  $end_date           ending date (YYYY-MM-DD)
-     *  @param boolean $make_day_graph     toggle to control whether or not
-     *                                     per day totals are included
-     *  @param string  $time_basis         one of created_date, modified_date,
-     *                                     submitted_date
+     * @param array   $eus_person_id_list list of users to aggregate over
+     * @param string  $start_date         starting date (YYYY-MM-DD)
+     * @param string  $end_date           ending date (YYYY-MM-DD)
+     * @param boolean $make_day_graph     toggle to control whether or not
+     *                                    per day totals are included
+     * @param string  $time_basis         one of created_date, modified_date,
+     *                                    submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @uses   Summary_model::summarize_uploads_general
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @uses   Summary_model::summarize_uploads_general
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function summarize_uploads_by_user_list(
         $eus_person_id_list, $start_date, $end_date,
@@ -120,18 +120,18 @@ class Summary_model extends CI_Model
      *  Helper function to retrieve aggregated data grouped
      *  by proposal id
      *
-     *  @param array   $eus_proposal_id_list list of proposals to aggregate over
-     *  @param string  $start_date           starting date (YYYY-MM-DD)
-     *  @param string  $end_date             ending date (YYYY-MM-DD)
-     *  @param boolean $make_day_graph       toggle to control whether or not
-     *                                       per day totals are included
-     *  @param string  $time_basis           one of created_date, modified_date,
-     *                                       submitted_date
+     * @param array   $eus_proposal_id_list list of proposals to aggregate over
+     * @param string  $start_date           starting date (YYYY-MM-DD)
+     * @param string  $end_date             ending date (YYYY-MM-DD)
+     * @param boolean $make_day_graph       toggle to control whether or not
+     *                                      per day totals are included
+     * @param string  $time_basis           one of created_date, modified_date,
+     *                                      submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @uses   Summary_model::summarize_uploads_general
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @uses   Summary_model::summarize_uploads_general
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function summarize_uploads_by_proposal_list(
         $eus_proposal_id_list, $start_date, $end_date,
@@ -150,18 +150,18 @@ class Summary_model extends CI_Model
      *  Helper function to retrieve aggregated data grouped
      *  by instrument id
      *
-     *  @param array   $eus_instrument_id_list list of instruments to aggregate over
-     *  @param string  $start_date             starting date (YYYY-MM-DD)
-     *  @param string  $end_date               ending date (YYYY-MM-DD)
-     *  @param boolean $make_day_graph         toggle to control whether or not
-     *                                         per day totals are included
-     *  @param string  $time_basis             one of created_date, modified_date,
-     *                                         submitted_date
+     * @param array   $eus_instrument_id_list list of instruments to aggregate over
+     * @param string  $start_date             starting date (YYYY-MM-DD)
+     * @param string  $end_date               ending date (YYYY-MM-DD)
+     * @param boolean $make_day_graph         toggle to control whether or not
+     *                                        per day totals are included
+     * @param string  $time_basis             one of created_date, modified_date,
+     *                                        submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @uses   Summary_model::summarize_uploads_general
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @uses   Summary_model::summarize_uploads_general
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function summarize_uploads_by_instrument_list(
         $eus_instrument_id_list, $start_date, $end_date,
@@ -180,18 +180,18 @@ class Summary_model extends CI_Model
      *  Backend database function to aggregate data over several
      *  different types of object groupings.
      *
-     *  @param array   $id_list        list of object id's
-     *  @param string  $start_date     starting date (YYYY-MM-DD)
-     *  @param string  $end_date       ending date (YYYY-MM-DD)
-     *  @param boolean $make_day_graph toggle to control whether or not
-     *                                 per day totals are included
-     *  @param string  $time_basis     one of created_date, modified_date,
-     *                                 submitted_date
-     *  @param string  $group_type     type of group to summarize over
+     * @param array   $id_list        list of object id's
+     * @param string  $start_date     starting date (YYYY-MM-DD)
+     * @param string  $end_date       ending date (YYYY-MM-DD)
+     * @param boolean $make_day_graph toggle to control whether or not
+     *                                per day totals are included
+     * @param string  $time_basis     one of created_date, modified_date,
+     *                                submitted_date
+     * @param string  $group_type     type of group to summarize over
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function summarize_uploads_general(
         $id_list, $start_date, $end_date, $make_day_graph,
@@ -239,15 +239,15 @@ class Summary_model extends CI_Model
      *  spread across a series of days. Also provides total file count
      *  and file volume across the entire date range specified.
      *
-     *  @param array  $eus_user_id_list list of user id's to include
-     *  @param string $start_date       starting date (YYYY-MM-DD)
-     *  @param string $end_date         ending date (YYYY-MM-DD)
-     *  @param string $time_basis       one of created_date, modified_date,
-     *                                  submitted_date
+     * @param array  $eus_user_id_list list of user id's to include
+     * @param string $start_date       starting date (YYYY-MM-DD)
+     * @param string $end_date         ending date (YYYY-MM-DD)
+     * @param string $time_basis       one of created_date, modified_date,
+     *                                 submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function get_per_day_totals_from_user_list($eus_user_id_list, $start_date, $end_date, $time_basis)
     {
@@ -317,15 +317,15 @@ class Summary_model extends CI_Model
      *  of users, split up by object type (instrument/proposal/user)
      *  over a given period of time.
      *
-     *  @param array  $eus_user_id_list user list to summarize
-     *  @param string $start_date       starting date (YYYY-MM-DD)
-     *  @param string $end_date         ending date (YYYY-MM-DD)
-     *  @param string $time_basis       one of created_date, modified_date,
-     *                                  submitted_date
+     * @param array  $eus_user_id_list user list to summarize
+     * @param string $start_date       starting date (YYYY-MM-DD)
+     * @param string $end_date         ending date (YYYY-MM-DD)
+     * @param string $time_basis       one of created_date, modified_date,
+     *                                 submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _get_summary_totals_from_user_list($eus_user_id_list,$start_date,$end_date,$time_basis)
     {
@@ -404,16 +404,16 @@ class Summary_model extends CI_Model
      *  of internal group items, split up by object type
      *  (instrument/proposal/user) over a given period of time.
      *
-     *  @param array  $group_list list of groups to aggregate
-     *  @param string $start_date starting date (YYYY-MM-DD)
-     *  @param string $end_date   ending date (YYYY-MM-DD)
-     *  @param string $time_basis one of created_date, modified_date,
-     *                            submitted_date
-     *  @param string $group_type type of group to filter by
+     * @param array  $group_list list of groups to aggregate
+     * @param string $start_date starting date (YYYY-MM-DD)
+     * @param string $end_date   ending date (YYYY-MM-DD)
+     * @param string $time_basis one of created_date, modified_date,
+     *                           submitted_date
+     * @param string $group_type type of group to filter by
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _get_summary_totals_from_group_list($group_list,$start_date,$end_date,$time_basis,$group_type)
     {
@@ -506,16 +506,16 @@ class Summary_model extends CI_Model
     /**
      *  [_get_per_day_totals_from_group_list description]
      *
-     *  @param array  $group_list list of groups to aggregate
-     *  @param string $start_date starting date (YYYY-MM-DD)
-     *  @param string $end_date   ending date (YYYY-MM-DD)
-     *  @param string $time_basis one of created_date, modified_date,
-     *                            submitted_date
-     *  @param string $group_type type of group to filter by
+     * @param array  $group_list list of groups to aggregate
+     * @param string $start_date starting date (YYYY-MM-DD)
+     * @param string $end_date   ending date (YYYY-MM-DD)
+     * @param string $time_basis one of created_date, modified_date,
+     *                           submitted_date
+     * @param string $group_type type of group to filter by
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _get_per_day_totals_from_group_list($group_list,$start_date,$end_date,$time_basis,$group_type)
     {
@@ -573,14 +573,14 @@ class Summary_model extends CI_Model
      *  group list, further filtered on a provided active record
      *  *where* array and time_basis type
      *
-     *  @param array  $group_id_list group id's to consider
-     *  @param array  $where_array   collection of where clause components
-     *  @param string $time_basis    one of created_date, modified_date,
-     *                               submitted_date
+     * @param array  $group_id_list group id's to consider
+     * @param array  $where_array   collection of where clause components
+     * @param string $time_basis    one of created_date, modified_date,
+     *                              submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _get_filtered_transactions_by_group($group_id_list, $where_array, $time_basis)
     {
@@ -607,14 +607,14 @@ class Summary_model extends CI_Model
      *  user list, further filtered on a provided active record
      *  *where* array and time_basis type
      *
-     *  @param array  $eus_id_list user id's to consider
-     *  @param array  $where_array collection of where clause components
-     *  @param string $time_basis  one of created_date, modified_date,
-     *                             submitted_date
+     * @param array  $eus_id_list user id's to consider
+     * @param array  $where_array collection of where clause components
+     * @param string $time_basis  one of created_date, modified_date,
+     *                            submitted_date
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _get_filtered_transactions_by_user($eus_id_list, $where_array, $time_basis)
     {
@@ -641,13 +641,13 @@ class Summary_model extends CI_Model
      *  into a more easily-parseable array block that also
      *  fills in any missing dates with zeroed out data
      *
-     *  @param array $temp_results    sparse gathered results
-     *  @param array $available_dates all the possible date entries
-     *                                between two given date
+     * @param array $temp_results    sparse gathered results
+     * @param array $available_dates all the possible date entries
+     *                               between two given date
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _temp_stats_to_output($temp_results,$available_dates)
     {
@@ -703,12 +703,12 @@ class Summary_model extends CI_Model
      *  Given a starting and ending date, generate all of the
      *  available dates between them, inclusive
      *
-     *  @param string $start_date starting date (YYYY-MM-DD)
-     *  @param string $end_date   ending date (YYYY-MM-DD)
+     * @param string $start_date starting date (YYYY-MM-DD)
+     * @param string $end_date   ending date (YYYY-MM-DD)
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _generate_available_dates($start_date, $end_date)
     {
@@ -731,12 +731,12 @@ class Summary_model extends CI_Model
      *  For any two given dates, clean the up and format them
      *  as an array of start/end time objects and strings
      *
-     *  @param string $start_date starting date (YYYY-MM-DD)
-     *  @param string $end_date   ending date (YYYY-MM-DD)
+     * @param string $start_date starting date (YYYY-MM-DD)
+     * @param string $end_date   ending date (YYYY-MM-DD)
      *
-     *  @return array
+     * @return array
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function canonicalize_date_range($start_date, $end_date)
     {
@@ -768,13 +768,13 @@ class Summary_model extends CI_Model
      *  ('2014','start') -> '2014-01-01'
      *  ('2015-12','end') -> '2015-12-31'
      *
-     *  @param string $date_string the short date to expand
-     *  @param string $type        'endedness' of the result
-     *                             to return (start/end)
+     * @param string $date_string the short date to expand
+     * @param string $type        'endedness' of the result
+     *                            to return (start/end)
      *
-     *  @return string the expanded version of the date
+     * @return string the expanded version of the date
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _convert_short_date($date_string, $type = 'start')
     {
