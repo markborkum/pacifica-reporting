@@ -267,7 +267,10 @@ var load_group_results = function(object_type, group_id, item_list) {
     ];
     var url = base_url + url_parts.join("/");
     // var url = base_url + "group/get_reporting_info_list/" + object_type + "/" + group_id + "/" + time_basis + "/" + time_range;
-    var getter = $.get(url);
+    var getter = $.ajax({
+        url: url,
+        timeout: 20000
+    });
     getter.done(function(data, status) {
         $("#loading_status_" + group_id).spin(false).hide();
         $("#loading_blocker_" + group_id).spin(false).hide();
@@ -278,6 +281,24 @@ var load_group_results = function(object_type, group_id, item_list) {
             $("#object_body_container_" + group_id).replaceWith(data);
         }
         obj_footer.enable();
+    });
+    getter.fail(function(jqXHR, textStatus, errorThrown) {
+        var response_data = jqXHR.responseText;
+        var error_msg = "";
+        if(errorThrown == "timeout") {
+            error_msg = "The connection to the server timed out before your data could be returned. <br />A page refresh usually fixes this.";
+        }else{
+            error_msg = "The data refresh operation encountered an error during load. <br />A page refresh usually fixes this.";
+        }
+        $("#refresh_error_dialog .refresh_error_message").html(error_msg);
+        $( "#refresh_error_dialog" ).dialog({
+            modal: true,
+            buttons: {
+                Ok: function() {
+                    $( this ).dialog( "close" );
+                }
+            }
+        });
     });
 };
 

@@ -392,13 +392,24 @@ class Ajax extends Baseline_api_controller
         if (!array_key_exists($object_type, $my_objects)) {
             $my_objects[$object_type] = array();
         }
+        $js = "
+        $(function(){
+            setup_search_checkboxes();
+            check_pane_refresh_status($(\"#group_edit_section_{$group_id}\"))
+            $(\".object_selection_checkbox\").click(function(event){
+                var click_el = $(event.target);
+                var group_edit_section = click_el.parents(\".group_edit_section\");
+                check_pane_refresh_status(group_edit_section);
+            });
+        });
+        ";
         $filter = parse_search_term($filter);
         $results = $this->myemsl->get_object_list($object_type, $filter, $my_objects[$object_type]);
         $this->page_data['results'] = $results['results'];
         $this->page_data['object_type'] = $object_type;
         $this->page_data['filter_text'] = $filter;
         $this->page_data['my_objects'] = $my_objects[$object_type];
-        $this->page_data['js'] = '$(function(){ setup_search_checkboxes(); })';
+        $this->page_data['js'] = $js;
         $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
     }
 

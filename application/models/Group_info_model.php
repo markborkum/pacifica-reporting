@@ -138,7 +138,6 @@ class Group_info_model extends CI_Model
             $group_info['item_list'],
             $group_info['options_list']['time_basis']
         );
-
         if ($earliest_latest) {
             extract($earliest_latest);
             $earliest_obj = new DateTime($earliest);
@@ -174,6 +173,8 @@ class Group_info_model extends CI_Model
 
             $group_info['options_list']['start_time'] = $start_time_obj->format('Y-m-d');
             $group_info['options_list']['end_time']   = $end_time_obj->format('Y-m-d');
+        }else{
+            $group_info['time_list'] = array();
         }//end if
 
         return $group_info;
