@@ -109,11 +109,11 @@ class Group extends Baseline_api_controller
      *  Grabs the base-level call to this controller and redirects
      *  it to Group::view
      *
-     *  @method index
+     * @method index
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      *
-     *  @return none
+     * @return none
      */
     public function index()
     {
@@ -123,17 +123,17 @@ class Group extends Baseline_api_controller
     /**
      *  Constructs the main report viewing page
      *
-     *  @param string $object_type classification of the object of interest [proposal/instrument/user]
-     *  @param string $time_range  parsable string to specify how far back to look from the current date [e.g. 3-months, 1-week, custom, etc]
-     *  @param string $start_date  beginning date for data collection in YYYY-MM-DD format
-     *  @param string $end_date    end date for data collection in YYYY-MM-DD format
-     *  @param string $time_basis  classification of date type to use [created/modified/submission]
+     * @param string $object_type classification of the object of interest [proposal/instrument/user]
+     * @param string $time_range  parsable string to specify how far back to look from the current date [e.g. 3-months, 1-week, custom, etc]
+     * @param string $start_date  beginning date for data collection in YYYY-MM-DD format
+     * @param string $end_date    end date for data collection in YYYY-MM-DD format
+     * @param string $time_basis  classification of date type to use [created/modified/submission]
      *
-     *  @method view
+     * @method view
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      *
-     *  @return none  sends output to *reporting_view.html*
+     * @return none  sends output to *reporting_view.html*
      */
     public function view(
         $object_type,
@@ -279,11 +279,11 @@ class Group extends Baseline_api_controller
      *  Returns an HTML block containing a table with details for each transaction
      *  represented in the current reporting view for the group
      *
-     *  @method get_transaction_list_details
+     * @method get_transaction_list_details
      *
-     *  @return none pushes HTML to *object_types/transaction_details_insert.html*
+     * @return none pushes HTML to *object_types/transaction_details_insert.html*
      *
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function get_transaction_list_details()
     {
@@ -309,18 +309,18 @@ class Group extends Baseline_api_controller
     /**
      *  [get_reporting_info_list description]
      *
-     *  @param string  $object_type   [description]
-     *  @param integer $group_id      [description]
-     *  @param boolean $time_basis    [description]
-     *  @param boolean $time_range    [description]
-     *  @param boolean $start_date    [description]
-     *  @param boolean $end_date      [description]
-     *  @param boolean $with_timeline [description]
+     * @param string  $object_type   [description]
+     * @param integer $group_id      [description]
+     * @param boolean $time_basis    [description]
+     * @param boolean $time_range    [description]
+     * @param boolean $start_date    [description]
+     * @param boolean $end_date      [description]
+     * @param boolean $with_timeline [description]
      *
-     *  @return none   pushes to viewfile
+     * @return none   pushes to viewfile
      *
-     *  @method get_reporting_info_list
-     *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     * @method get_reporting_info_list
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function get_reporting_info_list(
         $object_type, $group_id, $time_basis = FALSE,

@@ -32,16 +32,16 @@ if(!defined('BASEPATH')) exit('No direct script access allowed');
  *  Formats a time as a loose human readable approximation
  *  for display purposes ('a few minutes ago', 'about a month ago')
  *
- *  @param datetime $datetime_object the object to format
- *  @param datetime $base_time_obj   the time to which to
- *                                   compare the main datetime
- *                                   object
- *  @param boolean  $use_ago         should we include the word
- *                                   ago in the returned value?
+ * @param datetime $datetime_object the object to format
+ * @param datetime $base_time_obj   the time to which to
+ *                                  compare the main datetime
+ *                                  object
+ * @param boolean  $use_ago         should we include the word
+ *                                  ago in the returned value?
  *
- *  @return string
+ * @return string
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function friendlyElapsedTime($datetime_object, $base_time_obj = FALSE, $use_ago = TRUE)
 {
@@ -146,11 +146,11 @@ function friendlyElapsedTime($datetime_object, $base_time_obj = FALSE, $use_ago 
  *  a nicely formatted time string in the display area,
  *  and an ISO-formatted string in the datetime object
  *
- *  @param datetime $time_obj object to be formatted
+ * @param datetime $time_obj object to be formatted
  *
- *  @return string
+ * @return string
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function format_cart_display_time_element($time_obj)
 {
@@ -166,12 +166,12 @@ function format_cart_display_time_element($time_obj)
  *  For any two given dates, clean the up and format them
  *  as an array of start/end time objects and strings
  *
- *  @param string $start_date starting date (YYYY-MM-DD)
- *  @param string $end_date   ending date (YYYY-MM-DD)
+ * @param string $start_date starting date (YYYY-MM-DD)
+ * @param string $end_date   ending date (YYYY-MM-DD)
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function canonicalize_date_range($start_date, $end_date)
 {
@@ -203,13 +203,13 @@ function canonicalize_date_range($start_date, $end_date)
  *  ('2014','start') -> '2014-01-01'
  *  ('2015-12','end') -> '2015-12-31'
  *
- *  @param string $date_string the short date to expand
- *  @param string $type        'endedness' of the result
- *                             to return (start/end)
+ * @param string $date_string the short date to expand
+ * @param string $type        'endedness' of the result
+ *                            to return (start/end)
  *
- *  @return string the expanded version of the date
+ * @return string the expanded version of the date
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function convert_short_date($date_string, $type = 'start')
 {
@@ -227,12 +227,12 @@ function convert_short_date($date_string, $type = 'start')
  *  Given a starting and ending date, generate all of the
  *  available dates between them, inclusive
  *
- *  @param string $start_date starting date (YYYY-MM-DD)
- *  @param string $end_date   ending date (YYYY-MM-DD)
+ * @param string $start_date starting date (YYYY-MM-DD)
+ * @param string $end_date   ending date (YYYY-MM-DD)
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function generate_available_dates($start_date, $end_date)
 {
@@ -258,17 +258,17 @@ function generate_available_dates($start_date, $end_date)
   *  those are used preferentially and are cleaned up and
   *  formatted properly into an array date pair.
   *
-  *  @param string $time_range       human-parsable time period
-  *                                  (1-week, 1 month, 3_days)
-  *  @param array  $valid_date_range represents the earliest/latest
-  *                                  available dates for the
-  *                                  group under consideration
-  *  @param string $start_date       starting date (YYYY-MM-DD)
-  *  @param string $end_date         ending date (YYYY-MM-DD)
+  * @param string $time_range       human-parsable time period
+  *                                 (1-week, 1 month, 3_days)
+  * @param array  $valid_date_range represents the earliest/latest
+  *                                 available dates for the
+  *                                 group under consideration
+  * @param string $start_date       starting date (YYYY-MM-DD)
+  * @param string $end_date         ending date (YYYY-MM-DD)
   *
-  *  @return array
+  * @return array
   *
-  *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
   */
 function time_range_to_date_pair($time_range, $valid_date_range = FALSE, $start_date = FALSE, $end_date = FALSE)
 {
@@ -334,13 +334,13 @@ function time_range_to_date_pair($time_range, $valid_date_range = FALSE, $start_
  *  into a format that is readable by the HighCharts JS
  *  Charting module
  *
- *  @param array  $day_graph_info day-level information to parse
- *  @param string $start_date     starting date (YYYY-MM-DD)
- *  @param string $end_date       ending date (YYYY-MM-DD)
+ * @param array  $day_graph_info day-level information to parse
+ * @param string $start_date     starting date (YYYY-MM-DD)
+ * @param string $end_date       ending date (YYYY-MM-DD)
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function day_graph_to_series($day_graph_info, $start_date = FALSE, $end_date = FALSE)
 {
@@ -387,17 +387,17 @@ function day_graph_to_series($day_graph_info, $start_date = FALSE, $end_date = F
  *  those are used preferentially and are cleaned up and
  *  formatted properly into an array date pair.
  *
- *  @param string $time_range       human-parsable time period
- *                                  (1-week, 1 month, 3_days)
- *  @param string $start_date       starting date (YYYY-MM-DD)
- *  @param string $end_date         ending date (YYYY-MM-DD)
- *  @param array  $valid_date_range represents the earliest/latest
- *                                  available dates for the
- *                                  group under consideration
+ * @param string $time_range       human-parsable time period
+ *                                 (1-week, 1 month, 3_days)
+ * @param string $start_date       starting date (YYYY-MM-DD)
+ * @param string $end_date         ending date (YYYY-MM-DD)
+ * @param array  $valid_date_range represents the earliest/latest
+ *                                 available dates for the
+ *                                 group under consideration
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function fix_time_range($time_range, $start_date, $end_date, $valid_date_range = FALSE)
 {

@@ -31,11 +31,11 @@
 /**
  *  Converts a numeric year quarter into starting/ending month
  *
- *  @param string $quarter_num numeric quarter of the year to use (1-4)
+ * @param string $quarter_num numeric quarter of the year to use (1-4)
  *
- *  @return string (first_month)-(last_month) i.e. Jan-Mar
+ * @return string (first_month)-(last_month) i.e. Jan-Mar
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function quarter_to_range($quarter_num)
 {
@@ -57,11 +57,11 @@ function quarter_to_range($quarter_num)
  *  system itself. Returns true if the file only resides currently
  *  in the tape archive, not the spinning disk cache
  *
- *  @param string $path filepath to check for current status
+ * @param string $path filepath to check for current status
  *
- *  @return boolean does the file only currently exist on tape backup?
+ * @return boolean does the file only currently exist on tape backup?
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function is_file_on_tape($path)
 {
@@ -75,13 +75,13 @@ function is_file_on_tape($path)
  *  determine the current status of any file within the
  *  system for purposes of fast retrieval
  *
- *  @param string  $path    filepath to check for current status
- *  @param boolean $numeric return a numeric value for true/false
- *                          or return a human readable string
+ * @param string  $path    filepath to check for current status
+ * @param boolean $numeric return a numeric value for true/false
+ *                         or return a human readable string
  *
- *  @return string/integer
+ * @return string/integer
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function check_disk_stage($path, $numeric = FALSE)
 {
@@ -107,9 +107,9 @@ function check_disk_stage($path, $numeric = FALSE)
 /**
  *  Calculate the last modified date for the current file
  *
- *  @return datetime
+ * @return datetime
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_last_update()
 {

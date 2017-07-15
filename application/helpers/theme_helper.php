@@ -51,15 +51,15 @@ function load_scripts($common_collection, $page_specific_collection = FALSE)
 
 
  /**
- * Load CSS files as specified, folding in theming
- *
- * @param array $common_collection        collection of CSS files shared over the entire site
- * @param array $page_specific_collection CSS files just for this page family
- *
- * @return void
- *
- * @author Ken Auberry <kenneth.auberry@pnnl.gov>
- */
+  * Load CSS files as specified, folding in theming
+  *
+  * @param array $common_collection        collection of CSS files shared over the entire site
+  * @param array $page_specific_collection CSS files just for this page family
+  *
+  * @return void
+  *
+  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
+  */
 function load_stylesheets($common_collection, $page_specific_collection = FALSE)
 {
     $CI =& get_instance();

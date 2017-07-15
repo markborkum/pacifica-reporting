@@ -30,11 +30,11 @@ if(!defined('BASEPATH')) { exit('No direct script access allowed');
  *  Directly retrieves user info from the MyEMSL EUS
  *  database clone
  *
- *  @param integer $eus_id user id of the person in question
+ * @param integer $eus_id user id of the person in question
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_user_details($eus_id)
 {
@@ -44,11 +44,11 @@ function get_user_details($eus_id)
 /**
  *  Directly retrieves instrument info from md server
  *
- *  @param integer $instrument_id id of the instrument in question
+ * @param integer $instrument_id id of the instrument in question
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_instrument_details($instrument_id)
 {
@@ -58,11 +58,11 @@ function get_instrument_details($instrument_id)
 /**
  *  Directly retrieves proposal info from md server
  *
- *  @param integer $proposal_id proposal id of the item in question
+ * @param integer $proposal_id proposal id of the item in question
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_proposal_details($proposal_id)
 {
@@ -72,12 +72,12 @@ function get_proposal_details($proposal_id)
 /**
  *  Worker function for talking to md server
  *
- *  @param string $object_type type of object to query
- *  @param string $object_id   id of object to query
+ * @param string $object_type type of object to query
+ * @param string $object_id   id of object to query
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_details($object_type, $object_id)
 {

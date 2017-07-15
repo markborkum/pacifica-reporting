@@ -33,11 +33,11 @@ if(!defined('BASEPATH')) { exit('No direct script access allowed');
  *  Directly retrieves user info from the MyEMSL EUS
  *  database clone
  *
- *  @param integer $eus_id user id of the person in question
+ * @param integer $eus_id user id of the person in question
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_user_details_myemsl($eus_id)
 {
@@ -60,12 +60,12 @@ function get_user_details_myemsl($eus_id)
  *  Read and parse the '*general.ini*' file to retrieve things
  *  like the database connection strings, etc.
  *
- *  @param string $file_specifier the name of the file to be read
- *                                from the default folder location
+ * @param string $file_specifier the name of the file to be read
+ *                               from the default folder location
  *
- *  @return array an array of ini file items
+ * @return array an array of ini file items
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function read_myemsl_config_file($file_specifier = 'general')
 {
@@ -80,13 +80,13 @@ function read_myemsl_config_file($file_specifier = 'general')
  *  from a given cart object. This was needed to overcome the
  *  'single call for each cart item' limitation
  *
- *  @param array   $item_list     the item identifiers for the cart items to be processed cart items to be processed
- *                                cart items to be processed
- *  @param integer $eus_person_id cart owner user id
+ * @param array   $item_list     the item identifiers for the cart items to be processed cart items to be processed
+ *                               cart items to be processed
+ * @param integer $eus_person_id cart owner user id
  *
- *  @return string Base64 encoded token to use for the submission
+ * @return string Base64 encoded token to use for the submission
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function generate_cart_token($item_list,$eus_person_id)
 {

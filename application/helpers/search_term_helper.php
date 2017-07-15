@@ -31,11 +31,11 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
 /**
  *  [parse_search_term description]
  *
- *  @param string $raw_query string version of the search query
+ * @param string $raw_query string version of the search query
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function parse_search_term($raw_query)
 {

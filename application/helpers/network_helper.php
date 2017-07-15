@@ -33,14 +33,14 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  *  standard JSON with appropriate status headers
  *  and X-JSON messages
  *
- *  @param array   $response            the array to be transmitted
- *  @param string  $statusMessage       optional status message
- *  @param boolean $operationSuccessful Was the calling
- *                                      operation successful?
+ * @param array   $response            the array to be transmitted
+ * @param string  $statusMessage       optional status message
+ * @param boolean $operationSuccessful Was the calling
+ *                                     operation successful?
  *
- *  @return void (sends directly to browser)
+ * @return void (sends directly to browser)
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function transmit_array_with_json_header($response, $statusMessage = '', $operationSuccessful = TRUE)
 {
@@ -64,11 +64,11 @@ function transmit_array_with_json_header($response, $statusMessage = '', $operat
  *  to be parsed by the Select2 Jquery library for
  *  generating dropdown menu objects
  *
- *  @param array $response array to be formatted
+ * @param array $response array to be formatted
  *
- *  @return void (sends directly to browser)
+ * @return void (sends directly to browser)
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function format_array_for_select2($response)
 {
@@ -95,12 +95,12 @@ function format_array_for_select2($response)
  *  some content out of the middle to provide
  *  better context
  *
- *  @param string  $text     string to be shortened
- *  @param integer $maxchars maximum string length allowed
+ * @param string  $text     string to be shortened
+ * @param integer $maxchars maximum string length allowed
  *
- *  @return string shortened string
+ * @return string shortened string
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function shorten_string($text, $maxchars)
 {

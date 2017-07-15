@@ -34,9 +34,9 @@ if(!defined('BASEPATH')) {
  *  Properly formats the user returned in the ['REMOTE_USER']
  *  variable from Apache
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function get_user()
 {

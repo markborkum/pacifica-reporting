@@ -31,13 +31,13 @@
  *  Recursively construct the proper HTML
  *  for representing a folder full of items
  *
- *  @param array $dirs       array of directory objects to process
- *  @param array $path_array path components in array form
- *  @param array $item_info  metadata about each item
+ * @param array $dirs       array of directory objects to process
+ * @param array $path_array path components in array form
+ * @param array $item_info  metadata about each item
  *
- *  @return void
+ * @return void
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function build_folder_structure(&$dirs, $path_array, $item_info)
 {
@@ -61,12 +61,12 @@ function build_folder_structure(&$dirs, $path_array, $item_info)
  *  Construct an array of folders that can be translated to
  *  a JSON object
  *
- *  @param array  $folder_obj  container for folders
- *  @param string $folder_name display name for the folder object
+ * @param array  $folder_obj  container for folders
+ * @param string $folder_name display name for the folder object
  *
- *  @return array
+ * @return array
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function format_folder_object_json($folder_obj, $folder_name)
 {
@@ -96,12 +96,12 @@ function format_folder_object_json($folder_obj, $folder_name)
 /**
  *  Similar to format_folder_object_json, but outputs HTML
  *
- *  @param array  $folder_obj       container for folders
- *  @param string $output_structure complete HTML structure, passed by ref
+ * @param array  $folder_obj       container for folders
+ * @param string $output_structure complete HTML structure, passed by ref
  *
- *  @return string
+ * @return string
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function format_folder_object_html($folder_obj, &$output_structure)
 {
@@ -122,12 +122,12 @@ function format_folder_object_html($folder_obj, &$output_structure)
 /**
  *  Constructs the list item for each individual object
  *
- *  @param array $file_obj         the file item object to format
- *  @param array $output_structure complete HTML structure, passed by ref
+ * @param array $file_obj         the file item object to format
+ * @param array $output_structure complete HTML structure, passed by ref
  *
- *  @return void
+ * @return void
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function format_file_object_html($file_obj, &$output_structure)
 {
@@ -139,11 +139,11 @@ function format_file_object_html($file_obj, &$output_structure)
 /**
  *  Converts byte-wise file sizes to human-readable strings
  *
- *  @param integer $bytes file size in bytes to convert
+ * @param integer $bytes file size in bytes to convert
  *
- *  @return string
+ * @return string
  *
- *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
+ * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
 function format_bytes($bytes)
 {
