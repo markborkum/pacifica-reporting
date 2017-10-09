@@ -82,7 +82,7 @@ function format_array_for_select2($response)
 
     $ret_object = array(
     'total_count' => sizeof($results),
-    'incomplete_results' => FALSE,
+        'incomplete_results' => $results ? FALSE : TRUE,
     'items' => $results
     );
 

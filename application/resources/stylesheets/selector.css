@@ -1,0 +1,76 @@
+.active_proposal {
+    color:rgb(0, 175, 0);;
+}
+
+.select2-results__option--highlighted .active_proposal {
+    color:rgb(138, 255, 132);
+}
+
+.inactive_proposal {
+    color: rgb(227, 65, 61);
+}
+
+.select2-results__option--highlighted .inactive_proposal {
+    color: rgb(255, 147, 161);
+}
+
+.active_dates {
+    color:white;
+    background-color: rgb(181, 181, 181);
+    font-size: 0.85em;
+    border-radius: 3px;
+    position: absolute;
+    right: 3px;
+    top: -2px;
+    text-align: center;
+    width: 14em;
+}
+
+.prop_info{
+    position:relative;
+}
+
+.prop_description {
+    margin-top:0.25em;
+    margin-left:1em;
+    font-size:0.85em;
+}
+
+.select2-results__options li:nth-child(even) {
+    background-color:rgb(240,240,240);
+}
+
+.inst_info {
+    position:relative;
+}
+
+.user_info {
+    position:relative;
+}
+.inst_description {
+    margin-top:0.25em;
+    margin-left: 1em;
+    font-size: 0.85em;
+}
+
+.user_description {
+    margin-top:0.25em;
+    margin-left: 1em;
+    font-size: 0.85em;
+}
+
+.active_instrument{
+    color:rgb(0, 175, 0);;
+}
+
+.inactive_instrument{
+    color: rgb(227, 65, 61);
+}
+
+.select2-results__option--highlighted .active_instrument {
+    color:rgb(138, 255, 132);
+}
+
+.select2-results__option--highlighted .inactive_instrument {
+    color: rgb(255, 147, 161);
+}

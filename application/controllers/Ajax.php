@@ -66,6 +66,7 @@ class Ajax extends Baseline_api_controller
         // $this->load->model('Reporting_model', 'rep');
         $this->load->model('Group_info_model', 'gm');
         $this->load->model('Myemsl_model', 'myemsl');
+        $this->load->model('Search_model', 'search');
         // $this->load->model('Summary_model', 'summary');
         // $this->load->library('EUS', '', 'eus');
         // $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));

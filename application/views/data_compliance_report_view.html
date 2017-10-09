@@ -1,0 +1,28 @@
+<?php
+  $this->template_version = $this->config->item('template');
+  $this->load->view("{$this->template_version}_template/view_header_compliance");
+  $js = isset($js) ? $js : "";
+  $display_search = ' style="display:none;"';
+  $search_bar_contents = isset($search_bar_contents) ? $search_bar_contents : "";
+?>
+
+  <div id="container" style="padding-bottom: 10em;">
+    <div id="main" class="main">
+      <div class="search_bar_container" id="search_bar_container">
+        <?php $this->load->view("object_types/compliance_reporting/time_period_bar_contents.html") ?>
+        <?php $this->load->view('object_types/compliance_reporting/loading_screen.html', array('object_type' => $object_type)) ?>
+      </div>
+      <div id="search_results_display" class="form_container search_results_display"></div>
+    </div>
+  </div>
+  <?php $this->load->view("{$this->template_version}_template/view_footer_short"); ?>
+</div><!-- #page_content -->
+<?php if(!empty($js)): ?>
+<script type='text/javascript'>
+//<![CDATA[
+  <?= $js ?>
+//]]>
+</script>
+<?php endif; ?>
+</body>
+</html>

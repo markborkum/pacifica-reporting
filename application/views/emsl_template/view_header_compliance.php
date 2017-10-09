@@ -59,26 +59,6 @@
                     <div class="text_logo">
                         <?= $site_identifier ?><span class="site_slogan"><?= $this->config->item('site_slogan') ?></span>
                     </div>
-                    <div id="tab_selector_container" class="tab_selector">
-                        <nav>
-                            <ul id="page_menu" class="page_menu">
-                            <?php $menu_types = $this->accepted_object_types; ?>
-                            <?php while($menu_types): ?>
-                            <?php $object_type = strtolower(array_shift($menu_types)); ?>
-                                <li>
-                                    <?php if($my_object_type == $object_type) : ?>
-                                    <?php echo $object_type ?>
-                                    <?php else: ?>
-                                    <a href="<?php echo base_url() ?><?php echo $this->config->item('index_page') ?>group/view/<?php echo $object_type ?>"><?php echo $object_type ?></a>
-                                    <?php endif; ?>
-                                    <?php if(sizeof($menu_types) > 0) : ?>
-                                    <span class="menu_separator">|</span>
-                                    <?php endif; ?>
-                                </li>
-                            <?php endwhile; ?>
-                            </ul>
-                        </nav>
-                    </div>
                 </div>
                 <div id="header_container" class="header_container" style="position:relative;">
                     <h1 class="underline"><?php echo $page_header ?></h1>

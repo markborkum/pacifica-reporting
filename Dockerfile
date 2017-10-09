@@ -2,7 +2,14 @@ FROM php:5.6-apache
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install apt-utils && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y install php5-pgsql
+    DEBIAN_FRONTEND=noninteractive apt-get -y install php5-pgsql libpq-dev && \
+    DEBIAN_FRONTEND=noninteractive apt-get -y install php5-mysql mysql-client libmysqlclient-dev &&\
+    DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql-client-common
+
+RUN docker-php-ext-install mysqli mysql pdo pdo_mysql pgsql
+RUN docker-php-ext-configure mysql --with-mysql=/usr --with-mysqli=/usr/bin/mysql_config --with-pdo-mysql=/usr
+
+
 RUN a2enmod rewrite
 
 ENV APACHE_RUN_USER   www-data
@@ -25,8 +32,8 @@ RUN ln -s /var/www/html/application/resources /var/www/html/project_resources
 RUN cp -f /usr/share/php5/php.ini-development /usr/local/etc/php/php.ini
 RUN touch /usr/local/etc/php/conf.d/raw_data.ini \
     && echo "always_populate_raw_post_data = -1;" >> /usr/local/etc/php/conf.d/raw_data.ini
-RUN ln -s /usr/share/php5/pgsql/* /usr/local/etc/php/conf.d/
-RUN ln -s /usr/lib/php5/20131226/p* /usr/local/lib/php/extensions/no-debug-non-zts-20131226/
+#RUN ln -s /usr/share/php5/pgsql/* /usr/local/etc/php/conf.d/
+#RUN ln -s /usr/lib/php5/20131226/p* /usr/local/lib/php/extensions/no-debug-non-zts-20131226/
 RUN rm -rf /etc/apache2/sites-enabled/000-default.conf
 RUN echo 'date.timezone = America/Los_Angeles' | tee "/usr/local/etc/php/conf.d/timezone.ini"
 RUN ["/bin/bash", "-c", "source /etc/apache2/envvars"]

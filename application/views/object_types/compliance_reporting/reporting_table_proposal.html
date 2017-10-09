@@ -1,0 +1,29 @@
+<table>
+  <thead>
+    <tr>
+      <th>Proposal ID</th>
+      <th>Instrument Group</th>
+      <th>Number of Bookings</th>
+      <th>Data File Count</th>
+    </tr>
+  </thead>
+  <tbody>
+  <?php foreach($results_collection as $proposal_id => $booking_info): ?>
+    <?php foreach($booking_info as $inst_group_id => $info): ?>
+      <?php $inst_list = "Instruments Scheduled: <br /><br />"; ?>
+      <?php foreach($info['instruments_scheduled'] as $inst_id): ?>
+        <?php $inst_name = $this->compliance->get_instrument_name($inst_id); ?>
+        <?php $inst_list .=  "[Instrument: {$inst_id}]: {$inst_name}<br /><br />" ?>
+      <?php endforeach; ?>
+    <tr>
+      <?php $color_class = $info['file_count'] > 0 ? " green" : " yellow"; ?>
+      <?php $proposal_title = $this->compliance->get_proposal_name($proposal_id); ?>
+      <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= $proposal_id ?></td>
+      <td title="<?= $inst_list ?>"><?= $group_name_lookup[$inst_group_id]; ?></td>
+      <td><?= $info['booking_count']; ?></td>
+      <td><?= $info['file_count']; ?></td>
+    </tr>
+    <?php endforeach; ?>
+  <?php endforeach; ?>
+  </tbody>
+</table>

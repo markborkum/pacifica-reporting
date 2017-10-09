@@ -55,8 +55,8 @@ class Baseline_api_controller extends CI_Controller
     {
         parent::__construct();
         date_default_timezone_set($this->config->item('local_timezone'));
-        $this->metadata_url_base = str_replace('tcp:', 'http:', getenv('METADATA_PORT'));
-        $this->policy_url_base = str_replace('tcp:', 'http:', getenv('POLICY_PORT'));
+        // $this->metadata_url_base = str_replace('tcp:', 'http:', getenv('METADATA_PORT'));
+        // $this->policy_url_base = str_replace('tcp:', 'http:', getenv('POLICY_PORT'));
         $this->load->model('System_setup_model', 'setup');
         $this->application_version = $this->config->item('application_version');
         $this->metadata_url_base = $this->config->item('metadata_server_base_url');
@@ -92,6 +92,11 @@ class Baseline_api_controller extends CI_Controller
         $this->page_data['fullname'] = $this->fullname;
         $this->page_data['load_prototype'] = FALSE;
         $this->page_data['load_jquery'] = TRUE;
+        $this->page_data['site_identifier'] = $this->config->item('site_identifier');
+        $this->page_data['site_slogan'] = $this->config->item('site_slogan');
+        $this->status_site_base_url = $this->config->item('status_server_base_url');
+        $this->site_identifier = $this->config->item('site_identifier');
+        $this->site_slogan = $this->config->item('site_slogan');
         $this->controller_name = $this->uri->rsegment(1);
     }
 }

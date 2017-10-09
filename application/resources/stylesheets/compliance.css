@@ -1,0 +1,239 @@
+.results_object {
+    width: 100%;
+    margin-bottom: 0.75em;
+    /*border: 1px solid red;*/
+}
+
+.object_container {
+    width: 100px;
+    /*border: 1px solid orange;*/
+    text-align:center;
+    font-weight: bold;
+    border-radius: 4px;
+}
+
+.green {
+    background-color: rgb(150, 230, 150);
+}
+
+.yellow {
+    background-color: rgb(218, 217, 84);
+}
+.timeline_container {
+    margin-top:-3em;
+    position: relative;
+    width: auto;
+    padding-top:1px;
+    margin-left:103px;
+    /*border: 1px solid green*/
+}
+
+.export_csv_button {
+    position:absolute;
+    right:10px;
+    bottom: 0;
+}
+
+.timeline_week_container:first-of-type {
+    border-radius: 0;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+}
+
+.timeline_week_container:last-of-type {
+    border-radius: 0;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    border-right: none;
+}
+
+.timeline_week_container {
+    width:19.6%;
+    /*border: 1px solid #bbb;*/
+    background-color: #efefef;
+    margin: 0;
+    height: 38px;
+    margin-right: -2px;
+    display: inline-block;
+    border-right: 1.5px solid #bbb;
+}
+
+.search_term_container, .search_button_container {
+    position:relative;
+    border: 2px solid #666;
+    border-radius: 8px;
+    background-color: #efefef;
+}
+
+.search_term_type_selector, .search_term, .search_button_container, .search_term_container {
+    width: 100%;
+}
+
+.search_button_container {
+    height: 2em;
+}
+
+.time_period_instructions {
+    text-align: center;
+}
+
+.search_results_display {
+    margin-top: 1em;
+}
+
+table.reporting_results {
+    width: 100%;
+}
+
+.loading_screen_container {
+    width:80%;
+    height: 14em;
+    border: 2px solid #666;
+    border-radius: 0 0 8px 8px;
+    background-color: #fbfbfb;
+    margin-left:auto;
+    margin-right:auto;
+    margin-top: -5px;
+}
+
+#compliance_loader-parent{
+
+}
+
+.loading_progress_text {
+    text-align:center;
+    vertical-align: middle;
+    margin-top: 2em;
+    font-size: 2em;
+    font-style: italic;
+    font-weight: bold;
+    color: #666;
+}
+
+.loading_progress_indicator {
+    height:6em;
+    margin-top:1em;
+    position: relative;
+}
+
+.search_results_display table thead tr {
+    height: 40px;
+}
+
+input.search_button {
+    font-size: 0.95em;
+    padding: 5px 20px 4px 20px;
+    margin-left: 6px;
+    border-radius: 4px;
+    border: 1px solid #666;
+    background-color: #ddd;
+    font-weight: bold;
+    color: #555;
+}
+
+input.search_button:hover {
+    background-color: #aaa;
+    color: #efefef;
+}
+
+input.search_button:active {
+    background-color: #777;
+    color: #efefef;
+}
+
+.time_period_options .select2-selection {
+    background-color: #ddd;
+    border: 1px solid #666;
+    margin-bottom: 3px;
+    text-align: center;
+    font-weight: 700;
+    color: #555;
+}
+
+.search_button_container input:hover {
+    border-color: #999;
+    background-color: #999;
+}
+
+.search_button_container input:active {
+    color: #ccc;
+    border-color: #999;
+    background-color: #888;
+}
+
+
+@media (max-width:640px){
+
+}
+
+.select2-container .select2-choice, .select2-result-label {
+  font-size: 1.0em;
+  height: 45px;
+  overflow: auto;
+}
+
+.select2-arrow, .select2-chosen {
+  padding-top: 6px;
+}
+
+.search_label {
+    font-size: 1em !important;
+}
+
+.tp_selector.select2 {
+    font-size: 1.25em;
+    font-weight: bold;
+    color: #656565;
+}
+
+.tp_selector {
+    width: 10em;
+}
+
+.emsl_staff_logo {
+    padding-right: 13px;
+    margin-left: 6px;
+    vertical-align: middle;
+    background-image: url(/project_resources/images/staff_logos/emsl_logo.png);
+    background-repeat: no-repeat;
+    background-size: 64px 27px;
+    position: absolute;
+    right: 14px;
+    bottom: -0.75em;
+    width: 64px;
+    height: 27px;
+}
+
+
+/* @2x Images (Pixel Ratio of 1.25+) */
+
+@media only screen and (-o-min-device-pixel-ratio: 5/4),
+        only screen and (-webkit-min-device-pixel-ratio: 1.25),
+        only screen and (min-device-pixel-ratio: 1.25),
+        only screen and (min-resolution: 1.25dppx) {
+    .emsl_staff_logo {
+        background-image: url(/project_resources/images/staff_logos/emsl_logo@2x.png);
+    }
+}
+
+
+/* @3x Images (Pixel Ratio of 2.25+) */
+
+@media  only screen and (-o-min-device-pixel-ratio: 9/4),
+        only screen and (-webkit-min-device-pixel-ratio: 2.25),
+        only screen and (min-device-pixel-ratio: 2.25),
+        only screen and (min-resolution: 2.25dppx) {
+    .emsl_staff_logo {
+        background-image: url(/project_resources/images/staff_logos/emsl_logo@3x.png);
+    }
+}
+
+@media only screen and (-o-min-device-pixel-ratio: 13/4),
+       only screen and (-webkit-min-device-pixel-ratio: 3.25),
+       only screen and (min-device-pixel-ratio: 3.25),
+       only screen and (min-resolution: 3.25dppx) {
+   .emsl_staff_logo {
+       background-image: url(/project_resources/images/staff_logos/emsl_logo@4x.png);
+   }
+
+}

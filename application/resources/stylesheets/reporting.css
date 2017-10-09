@@ -166,6 +166,7 @@ header.secondary .page_header {
 }
 
 #search_bar_container {
+    position:relative;
     color: #fefefe;
     padding: 0.5em;
     background-color: rgb(61, 101, 149);
