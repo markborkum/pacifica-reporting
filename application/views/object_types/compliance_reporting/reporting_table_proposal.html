@@ -1,28 +1,42 @@
-<table>
+<table class="compliance_table">
   <thead>
     <tr>
       <th>Proposal ID</th>
-      <th>Instrument Group</th>
+      <th>Instrument ID</th>
+      <th>Group</th>
+      <th>Instrument Name</th>
       <th>Number of Bookings</th>
       <th>Data File Count</th>
     </tr>
   </thead>
   <tbody>
   <?php foreach($results_collection as $proposal_id => $booking_info): ?>
-    <?php foreach($booking_info as $inst_group_id => $info): ?>
-      <?php $inst_list = "Instruments Scheduled: <br /><br />"; ?>
-      <?php foreach($info['instruments_scheduled'] as $inst_id): ?>
-        <?php $inst_name = $this->compliance->get_instrument_name($inst_id); ?>
-        <?php $inst_list .=  "[Instrument: {$inst_id}]: {$inst_name}<br /><br />" ?>
-      <?php endforeach; ?>
-    <tr>
-      <?php $color_class = $info['file_count'] > 0 ? " green" : " yellow"; ?>
+    <?php $line_class = "new_proposal_line"; ?>
+    <?php $proposal_file_count = 0; ?>
+    <?php $code_yellow = FALSE; ?>
+    <?php foreach($booking_info as $inst_id => $info): ?>
+      <?php $code_yellow = empty($info['file_count']) || $code_yellow ? TRUE : FALSE; ?>
+      <?php $proposal_file_count += $info['file_count']; ?>
+    <?php endforeach; ?>
+    <?php foreach($booking_info as $inst_id => $info): ?>
+    <tr class="<?= $line_class ?>">
+      <?php $inst_color_class = $info['file_count'] > 0 ? " green" : " red"; ?>
+      <?php if($code_yellow && $proposal_file_count <= 0): ?>
+        <?php $color_class = " red"; ?>
+      <?php elseif(!$code_yellow && $proposal_file_count > 0): ?>
+        <?php $color_class = " green"; ?>
+      <?php else: ?>
+        <?php $color_class = " yellow"; ?>
+      <?php endif; ?>
       <?php $proposal_title = $this->compliance->get_proposal_name($proposal_id); ?>
-      <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= $proposal_id ?></td>
-      <td title="<?= $inst_list ?>"><?= $group_name_lookup[$inst_group_id]; ?></td>
+      <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= !empty($line_class) ? $proposal_id : "" ?></td>
+      <td class="instrument_id_container<?= $inst_color_class ?>"><?= $inst_id ?></td>
+      <td><?= $group_name_lookup[$info['instrument_group_id']]; ?></td>
+      <td><?= $this->compliance->get_instrument_name($inst_id); ?></td>
       <td><?= $info['booking_count']; ?></td>
       <td><?= $info['file_count']; ?></td>
     </tr>
+    <?php $line_class = ""; ?>
     <?php endforeach; ?>
   <?php endforeach; ?>
   </tbody>

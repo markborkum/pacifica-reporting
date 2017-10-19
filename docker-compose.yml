@@ -1,4 +1,6 @@
 version: '2'
+volumes:
+  my-datavolume:
 services:
 # Nginx proxy pass frontends
   proxyfrontend:
@@ -60,10 +62,8 @@ services:
       - metadataserver:metadata
       - policyserver:policy
       - reportingprefsdb:prefsdb
-      - mysql
     environment:
       METADATA_PORT: tcp://metadata:8121
-      # METADATA_PORT: tcp://metadatasnapdev.my.emsl.pnl.go
       POLICY_PORT: tcp://policy:8181
       PREFSDB_ADDR: prefsdb
       PREFSDB_PORT: 5432
@@ -77,18 +77,6 @@ services:
       EUSDB_USER: ersup_play
       EUSDB_PASSWORD: play
 
-  reportingprefsdb:
-    container_name: reportingprefsdb
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: pacifica
-      POSTGRES_DB: pacifica_reporting
-      POSTGRES_USER: pacifica
-    ports:
-      - 55432:5432
-
-
-# Upload status
   uploadstatus:
     container_name: reporting_uploadstatus
     build:
@@ -126,17 +114,31 @@ services:
     ports:
       - 45432:5432
 
+  # mysql:
+  #   container_name: reporting_mysqldb
+  #   image: cagataygurturk/docker-ssh-tunnel
+  #   volumes:
+  #     - $HOME/.ssh/tunnel-config:/root/.ssh/config:ro
+  #     - $HOME/.ssh/tunnel_id_ecdsa:/root/.ssh/tunnel_id_ecdsa:ro
+  #   environment:
+  #     TUNNEL_HOST: mysql-tunnel
+  #     REMOTE_HOST: eusi.emsl.pnl.gov
+  #     LOCAL_PORT: 3306
+  #     REMOTE_PORT: 3306
+
   mysql:
     container_name: reporting_mysqldb
-    image: cagataygurturk/docker-ssh-tunnel
-    volumes:
-      - $HOME/.ssh/tunnel-config:/root/.ssh/config:ro
-      - $HOME/.ssh/tunnel_id_ecdsa:/root/.ssh/tunnel_id_ecdsa:ro
+    image: mysql:latest
+    restart: always
+    ports:
+      - 3306:3306
     environment:
-      TUNNEL_HOST: mysql-tunnel
-      REMOTE_HOST: eusi.emsl.pnl.gov
-      LOCAL_PORT: 3306
-      REMOTE_PORT: 3306
+      MYSQL_ROOT_PASSWORD: play
+      MYSQL_PASS: play
+      MYSQL_DATABASE: ERSUPPLAY
+      MYSQL_USER: ersup_play
+    volumes:
+      - my-datavolume:/var/lib/mysql
 
 
   # metadataserver:
@@ -153,7 +155,6 @@ services:
   #     REMOTE_HOST: core-0-dev.my.emsl.pnl.gov
   #     LOCAL_PORT: 8121
   #     REMOTE_PORT: 7121
-
 
   metadataserver:
     build:
@@ -173,6 +174,7 @@ services:
       POSTGRES_PORT_5432_TCP_PORT: 5432
       POSTGRES_ENV_POSTGRES_PASSWORD: pacifica
 
+
   # policyserver:
   #   container_name: reporting_policyserver
   #   image: cagataygurturk/docker-ssh-tunnel
@@ -188,7 +190,6 @@ services:
   #     LOCAL_PORT: 8181
   #     REMOTE_PORT: 7181
 
-
   policyserver:
     build:
       context: ../policy
@@ -201,6 +202,16 @@ services:
       - 8181:8181
     environment:
       METADATA_PORT: tcp://metadata:8121
+
+  reportingprefsdb:
+    container_name: reportingprefsdb
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: pacifica
+      POSTGRES_DB: pacifica_reporting
+      POSTGRES_USER: pacifica
+    ports:
+      - 55432:5432
 
   elasticdb:
     build:
@@ -230,75 +241,74 @@ services:
     ports:
       - 5432:5432
 
+
   # cartrabbit:
-  #     image: rabbitmq
-  #     container_name: cartrabbit
-  #     ports:
-  #         - 5672:5672
+  #   image: rabbitmq
+  #   container_name: cartrabbit
+  #   ports:
+  #     - 5672:5672
   #
   # cartmysql:
-  #     image: mysql
-  #     container_name: cartmysql
-  #     environment:
-  #         MYSQL_ROOT_PASSWORD: root
-  #         MYSQL_DATABASE: pacifica_cart
-  #         MYSQL_USER: cartd
-  #         MYSQL_PASSWORD: cartd
-  #     ports:
-  #         - 3306:3306
-
-  #
+  #   image: mysql
+  #   container_name: cartmysql
+  #   environment:
+  #     MYSQL_ROOT_PASSWORD: root
+  #     MYSQL_DATABASE: pacifica_cart
+  #     MYSQL_USER: cartd
+  #     MYSQL_PASSWORD: cartd
+  #   ports:
+  #     - 3306:3306
   #
   # cartworkers:
-  #     container_name: cartworkers
-  #     build:
-  #         context: ../cartd
-  #         dockerfile: Dockerfile
-  #     links:
-  #         - cartrabbit:amqp
-  #         - cartmysql:mysql
-  #         - archiveinterface:archivei
-  #     volumes:
-  #         # - /shared:/shared
-  #         - /Users/d3k857/Downloads/shared:/shared
+  #   container_name: cartworkers
+  #   build:
+  #     context: ../cartd
+  #     dockerfile: Dockerfile
+  #   links:
+  #     - cartrabbit:amqp
+  #     - cartmysql:mysql
+  #     - archiveinterface:archivei
+  #   volumes:
+  #     # - /shared:/shared
+  #     - /Users/d3k857/Downloads/shared:/shared
   #
-  #     environment:
-  #         VOLUME_PATH: /shared/
-  #         LRU_BUFFER_TIME: 0
-  #         # ARCHIVE_INTERFACE_URL: http://archivei:8080
-  #         ARCHIVEI_PORT_8080_TCP_ADDR: archivei
-  #         ARCHIVEI_PORT_8080_TCP_PORT: 8080
-  #         AMQP_PORT_5672_TCP_ADDR: amqp
-  #         AMQP_PORT_5672_TCP_PORT: 5672
-  #         MYSQL_PORT_3306_TCP_ADDR: mysql
-  #         MYSQL_PORT_3306_TCP_PORT: 3306
-  #         MYSQL_ENV_MYSQL_DATABASE: pacifica_cart
-  #         MYSQL_ENV_MYSQL_USER: cartd
-  #         MYSQL_ENV_MYSQL_PASSWORD: cartd
+  #   environment:
+  #     VOLUME_PATH: /shared/
+  #     LRU_BUFFER_TIME: 0
+  #     # ARCHIVE_INTERFACE_URL: http://archivei:8080
+  #     ARCHIVEI_PORT_8080_TCP_ADDR: archivei
+  #     ARCHIVEI_PORT_8080_TCP_PORT: 8080
+  #     AMQP_PORT_5672_TCP_ADDR: amqp
+  #     AMQP_PORT_5672_TCP_PORT: 5672
+  #     MYSQL_PORT_3306_TCP_ADDR: mysql
+  #     MYSQL_PORT_3306_TCP_PORT: 3306
+  #     MYSQL_ENV_MYSQL_DATABASE: pacifica_cart
+  #     MYSQL_ENV_MYSQL_USER: cartd
+  #     MYSQL_ENV_MYSQL_PASSWORD: cartd
   #
   # cartserver:
-  #     container_name: cartserver
-  #     build:
-  #         context: ../cartd
-  #         dockerfile: Dockerfile.wsgi
-  #     ports:
-  #         - 8081:8081
-  #     links:
-  #         - cartrabbit:amqp
-  #         - cartmysql:mysql
-  #         - archiveinterface:archivei
-  #     volumes:
-  #         # - /shared:/shared
-  #         - /Users/d3k857/Downloads/shared:/shared
-  #     environment:
-  #         VOLUME_PATH: /shared/
-  #         LRU_BUFFER_TIME: 0
-  #         ARCHIVEI_PORT_8080_TCP_ADDR: archivei
-  #         ARCHIVEI_PORT_8080_TCP_PORT: 8080
-  #         AMQP_PORT_5672_TCP_ADDR: amqp
-  #         AMQP_PORT_5672_TCP_PORT: 5672
-  #         MYSQL_PORT_3306_TCP_ADDR: mysql
-  #         MYSQL_PORT_3306_TCP_PORT: 3306
-  #         MYSQL_ENV_MYSQL_DATABASE: pacifica_cart
-  #         MYSQL_ENV_MYSQL_USER: cartd
-  #         MYSQL_ENV_MYSQL_PASSWORD: cartd
+  #   container_name: cartserver
+  #   build:
+  #     context: ../cartd
+  #     dockerfile: Dockerfile.wsgi
+  #   ports:
+  #     - 8081:8081
+  #   links:
+  #     - cartrabbit:amqp
+  #     - cartmysql:mysql
+  #     - archiveinterface:archivei
+  #   volumes:
+  #     # - /shared:/shared
+  #     - /Users/d3k857/Downloads/shared:/shared
+  #   environment:
+  #     VOLUME_PATH: /shared/
+  #     LRU_BUFFER_TIME: 0
+  #     ARCHIVEI_PORT_8080_TCP_ADDR: archivei
+  #     ARCHIVEI_PORT_8080_TCP_PORT: 8080
+  #     AMQP_PORT_5672_TCP_ADDR: amqp
+  #     AMQP_PORT_5672_TCP_PORT: 5672
+  #     MYSQL_PORT_3306_TCP_ADDR: mysql
+  #     MYSQL_PORT_3306_TCP_PORT: 3306
+  #     MYSQL_ENV_MYSQL_DATABASE: pacifica_cart
+  #     MYSQL_ENV_MYSQL_USER: cartd
+  #     MYSQL_ENV_MYSQL_PASSWORD: cartd

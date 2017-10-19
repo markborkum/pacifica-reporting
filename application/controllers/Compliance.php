@@ -115,7 +115,7 @@ class Compliance extends Baseline_api_controller
      * @param string $start_time  [description] earliest date to grab
      * @param string $end_time    [description] latest date to grab
      * @param string $output_type should the output go to screen or csv file
-     * 
+     *
      * @return none
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
@@ -137,8 +137,6 @@ class Compliance extends Baseline_api_controller
         $eus_booking_records
             = $this->compliance->retrieve_active_proposal_list_from_eus($start_time_obj, $end_time_obj);
 
-        // print(json_encode($eus_booking_records['by_proposal']));
-        // exit();
         $group_name_lookup = $this->compliance->get_group_name_lookup();
         $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, $start_time_obj, $end_time_obj);
         ksort($mappings);
@@ -161,13 +159,16 @@ class Compliance extends Baseline_api_controller
             $export_data = array();
             $handle = fopen('php://output', 'w');
             $field_names = array(
-                "Proposal ID","Instrument Group","Number of Bookings","Data File Count"
+                "proposal_id","instrument_id","group","instrument_name",
+                "number_of_bookings","data_file_count"
             );
             fputcsv($handle, $field_names);
             foreach($mappings as $proposal_id => $entry){
-                foreach($entry as $inst_group_id => $info){
+                foreach($entry as $instrument_id => $info){
                     $data = array(
-                        $proposal_id, $group_name_lookup[$inst_group_id],
+                        $proposal_id, $instrument_id,
+                        $group_name_lookup[$info['instrument_group_id']],
+                        $this->compliance->get_instrument_name($instrument_id),
                         $info['booking_count'], $info['file_count']
                     );
                     fputcsv($handle, $data);

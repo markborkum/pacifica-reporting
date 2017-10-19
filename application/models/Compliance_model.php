@@ -113,46 +113,28 @@ class Compliance_model extends CI_Model
     public function retrieve_active_proposal_list_from_eus($start_date_obj, $end_date_obj)
     {
         $column_array = array(
-            'COUNT(BOOKING_ID) as booking_count',
-            'RESOURCE_ID as instrument_id',
-            'PROPOSAL_ID as proposal_id',
-            'MIN(DATE_START) as date_start',
-            'MAX(DATE_FINISH) as date_finish'
+            'COUNT(`BOOKING_STATS_ID`) as booking_count',
+            '`RESOURCE_ID` as instrument_id',
+            '`PROPOSAL_ID` as proposal_id',
+            'MIN(`MONTH`) as query_month',
+            'MIN(`DATE_START`) as date_start',
+            'MAX(`DATE_FINISH`) as date_finish'
         );
 
-        // $column_array = array(
-        //     'BOOKING_ID as booking_id',
-        //     'RESOURCE_ID as instrument_id',
-        //     'IFNULL(PROPOSAL_ID, 0) as proposal_id',
-        //     'LOWER(USAGE_CD) as usage_code',
-        //     'DATE_START as date_start',
-        //     'DATE_FINISH as date_finish',
-        //     'IF(LOWER(EXCLUDE_WEEKENDS) = \'y\', TRUE, FALSE) as exclude_weekends'
-        // );
+        $first_of_month = $start_date_obj->modify('first day of this month');
 
-        $query = $this->eusDB->select($column_array)->from("ERS_BOOKING")
-            ->group_start()
-            ->group_start()
-            ->where('DATE_START >=', $start_date_obj->format('Y-m-d'))
-            ->where('DATE_START <=', $end_date_obj->format('Y-m-d'))
-            ->group_end()
-            ->or_group_start()
-            ->where('DATE_FINISH >=', $start_date_obj->format('Y-m-d'))
-            ->where('DATE_FINISH <=', $end_date_obj->format('Y-m-d'))
-            ->group_end()
-            ->group_end()
-            ->where('NOT ISNULL(PROPOSAL_ID)')
+        $query = $this->eusDB->select($column_array)->from("ERS_BOOKING_STATS")
+            ->where('NOT ISNULL(`PROPOSAL_ID`)')
             ->group_by(array('PROPOSAL_ID', 'RESOURCE_ID'))
-            ->order_by('instrument_id, date_start')
+            ->having('MIN(`MONTH`)', $first_of_month->format('Y-m-d'))
+            ->order_by('PROPOSAL_ID, RESOURCE_ID')
             ->get();
 
         $usage = array(
             'by_instrument' => array(),
-            'by_proposal' => array()//,
-            // 'group_instrument_lookup' => array()
+            'by_proposal' => array()
         );
         $instrument_group_lookup = array();
-        // $group_instrument_lookup = array();
 
         foreach($query->result() as $row){
             $inst_id = intval($row->instrument_id);
@@ -176,33 +158,29 @@ class Compliance_model extends CI_Model
                 'file_count' => 0
             );
             $inst_group_comp[] = $group_id;
-            // $usage['by_instrument'][$inst_id]['bookings'][$row->booking_id] = $entry;
-            $usage['by_proposal'][$row->proposal_id][$group_id][$inst_id] = $entry;
+            $usage['by_proposal'][$row->proposal_id][$inst_id] = $entry;
         }
 
         $ungrouped = $usage['by_proposal'];
-        foreach($ungrouped as $proposal_id => $group_entries){
-            foreach($group_entries as $group_id => $inst_entries){
-                $new_entry = array();
-                foreach($inst_entries as $inst_id => $entry){
-                    if(empty($new_entry)) {
-                        $new_entry = $entry;
-                        $new_entry['instruments_scheduled'] = array($new_entry['instrument_id']);
-                        unset($new_entry['instrument_id']);
-                    }else{
-                        $new_entry['booking_count'] += $entry['booking_count'];
-                        $new_entry['instruments_scheduled'][] = $entry['instrument_id'];
-                        $new_entry['date_start'] = $entry['date_start'] < $new_entry['date_start']
-                            ? $entry['date_start'] : $new_entry['date_start'];
-                        $new_entry['date_finish'] = $entry['date_finish'] > $new_entry['date_finish']
-                            ? $entry['date_finish'] : $new_entry['date_finish'];
-                    };
-                }
-                $usage['by_proposal'][$proposal_id][$group_id] = $new_entry;
+        foreach($ungrouped as $proposal_id => $inst_entries){
+            $new_entry = array();
+            foreach($inst_entries as $inst_id => $entry){
+                if(empty($new_entry)) {
+                    $new_entry = $entry;
+                    $new_entry['instruments_scheduled'] = array($new_entry['instrument_id']);
+                    unset($new_entry['instrument_id']);
+                }else{
+                    $new_entry['booking_count'] += $entry['booking_count'];
+                    $new_entry['instruments_scheduled'][] = $entry['instrument_id'];
+                    $new_entry['date_start'] = $entry['date_start'] < $new_entry['date_start']
+                        ? $entry['date_start'] : $new_entry['date_start'];
+                    $new_entry['date_finish'] = $entry['date_finish'] > $new_entry['date_finish']
+                        ? $entry['date_finish'] : $new_entry['date_finish'];
+                };
             }
+            $usage['by_proposal'][$proposal_id][$inst_id] = $new_entry;
         }
 
-        // $usage['group_instrument_lookup'] = $group_instrument_lookup;
         $usage['instrument_group_compilation'] = array_unique($inst_group_comp);
         return $usage;
     }
@@ -342,7 +320,7 @@ class Compliance_model extends CI_Model
         if($query->status_code == 200 && $query->body != '[]') {
             $results = json_decode($query->body, TRUE);
             $instrument_entry = array_shift($results);
-            $instrument_name = $instrument_entry['name'];
+            $instrument_name = $instrument_entry['name_short'];
             $this->instrument_cache[$instrument_id] = $instrument_name;
         }
         return $instrument_name;
@@ -413,24 +391,25 @@ class Compliance_model extends CI_Model
         $transactions_list_query = Requests::get($url, array('Accept' => 'application/json'));
         if($transactions_list_query->status_code == 200) {
             $transactions_list = json_decode($transactions_list_query->body, TRUE);
+            $stats_template = array(
+                'booking_count' => 0,
+                'data_file_count' => 0,
+                'instruments_scheduled' => array(),
+                'transaction_list' => array()
+            );
             foreach($transactions_list as $transaction_id => $trans_info){
-                $my_group_id = $this->get_group_id($trans_info['instrument_id']);
+                // $my_group_id = $this->get_group_id($trans_info['instrument_id']);
                 $proposal_id = strval($trans_info['proposal_id']);
-                $stats_template = array(
-                    'booking_count' => 0,
-                    'data_file_count' => 0,
-                    'instruments_scheduled' => array(),
-                    'transaction_list' => array()
-                );
+                $instrument_id = intval($trans_info['instrument_id']);
                 if(!array_key_exists($proposal_id, $booking_stats_cache)) {
                     $booking_stats_cache[$proposal_id] = array();
                 }
-                if(!array_key_exists($my_group_id, $booking_stats_cache)) {
-                    $booking_stats_cache[$proposal_id][$my_group_id] = $stats_template;
+                if(!array_key_exists($instrument_id, $booking_stats_cache)) {
+                    $booking_stats_cache[$proposal_id][$instrument_id] = $stats_template;
                 }
-                $booking_stats_cache[$proposal_id][$my_group_id]['data_file_count']
+                $booking_stats_cache[$proposal_id][$instrument_id]['data_file_count']
                     += $trans_info['file_count'];
-                $booking_stats_cache[$proposal_id][$my_group_id]['transaction_list'][$trans_info['upload_date']][]
+                $booking_stats_cache[$proposal_id][$instrument_id]['transaction_list'][$trans_info['upload_date']][]
                     = array(
                         'transaction_id' => $transaction_id,
                         'file_count' => intval($trans_info['file_count']),
@@ -439,23 +418,23 @@ class Compliance_model extends CI_Model
             }
         }
 
-        foreach($object_list as $proposal_id => $inst_groups){
-            foreach($inst_groups as $inst_group_id => $record){
+        foreach($object_list as $proposal_id => $inst_id_list){
+            foreach($inst_id_list as $inst_id => $record){
                 $inst_group_id = $record['instrument_group_id'];
                 $proposal_id = strval($record['proposal_id']);
                 $earliest_date = clone($record['date_start']);
-                $earliest_date->modify('-1 week');
+                // $earliest_date->modify('-1 week');
                 $latest_date = clone($record['date_finish']);
                 $latest_date->modify('+3 weeks');
                 //check the transaction record for matching entries
-                $eus_objects[$proposal_id][$inst_group_id]['date_start'] = $record['date_start']->format('Y-m-d');
-                $eus_objects[$proposal_id][$inst_group_id]['date_finish'] = $record['date_finish']->format('Y-m-d');
-                if(isset($booking_stats_cache[$proposal_id][$inst_group_id])) {
-                    $transactions = $booking_stats_cache[$proposal_id][$inst_group_id]['transaction_list'];
+                $eus_objects[$proposal_id][$inst_id]['date_start'] = $record['date_start']->format('Y-m-d');
+                $eus_objects[$proposal_id][$inst_id]['date_finish'] = $record['date_finish']->format('Y-m-d');
+                if(isset($booking_stats_cache[$proposal_id][$inst_id])) {
+                    $transactions = $booking_stats_cache[$proposal_id][$inst_id]['transaction_list'];
                     foreach($transactions as $upload_date => $txn_entries){
                         foreach($txn_entries as $txn_entry){
                             if($txn_entry['upload_date_obj'] >= $earliest_date && $txn_entry['upload_date_obj'] <= $latest_date) {
-                                $eus_objects[$proposal_id][$inst_group_id]['file_count'] += $txn_entry['file_count'];
+                                $eus_objects[$proposal_id][$inst_id]['file_count'] += $txn_entry['file_count'];
                             }
                         }
 
@@ -471,7 +450,7 @@ class Compliance_model extends CI_Model
      * Get the bookends for available ERS instrument booking dates
      *
      * @return array set of earliest/latest dates for the ERS booking stream_copy_to_stream
-     * 
+     *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function earliest_latest_booking_periods()
