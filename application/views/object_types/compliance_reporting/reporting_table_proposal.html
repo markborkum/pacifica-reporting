@@ -10,6 +10,8 @@
     </tr>
   </thead>
   <tbody>
+  <?php $instrument_group_cache = $this->get_group_id_cache(); ?>
+
   <?php foreach($results_collection as $proposal_id => $booking_info): ?>
     <?php $line_class = "new_proposal_line"; ?>
     <?php $proposal_file_count = 0; ?>
@@ -31,7 +33,7 @@
       <?php $proposal_title = $this->compliance->get_proposal_name($proposal_id); ?>
       <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= !empty($line_class) ? $proposal_id : "" ?></td>
       <td class="instrument_id_container<?= $inst_color_class ?>"><?= $inst_id ?></td>
-      <td><?= $group_name_lookup[$info['instrument_group_id']]; ?></td>
+      <td><?= $group_name_lookup[$instrument_group_cache[$inst_id]]; ?></td>
       <td><?= $this->compliance->get_instrument_name($inst_id); ?></td>
       <td><?= $info['booking_count']; ?></td>
       <td><?= $info['file_count']; ?></td>
