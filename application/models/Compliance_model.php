@@ -456,14 +456,14 @@ class Compliance_model extends CI_Model
     public function earliest_latest_booking_periods()
     {
         $column_array = array(
-            'DATE(MIN(DATE_START)) as earliest',
-            'DATE(MAX(DATE_FINISH)) as latest'
+            'DATE(MIN(MONTH)) as earliest',
+            'DATE(MAX(MONTH)) as latest'
         );
         $results_array = array(
             'earliest' => FALSE,
             'latest' => FALSE
         );
-        $query = $this->eusDB->select($column_array)->from("ERS_BOOKING")->get();
+        $query = $this->eusDB->select($column_array)->from("ERS_BOOKING_STATS")->get();
         if($query && $query->num_rows() > 0) {
             $results = $query->result_array();
             $result = array_pop($results);
