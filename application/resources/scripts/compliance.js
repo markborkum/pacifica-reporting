@@ -72,12 +72,12 @@ var export_report_as_csv = function(element, csv_url){};
 
 
 var generate_year_select_options = function(parent_obj, min_date, max_date, selected_year){
-    var today = new Date();
-    var min_date_obj = new Date(min_date);
-    var max_date_obj = new Date(max_date);
-    var min_year = min_date_obj.getFullYear();
-    var max_year = max_date_obj.getFullYear();
-    var current_year = max_year;
+    var today = moment();
+    var min_date_obj = moment(min_date);
+    var max_date_obj = moment(max_date);
+    var min_year = min_date_obj.year();
+    var max_year = max_date_obj.year();
+    var current_year = today.year();
     if(!selected_year){
         selected_year = current_year;
     }

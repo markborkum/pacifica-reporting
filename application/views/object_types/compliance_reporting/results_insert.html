@@ -1,0 +1,15 @@
+<?php foreach($results_collection as $object_id => $booking_entry): ?>
+<?php foreach($booking_entry as $booking_id => $object_entry): ?>
+  <?php $compliance_class = $object_entry['data_present'] == TRUE ? ' green' : ' red'; ?>
+  <div id="results_object_<?= $object_id ?>" class="results_object">
+    <div id="object_container_<?= $object_id ?>" class="object_container<?= $compliance_class ?>">
+      <?= ucwords($object_type) ?> ID<br />
+      <?= $object_id ?>
+    </div>
+    <div id="timeline_container_<?= $object_id ?>" class="timeline_container">
+      <?php $timeline_data = array('object_entry' => $object_entry, 'object_id' => $object_id, 'start' => $start_date, 'end' => $end_date); ?>
+      <?php $this->load->view('object_types/compliance_reporting/timeline_guts_insert.html', $timeline_data); ?>
+    </div>
+  </div>
+<?php endforeach; ?>
+<?php endforeach; ?>

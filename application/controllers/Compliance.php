@@ -141,8 +141,6 @@ class Compliance extends Baseline_api_controller
         $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, $start_time_obj, $end_time_obj);
         ksort($mappings);
 
-        // print(json_encode($mappings));
-        // exit();
         $page_data = array(
             'results_collection' => $mappings,
             'group_name_lookup' => $group_name_lookup,
@@ -151,7 +149,6 @@ class Compliance extends Baseline_api_controller
             'end_date' => $end_time_obj->format('Y-m-d')
         );
 
-        // print(json_encode($page_data));
         if($output_type == 'csv') {
             $filename = "Compliance_report_by_proposal_".$start_time_obj->format('Y-m').".csv";
             header('Content-Type: text/csv');
@@ -175,7 +172,6 @@ class Compliance extends Baseline_api_controller
                 }
             }
             fclose($handle);
-            // $this->load->view('object_types/compliance_reporting/reporting_table_proposal_csv.html', $page_data);
         }else{
             $this->load->view('object_types/compliance_reporting/reporting_table_proposal.html', $page_data);
         }

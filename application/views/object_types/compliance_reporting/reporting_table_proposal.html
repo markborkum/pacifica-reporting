@@ -10,7 +10,7 @@
     </tr>
   </thead>
   <tbody>
-  <?php $instrument_group_cache = $this->get_group_id_cache(); ?>
+  <?php $instrument_group_cache = $this->compliance->get_group_id_cache(); ?>
 
   <?php foreach($results_collection as $proposal_id => $booking_info): ?>
     <?php $line_class = "new_proposal_line"; ?>

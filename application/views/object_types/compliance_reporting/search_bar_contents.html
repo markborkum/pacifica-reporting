@@ -1,0 +1,22 @@
+<div class="themed" id="search_boxes">
+  <form id="search_terms">
+    <fieldset id="search_fieldset" style="height:20%;">
+      <legend>Search Criteria</legend>
+        <div id="search_term_container" class="search_term_container">
+          <label for="search_term_type_selector" class="search_label">Type of Search to Perform</label>
+          <select id="search_term_type_selector" class="select_replaceable search_term_type_selector">
+            <option></option>
+            <?php foreach($object_types as $type_name): ?>
+            <option value="<?= $type_name ?>"><?= ucwords($type_name) ?></option>
+            <?php endforeach; ?>
+          </select>
+          &nbsp;
+          <select id="search_term" multiple="multiple" class="select_replaceable search_term">
+           </select>
+        </div>
+        <div id="search_button_container" class="search_button_container">
+          <input type="button" id="generate_report_button" name="generate_report_button" value="Generate Report" />
+        </div>
+    </fieldset>
+  </form>
+</div>
