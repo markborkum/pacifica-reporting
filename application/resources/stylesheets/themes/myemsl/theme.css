@@ -68,7 +68,7 @@ header.secondary .logo_container {
   left:210px;
   top:48px;
   color:#FDA508;
-  text-transform:uppercase;
+  /* text-transform:uppercase; */
   font-size:0.9em;
   font-weight:bold;
   padding-left: 0;
