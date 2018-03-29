@@ -1,45 +1,45 @@
-<table class="compliance_table">
-  <thead>
-    <tr>
-      <th>Proposal ID</th>
-      <th>Instrument ID</th>
-      <th>Group</th>
-      <th>Instrument Name</th>
-      <th>Number of Bookings</th>
-      <th>Data File Count</th>
-    </tr>
-  </thead>
-  <tbody>
-  <?php $instrument_group_cache = $this->compliance->get_group_id_cache(); ?>
+<div class="search_results_display">
+  <table class="compliance_table">
+    <thead>
+      <tr style="border-top: 1px solid rgb(103, 103, 103);">
+        <th>Proposal ID</th>
+        <th>Instrument ID</th>
+        <th>Instrument</th>
+        <th>Number of Bookings</th>
+        <th>Data File Count</th>
+      </tr>
+    </thead>
+    <tbody>
+    <?php $instrument_group_cache = $this->compliance->get_group_id_cache(); ?>
 
-  <?php foreach($results_collection as $proposal_id => $booking_info): ?>
-    <?php $line_class = "new_proposal_line"; ?>
-    <?php $proposal_file_count = 0; ?>
-    <?php $code_yellow = FALSE; ?>
-    <?php foreach($booking_info as $inst_id => $info): ?>
-      <?php $code_yellow = empty($info['file_count']) || $code_yellow ? TRUE : FALSE; ?>
-      <?php $proposal_file_count += $info['file_count']; ?>
+    <?php foreach($results_collection as $proposal_id => $booking_info): ?>
+      <?php $line_class = "new_proposal_line"; ?>
+      <?php $proposal_file_count = 0; ?>
+      <?php $code_yellow = FALSE; ?>
+      <?php foreach($booking_info as $inst_id => $info): ?>
+        <?php $code_yellow = empty($info['file_count']) || $code_yellow ? TRUE : FALSE; ?>
+        <?php $proposal_file_count += $info['file_count']; ?>
+      <?php endforeach; ?>
+      <?php foreach($booking_info as $inst_id => $info): ?>
+      <tr class="<?= $line_class ?>">
+        <?php $inst_color_class = $info['file_count'] > 0 ? " green" : " red"; ?>
+        <?php if($code_yellow && $proposal_file_count <= 0): ?>
+          <?php $color_class = " red"; ?>
+        <?php elseif(!$code_yellow && $proposal_file_count > 0): ?>
+          <?php $color_class = " green"; ?>
+        <?php else: ?>
+          <?php $color_class = " yellow"; ?>
+        <?php endif; ?>
+        <?php $proposal_title = $this->compliance->get_proposal_name($proposal_id); ?>
+        <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= !empty($line_class) ? $proposal_id : "" ?></td>
+        <td class="instrument_id_container<?= $inst_color_class ?>"><?= $inst_id ?></td>
+        <td><span class="instrument_group"><?= $group_name_lookup[$instrument_group_cache[$inst_id]]; ?></span><p class="instrument_name"><?= $this->compliance->get_instrument_name($inst_id); ?></p></td>
+        <td><?= $info['booking_count']; ?></td>
+        <td><?= $info['file_count']; ?></td>
+      </tr>
+      <?php $line_class = ""; ?>
+      <?php endforeach; ?>
     <?php endforeach; ?>
-    <?php foreach($booking_info as $inst_id => $info): ?>
-    <tr class="<?= $line_class ?>">
-      <?php $inst_color_class = $info['file_count'] > 0 ? " green" : " red"; ?>
-      <?php if($code_yellow && $proposal_file_count <= 0): ?>
-        <?php $color_class = " red"; ?>
-      <?php elseif(!$code_yellow && $proposal_file_count > 0): ?>
-        <?php $color_class = " green"; ?>
-      <?php else: ?>
-        <?php $color_class = " yellow"; ?>
-      <?php endif; ?>
-      <?php $proposal_title = $this->compliance->get_proposal_name($proposal_id); ?>
-      <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= !empty($line_class) ? $proposal_id : "" ?></td>
-      <td class="instrument_id_container<?= $inst_color_class ?>"><?= $inst_id ?></td>
-      <td><?= $group_name_lookup[$instrument_group_cache[$inst_id]]; ?></td>
-      <td><?= $this->compliance->get_instrument_name($inst_id); ?></td>
-      <td><?= $info['booking_count']; ?></td>
-      <td><?= $info['file_count']; ?></td>
-    </tr>
-    <?php $line_class = ""; ?>
-    <?php endforeach; ?>
-  <?php endforeach; ?>
-  </tbody>
-</table>
+    </tbody>
+  </table>
+</div>

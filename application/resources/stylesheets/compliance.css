@@ -35,6 +35,19 @@
     border-collapse: collapse;
 }
 
+.proposal_id_container, .instrument_id_container {
+    font-weight: 600;
+}
+
+.instrument_name {
+    font-size: 0.8em;
+    margin: 0;
+}
+
+.instrument_group {
+    font-weight: 600;
+}
+
 .timeline_container {
     margin-top:-3em;
     position: relative;
@@ -94,7 +107,10 @@
 }
 
 .search_results_display {
-    margin-top: 1em;
+    border-radius: 10px;
+    margin-top: 1.5em;
+    padding-top: 1em;
+    background-color: rgb(103, 103, 103);
 }
 
 table.reporting_results {
@@ -102,8 +118,8 @@ table.reporting_results {
 }
 
 .loading_screen_container {
-    width:80%;
-    height: 14em;
+    width:60%;
+    height: 12em;
     border: 2px solid #666;
     border-radius: 0 0 8px 8px;
     background-color: #fbfbfb;
@@ -120,7 +136,7 @@ table.reporting_results {
     text-align:center;
     vertical-align: middle;
     margin-top: 2em;
-    font-size: 2em;
+    font-size: 1.75em;
     font-style: italic;
     font-weight: bold;
     color: #666;
@@ -128,7 +144,7 @@ table.reporting_results {
 
 .loading_progress_indicator {
     height:6em;
-    margin-top:1em;
+    margin-top:0.5em;
     position: relative;
 }
 
