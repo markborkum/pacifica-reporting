@@ -44,7 +44,9 @@ class System_setup_model extends CI_Model
     public function __construct()
     {
         parent::__construct();
-
+        if (file_exists(APPPATH."db_create_completed.txt")) {
+            return;
+        }
         //quickly assess the current system status
         try {
             $this->setup_db_structure();
@@ -81,6 +83,20 @@ class System_setup_model extends CI_Model
         }else{
             log_message('info', 'DB Type is sqlite3, so we don\'t have to explicitly make the db file');
         }
+    }
+    /**
+     *  Replacement for malfunctioning CI database util
+     *
+     * @param string $table_name [description]
+     *
+     * @return bool  does the table in question exist?
+     *
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     */
+    private function _table_exists($table_name)
+    {
+        $query = $this->db->query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name = '{$table_name}';");
+        return $query->num_rows() == 1;
     }
 
     /**
@@ -240,7 +256,7 @@ class System_setup_model extends CI_Model
         );
 
         foreach($db_create_object['tables'] as $table_name => $table_def){
-            if(!$this->db->table_exists($table_name)) {
+            if(!$this->_table_exists($table_name)) {
                 $this->dbforge->add_field($table_def);
                 if(array_key_exists($table_name, $db_create_object['keys'])) {
                     foreach($db_create_object['keys'][$table_name] as $key){
@@ -255,6 +271,7 @@ class System_setup_model extends CI_Model
                 }
             }
         }
+        touch(APPPATH."db_create_completed.txt");
     }
 
 }
