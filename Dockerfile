@@ -1,4 +1,5 @@
 FROM php:5.6-apache
+RUN rm /etc/apt/preferences.d/no-debian-php
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install apt-utils && \

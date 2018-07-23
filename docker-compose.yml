@@ -1,4 +1,4 @@
-version: '2'
+version: '3.3'
 services:
 # Nginx proxy pass frontends
   proxyfrontend:
@@ -24,6 +24,19 @@ services:
       PROXY_ADDR: proxyserver
       PROXY_PORT: 8180
 
+
+
+  ingestserver:
+    container_name: reporting_ingest
+    image: nginx:alpine
+    volumes:
+      - ./ingest_data:/usr/share/nginx/html
+      - ./auth/ingest_conf:/etc/nginx/conf.d
+    ports:
+      - 9080:80
+
+
+
   archiveinterface:
     image: pacifica/archiveinterface
     container_name: reporting_archiveinterface
@@ -47,9 +60,7 @@ services:
       METADATA_PORT: tcp://metadata:8121
       ARCHIVEI_PORT: tcp://archiveinterface:8080
 
-
-
-        # Reporting services
+  # Reporting services
   reporting:
     container_name: reporting
     build:
@@ -75,8 +86,6 @@ services:
       EUSDB_USER: ersup_play
       EUSDB_PASSWORD: play
 
-
-
   uploadstatus:
     container_name: reporting_uploadstatus
     build:
@@ -89,11 +98,13 @@ services:
       - policyserver:policy
       - uploadstatusdb:cartdb
       - archiveinterface:archivei
+      - ingestserver:ingest
     environment:
       METADATA_PORT: tcp://metadata:8121
       POLICY_PORT: tcp://policy:8181
       ARCHIVE_PORT: tcp://archivei:8080
       CART_PORT: tcp://cart:8081
+      INGESTER_PORT: tcp://ingest
       CARTDB_ADDR: cartdb
       CARTDB_PORT: 5432
       CARTDB_USER: pacifica
@@ -103,6 +114,8 @@ services:
       CART_DOWNLOAD_PORT: tcp://cartng.emsl.pnl.gov:8443
       FILE_DOWNLOAD_PORT: tcp://filesng.emsl.pnl.gov:8443
       SITE_NAME: status.local
+    ports:
+        - 9001:9001
 
   uploadstatusdb:
     container_name: reporting_uploadstatusdb
@@ -114,51 +127,78 @@ services:
     ports:
       - 45432:5432
 
-  mysql:
-    container_name: reporting_mysqldb
-    image: cagataygurturk/docker-ssh-tunnel
-    volumes:
-      - $HOME/.ssh/tunnel-config:/root/.ssh/config:ro
-      - $HOME/.ssh/tunnel_id_ecdsa:/root/.ssh/tunnel_id_ecdsa:ro
-    environment:
-      TUNNEL_HOST: mysql-tunnel
-      REMOTE_HOST: eusi.emsl.pnl.gov
-      LOCAL_PORT: 3306
-      REMOTE_PORT: 3306
+  # mysql:
+  #   container_name: reporting_mysqldb
+  #   image: cagataygurturk/docker-ssh-tunnel
+  #   volumes:
+  #     - $HOME/.ssh/tunnel-config:/root/.ssh/config:ro
+  #     - $HOME/.ssh/tunnel_id_ecdsa:/root/.ssh/tunnel_id_ecdsa:ro
+  #   environment:
+  #     TUNNEL_HOST: mysql-tunnel
+  #     REMOTE_HOST: eusi.emsl.pnl.gov
+  #     LOCAL_PORT: 3306
+  #     REMOTE_PORT: 3306
 
+# Metadata and policy servers
+  policyserver:
+    container_name: reporting_policyserver
+    # image: pacifica/policy
+    build:
+      context: ../policy
+    links:
+      - metadataserver:metadata
+    ports:
+      - 8181:8181
+    environment:
+      METADATA_PORT: tcp://metadata:8121
+
+  elasticdb:
+    build:
+      context: ../metadata
+      dockerfile: docker-compose/Dockerfile.elastic
+    container_name: reporting_elasticdb
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - cluster.name=docker-cluster
+      - bootstrap.memory_lock=true
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+
+  metadatadb:
+    image: postgres
+    container_name: reporting_metadatadb
+    environment:
+      POSTGRES_PASSWORD: pacifica
+      POSTGRES_DB: pacifica_metadata
+      POSTGRES_USER: pacifica
+    ports:
+      - 5432:5432
 
   metadataserver:
+    # image: pacifica/metadata
+    build:
+        context: ../metadata
     container_name: reporting_metadataserver
-    image: cagataygurturk/docker-ssh-tunnel
-    volumes:
-      - $HOME/.ssh/tunnel-config:/root/.ssh/config:ro
-      - $HOME/.ssh/tunnel_id_ecdsa:/root/.ssh/tunnel_id_ecdsa:ro
+    links:
+      - metadatadb:postgres
+      - elasticdb:elasticdb
     ports:
       - 8121:8121
     environment:
       ELASTICDB_PORT: tcp://elasticdb:9200
-      TUNNEL_HOST: mysql-tunnel
-      REMOTE_HOST: core-0-dev.my.emsl.pnl.gov
-      LOCAL_PORT: 8121
-      REMOTE_PORT: 7121
-
-  policyserver:
-    container_name: reporting_policyserver
-    image: cagataygurturk/docker-ssh-tunnel
-    volumes:
-      - $HOME/.ssh/tunnel-config:/root/.ssh/config:ro
-      - $HOME/.ssh/tunnel_id_ecdsa:/root/.ssh/tunnel_id_ecdsa:ro
-    ports:
-      - 8181:8181
-    environment:
-      # ELASTICDB_PORT: tcp://elasticdb:9200
-      TUNNEL_HOST: mysql-tunnel
-      REMOTE_HOST: core-0-dev.my.emsl.pnl.gov
-      LOCAL_PORT: 8181
-      REMOTE_PORT: 7181
+      POSTGRES_ENV_POSTGRES_DB: pacifica_metadata
+      POSTGRES_ENV_POSTGRES_USER: pacifica
+      POSTGRES_PORT_5432_TCP_ADDR: postgres
+      POSTGRES_PORT_5432_TCP_PORT: 5432
+      POSTGRES_ENV_POSTGRES_PASSWORD: pacifica
 
   reportingprefsdb:
-    container_name: reportingprefsdb
+    container_name: reporting_prefsdb
     image: postgres
     environment:
       POSTGRES_PASSWORD: pacifica

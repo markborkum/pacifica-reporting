@@ -72,8 +72,19 @@ $db['default'] = array(
   'cachedir' => ""
 );
 
+// $db['eus'] = array(
+//   'hostname' => getenv('EUSDB_ADDR'),
+//   'username' => getenv('EUSDB_USER'),
+//   'password' => getenv('EUSDB_PASSWORD'),
+//   'database' => getenv('EUSDB_NAME'),
+//   'dbdriver' => "mysqli",
+//   'db_debug' => TRUE,
+//   'pconnect' => FALSE
+// );
+
 $db['eus'] = array(
-  'hostname' => getenv('EUSDB_ADDR'),
+  'hostname' => 'docker.for.mac.localhost',
+  'port' => 33306,
   'username' => getenv('EUSDB_USER'),
   'password' => getenv('EUSDB_PASSWORD'),
   'database' => getenv('EUSDB_NAME'),

@@ -86,7 +86,6 @@ class Ajax extends Baseline_api_controller
         if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
             $post_info = json_decode($http_raw_post_data, true);
-            // $post_info = $post_info[0];
             $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : false;
             $group_info = $this->gm->make_new_group($object_type, $this->user_id, $group_name);
             if ($group_info && is_array($group_info)) {

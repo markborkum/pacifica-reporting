@@ -12,7 +12,7 @@
 ?>
 <?php foreach($categorized_results as $category => $type_items): ?>
   <?php $category = strtolower(trim($category)); ?>
-<ul id='<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results' class="search_results_list">
+<ul id="<?= $object_type ?>_<?= strtolower(str_replace(' ','_',trim($category))) ?>_search_results" class="search_results_list">
   <div class="search_results_header">
     <?= $category ?>
   </div>
@@ -21,13 +21,13 @@
   <li>
     <input type="checkbox" class='object_selection_checkbox' id="instrument_id_<?= $object_id ?>" <?= $checked ?>name="instrument_id_<?= $object_id ?>" />
     <input type="hidden" class="item_category" value="<?= $category ?>" />
-    <label for='instrument_id_<?= $object_id ?>'><?= $object_info['display_name'] ?></label>
+    <label for="instrument_id_<?= $object_id ?>"><?= $object_info['display_name'] ?></label>
   </li>
   <?php endforeach; ?>
 </ul>
 <?php endforeach; ?>
 <?php if(!empty($js)): ?>
-<script type='text/javascript'>
+<script type="text/javascript">
 //<![CDATA[
   <?= $js ?>
 //]]>
