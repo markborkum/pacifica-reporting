@@ -58,6 +58,7 @@ class Group_info_model extends CI_Model
         $this->load->helper(array('item'));
         // $this->load->library('EUS', '', 'eus');
         $this->debug = $this->config->item('debug_enabled');
+        $this->load->database('default');
         $this->load->library('PHPRequests');
         $this->metadata_url_base = $this->config->item('metadata_server_base_url');
         $this->policy_url_base = $this->config->item('policy_server_base_url');

@@ -1,28 +1,28 @@
 version: '3.3'
 services:
 # Nginx proxy pass frontends
-  proxyfrontend:
+    proxyfrontend:
     container_name: reporting_proxyfrontend
-    build:
-      context: .
-      dockerfile: Dockerfile.proxy
-    links:
-      - uploadstatus:statusbackend
-      - reporting:reportingbackend
-      - archiveinterface:archiveinterface
-      - proxyserver:proxyserver
-    ports:
-      - 80:80
-      - 443:443
-    environment:
-      UPLOAD_STATUS_ADDR: statusbackend
-      UPLOAD_STATUS_PORT: 80
-      REPORTING_ADDR: reportingbackend
-      REPORTING_PORT: 80
-      FILE_REDIRECT_ADDR: archiveinterface
-      FILE_REDIRECT_PORT: 8080
-      PROXY_ADDR: proxyserver
-      PROXY_PORT: 8180
+        build:
+            context: .
+            dockerfile: Dockerfile.proxy
+        links:
+            - uploadstatus:statusbackend
+            - reporting:reportingbackend
+            - archiveinterface:archiveinterface
+            - proxyserver:proxyserver
+        ports:
+            - 80:80
+            - 443:443
+        environment:
+            UPLOAD_STATUS_ADDR: statusbackend
+            UPLOAD_STATUS_PORT: 80
+            REPORTING_ADDR: reportingbackend
+            REPORTING_PORT: 80
+            FILE_REDIRECT_ADDR: archiveinterface
+            FILE_REDIRECT_PORT: 8080
+            PROXY_ADDR: proxyserver
+            PROXY_PORT: 8180
 
 
 
@@ -37,95 +37,95 @@ services:
 
 
 
-  archiveinterface:
-    image: pacifica/archiveinterface
+    archiveinterface:
+        image: pacifica/archiveinterface
     container_name: reporting_archiveinterface
-    ports:
-      - 8080:8080
-    volumes:
-      # - /srv:/srv
-      - /Users/d3k857/Downloads/srv:/srv
+        ports:
+            - 8080:8080
+        volumes:
+            # - /srv:/srv
+            - /Users/d3k857/Downloads/srv:/srv
 
-  proxyserver:
+    proxyserver:
     container_name: reporting_proxyserver
-    build:
-      context: ../proxy
-    links:
-      - metadataserver:metadata
-      - archiveinterface:archiveinterface
-    ports:
-      - 8180:8180
-    environment:
-      NGINX_ACCEL: 'True'
-      METADATA_PORT: tcp://metadata:8121
-      ARCHIVEI_PORT: tcp://archiveinterface:8080
+        build:
+            context: ../proxy
+        links:
+            - metadataserver:metadata
+            - archiveinterface:archiveinterface
+        ports:
+            - 8180:8180
+        environment:
+            NGINX_ACCEL: 'True'
+            METADATA_PORT: tcp://metadata:8121
+            ARCHIVEI_PORT: tcp://archiveinterface:8080
 
-  # Reporting services
-  reporting:
-    container_name: reporting
-    build:
-      context: .
-    volumes:
-      - ./:/var/www/html
-    links:
-      - metadataserver:metadata
-      - policyserver:policy
-      - reportingprefsdb:prefsdb
-    environment:
-      METADATA_PORT: tcp://metadata:8121
-      POLICY_PORT: tcp://policy:8181
-      PREFSDB_ADDR: prefsdb
-      PREFSDB_PORT: 5432
-      PREFSDB_USER: pacifica
-      PREFSDB_PASSWORD: pacifica
-      PREFSDB_DB_NAME: pacifica_reporting
-      SITE_NAME: reporting.local
+    # Reporting services
+    reporting:
+        container_name: reporting
+        build:
+            context: .
+        volumes:
+            - ./:/var/www/html
+        links:
+            - metadataserver:metadata
+            - policyserver:policy
+            - reportingprefsdb:prefsdb
+        environment:
+            METADATA_PORT: tcp://metadata:8121
+            POLICY_PORT: tcp://policy:8181
+            PREFSDB_ADDR: prefsdb
+            PREFSDB_PORT: 5432
+            PREFSDB_USER: pacifica
+            PREFSDB_PASSWORD: pacifica
+            PREFSDB_DB_NAME: pacifica_reporting
+            SITE_NAME: reporting.local
       EUSDB_ADDR: mysql
       EUSDB_PORT: 3306
       EUSDB_NAME: ERSUPPLAY
       EUSDB_USER: ersup_play
       EUSDB_PASSWORD: play
 
-  uploadstatus:
+    uploadstatus:
     container_name: reporting_uploadstatus
-    build:
-      context: ../upload-status
-      dockerfile: Dockerfile.dev
-    volumes:
+        build:
+            context: ../upload-status
+            dockerfile: Dockerfile.dev
+        volumes:
       - ../upload-status/:/var/www/html
-    links:
-      - metadataserver:metadata
-      - policyserver:policy
-      - uploadstatusdb:cartdb
-      - archiveinterface:archivei
+        links:
+            - metadataserver:metadata
+            - policyserver:policy
+            - uploadstatusdb:cartdb
+            - archiveinterface:archivei
       - ingestserver:ingest
-    environment:
-      METADATA_PORT: tcp://metadata:8121
-      POLICY_PORT: tcp://policy:8181
-      ARCHIVE_PORT: tcp://archivei:8080
-      CART_PORT: tcp://cart:8081
+        environment:
+            METADATA_PORT: tcp://metadata:8121
+            POLICY_PORT: tcp://policy:8181
+            ARCHIVE_PORT: tcp://archivei:8080
+            CART_PORT: tcp://cart:8081
       INGESTER_PORT: tcp://ingest
-      CARTDB_ADDR: cartdb
-      CARTDB_PORT: 5432
-      CARTDB_USER: pacifica
-      CARTDB_PASSWORD: pacifica
-      CARTDB_DB_NAME: pacifica_upload_status
-      CARTDB_DBDRIVER: postgre
-      CART_DOWNLOAD_PORT: tcp://cartng.emsl.pnl.gov:8443
-      FILE_DOWNLOAD_PORT: tcp://filesng.emsl.pnl.gov:8443
-      SITE_NAME: status.local
+            CARTDB_ADDR: cartdb
+            CARTDB_PORT: 5432
+            CARTDB_USER: pacifica
+            CARTDB_PASSWORD: pacifica
+            CARTDB_DB_NAME: pacifica_upload_status
+            CARTDB_DBDRIVER: postgre
+            CART_DOWNLOAD_PORT: tcp://cartng.emsl.pnl.gov:8443
+            FILE_DOWNLOAD_PORT: tcp://filesng.emsl.pnl.gov:8443
+            SITE_NAME: status.local
     ports:
         - 9001:9001
 
-  uploadstatusdb:
+    uploadstatusdb:
     container_name: reporting_uploadstatusdb
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: pacifica
-      POSTGRES_DB: pacifica_upload_status
-      POSTGRES_USER: pacifica
-    ports:
-      - 45432:5432
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: pacifica
+            POSTGRES_DB: pacifica_upload_status
+            POSTGRES_USER: pacifica
+        ports:
+            - 45432:5432
 
   # mysql:
   #   container_name: reporting_mysqldb
@@ -179,30 +179,30 @@ services:
     ports:
       - 5432:5432
 
-  metadataserver:
+    metadataserver:
     # image: pacifica/metadata
-    build:
-        context: ../metadata
+        build:
+            context: ../metadata
     container_name: reporting_metadataserver
-    links:
-      - metadatadb:postgres
+        links:
+            - metadatadb:postgres
       - elasticdb:elasticdb
-    ports:
-      - 8121:8121
-    environment:
-      ELASTICDB_PORT: tcp://elasticdb:9200
-      POSTGRES_ENV_POSTGRES_DB: pacifica_metadata
-      POSTGRES_ENV_POSTGRES_USER: pacifica
-      POSTGRES_PORT_5432_TCP_ADDR: postgres
-      POSTGRES_PORT_5432_TCP_PORT: 5432
-      POSTGRES_ENV_POSTGRES_PASSWORD: pacifica
+        ports:
+            - 8121:8121
+        environment:
+            ELASTICDB_PORT: tcp://elasticdb:9200
+            POSTGRES_ENV_POSTGRES_DB: pacifica_metadata
+            POSTGRES_ENV_POSTGRES_USER: pacifica
+            POSTGRES_PORT_5432_TCP_ADDR: postgres
+            POSTGRES_PORT_5432_TCP_PORT: 5432
+            POSTGRES_ENV_POSTGRES_PASSWORD: pacifica
 
   reportingprefsdb:
     container_name: reporting_prefsdb
-    image: postgres
-    environment:
-      POSTGRES_PASSWORD: pacifica
+        image: postgres
+        environment:
+            POSTGRES_PASSWORD: pacifica
       POSTGRES_DB: pacifica_reporting
-      POSTGRES_USER: pacifica
-    ports:
+            POSTGRES_USER: pacifica
+        ports:
       - 55432:5432
