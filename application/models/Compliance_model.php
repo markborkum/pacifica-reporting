@@ -54,7 +54,7 @@ class Compliance_model extends CI_Model
         $this->metadata_url_base = $this->config->item('metadata_server_base_url');
         $this->policy_url_base = $this->config->item('policy_server_base_url');
         $this->content_type = "application/json";
-        $this->eusDB = $this->load->database('eus', TRUE);
+        $this->eusDB = $this->load->database('eus', true);
         $this->instrument_cache = array();
         $this->instrument_group_cache = array();
         $this->proposal_cache = array();
@@ -72,11 +72,11 @@ class Compliance_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function retrieve_uploads_for_object_list($object_type, $id_list, $start_time_obj = FALSE, $end_time_obj = FALSE)
+    public function retrieve_uploads_for_object_list($object_type, $id_list, $start_time_obj = false, $end_time_obj = false)
     {
         $allowed_object_types = array('instrument', 'proposal');
-        if(!in_array($object_type, $allowed_object_types)) {
-            return FALSE;
+        if (!in_array($object_type, $allowed_object_types)) {
+            return false;
         }
 
         $json_blob = array(
@@ -94,8 +94,8 @@ class Compliance_model extends CI_Model
             json_encode($json_blob),
             array('timeout' => 120)
         );
-        if($query->success) {
-            return json_decode($query->body, TRUE);
+        if ($query->success) {
+            return json_decode($query->body, true);
         }
         return array();
     }
@@ -136,9 +136,9 @@ class Compliance_model extends CI_Model
         );
         $instrument_group_lookup = array();
 
-        foreach($query->result() as $row){
+        foreach ($query->result() as $row) {
             $inst_id = intval($row->instrument_id);
-            if(!array_key_exists($inst_id, $instrument_group_lookup)) {
+            if (!array_key_exists($inst_id, $instrument_group_lookup)) {
                 $group_id = $this->get_group_id($inst_id);
                 $instrument_group_lookup[$inst_id] = $group_id;
             }
@@ -162,14 +162,14 @@ class Compliance_model extends CI_Model
         }
 
         $ungrouped = $usage['by_proposal'];
-        foreach($ungrouped as $proposal_id => $inst_entries){
+        foreach ($ungrouped as $proposal_id => $inst_entries) {
             $new_entry = array();
-            foreach($inst_entries as $inst_id => $entry){
-                if(empty($new_entry)) {
+            foreach ($inst_entries as $inst_id => $entry) {
+                if (empty($new_entry)) {
                     $new_entry = $entry;
                     $new_entry['instruments_scheduled'] = array($new_entry['instrument_id']);
                     unset($new_entry['instrument_id']);
-                }else{
+                } else {
                     $new_entry['booking_count'] += $entry['booking_count'];
                     $new_entry['instruments_scheduled'][] = $entry['instrument_id'];
                     $new_entry['date_start'] = $entry['date_start'] < $new_entry['date_start']
@@ -201,9 +201,9 @@ class Compliance_model extends CI_Model
         $group_id_list = array();
         $group_retrieval_url .= http_build_query($url_args_array, '', '&');
         $query = Requests::get($group_retrieval_url, array('Accept' => 'application/json'));
-        if($query->status_code == 200 && $query->body != '[]') {
-            $results = json_decode($query->body, TRUE);
-            foreach($results as $inst_entry){
+        if ($query->status_code == 200 && $query->body != '[]') {
+            $results = json_decode($query->body, true);
+            foreach ($results as $inst_entry) {
                 $group_id_list[$inst_entry['instrument_id']] = $inst_entry['group_id'];
             }
         }
@@ -222,7 +222,7 @@ class Compliance_model extends CI_Model
      */
     public function get_group_id($instrument_id)
     {
-        if(array_key_exists($instrument_id, $this->instrument_group_cache)) {
+        if (array_key_exists($instrument_id, $this->instrument_group_cache)) {
             return $this->instrument_group_cache[$instrument_id];
         }
         $group_retrieval_url = "{$this->metadata_url_base}/instrument_group?";
@@ -233,8 +233,8 @@ class Compliance_model extends CI_Model
         $group_id = 0;
         $group_retrieval_url .= http_build_query($url_args_array, '', '&');
         $query = Requests::get($group_retrieval_url, array('Accept' => 'application/json'));
-        if($query->status_code == 200 && $query->body != '[]') {
-            $results = json_decode($query->body, TRUE);
+        if ($query->status_code == 200 && $query->body != '[]') {
+            $results = json_decode($query->body, true);
             $inst_entry = array_shift($results);
             $group_id = $inst_entry['group_id'];
             $this->instrument_group_cache[$instrument_id] = $group_id;
@@ -254,9 +254,9 @@ class Compliance_model extends CI_Model
         $group_list = array();
         $group_retrieval_url = "{$this->metadata_url_base}/groups";
         $query = Requests::get($group_retrieval_url, array('Accept' => 'application/json'));
-        if($query->status_code == 200 && $query->body != '[]') {
-            $results = json_decode($query->body, TRUE);
-            foreach($results as $group_entry){
+        if ($query->status_code == 200 && $query->body != '[]') {
+            $results = json_decode($query->body, true);
+            foreach ($results as $group_entry) {
                 $group_list[$group_entry['_id']] = $group_entry['name'];
             }
         }
@@ -275,7 +275,7 @@ class Compliance_model extends CI_Model
      */
     public function get_proposal_name($proposal_id)
     {
-        if(array_key_exists($proposal_id, $this->proposal_cache)) {
+        if (array_key_exists($proposal_id, $this->proposal_cache)) {
             return $this->proposal_cache[$proposal_id];
         }
         $proposal_url = "{$this->metadata_url_base}/proposals?";
@@ -286,8 +286,8 @@ class Compliance_model extends CI_Model
         $proposal_name = "Unknown Proposal {$proposal_id}";
         $proposal_url .= http_build_query($url_args_array, '', '&');
         $query = Requests::get($proposal_url, array('Accept' => 'application/json'));
-        if($query->status_code == 200 && $query->body != '[]') {
-            $results = json_decode($query->body, TRUE);
+        if ($query->status_code == 200 && $query->body != '[]') {
+            $results = json_decode($query->body, true);
             $proposal_entry = array_shift($results);
             $proposal_name = $proposal_entry['title'];
             $this->proposal_cache[$proposal_id] = $proposal_name;
@@ -306,7 +306,7 @@ class Compliance_model extends CI_Model
      */
     public function get_instrument_name($instrument_id)
     {
-        if(array_key_exists($instrument_id, $this->instrument_cache)) {
+        if (array_key_exists($instrument_id, $this->instrument_cache)) {
             return $this->instrument_cache[$instrument_id];
         }
         $instrument_url = "{$this->metadata_url_base}/instruments?";
@@ -317,8 +317,8 @@ class Compliance_model extends CI_Model
         $instrument_name = "Unknown Instrument {$instrument_id}";
         $instrument_url .= http_build_query($url_args_array, '', '&');
         $query = Requests::get($instrument_url, array('Accept' => 'application/json'));
-        if($query->status_code == 200 && $query->body != '[]') {
-            $results = json_decode($query->body, TRUE);
+        if ($query->status_code == 200 && $query->body != '[]') {
+            $results = json_decode($query->body, true);
             $instrument_entry = array_shift($results);
             $instrument_name = $instrument_entry['name_short'];
             $this->instrument_cache[$instrument_id] = $instrument_name;
@@ -345,9 +345,9 @@ class Compliance_model extends CI_Model
         );
         $instruments_retrieval_url .= http_build_query($url_args_array, '', '&');
         $inst_query = Requests::get($instruments_retrieval_url, array('Accept' => 'application/json'));
-        if($inst_query->status_code == 200) {
-            $inst_results = json_decode($inst_query->body, TRUE);
-            foreach($inst_results as $entry){
+        if ($inst_query->status_code == 200) {
+            $inst_results = json_decode($inst_query->body, true);
+            foreach ($inst_results as $entry) {
                 $instrument_list[] = $entry['instrument_id'];
             }
         }
@@ -367,10 +367,11 @@ class Compliance_model extends CI_Model
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function cross_reference_bookings_and_data(
-        $object_type, $eus_object_type_records,
-        $start_time, $end_time
-    )
-    {
+        $object_type,
+        $eus_object_type_records,
+        $start_time,
+        $end_time
+    ) {
         $object_list = $eus_object_type_records["by_{$object_type}"];
         $inst_group_list = $eus_object_type_records["instrument_group_compilation"];
         $group_name_lookup = $this->get_group_name_lookup();
@@ -389,22 +390,22 @@ class Compliance_model extends CI_Model
         $url = "{$this->metadata_url_base}/transactioninfo/multisearch?";
         $url .= http_build_query($url_args_array, '', '&');
         $transactions_list_query = Requests::get($url, array('Accept' => 'application/json'));
-        if($transactions_list_query->status_code == 200) {
-            $transactions_list = json_decode($transactions_list_query->body, TRUE);
+        if ($transactions_list_query->status_code == 200) {
+            $transactions_list = json_decode($transactions_list_query->body, true);
             $stats_template = array(
                 'booking_count' => 0,
                 'data_file_count' => 0,
                 'instruments_scheduled' => array(),
                 'transaction_list' => array()
             );
-            foreach($transactions_list as $transaction_id => $trans_info){
+            foreach ($transactions_list as $transaction_id => $trans_info) {
                 // $my_group_id = $this->get_group_id($trans_info['instrument_id']);
                 $proposal_id = strval($trans_info['proposal_id']);
                 $instrument_id = intval($trans_info['instrument_id']);
-                if(!array_key_exists($proposal_id, $booking_stats_cache)) {
+                if (!array_key_exists($proposal_id, $booking_stats_cache)) {
                     $booking_stats_cache[$proposal_id] = array();
                 }
-                if(!array_key_exists($instrument_id, $booking_stats_cache)) {
+                if (!array_key_exists($instrument_id, $booking_stats_cache)) {
                     $booking_stats_cache[$proposal_id][$instrument_id] = $stats_template;
                 }
                 $booking_stats_cache[$proposal_id][$instrument_id]['data_file_count']
@@ -418,8 +419,8 @@ class Compliance_model extends CI_Model
             }
         }
 
-        foreach($object_list as $proposal_id => $inst_id_list){
-            foreach($inst_id_list as $inst_id => $record){
+        foreach ($object_list as $proposal_id => $inst_id_list) {
+            foreach ($inst_id_list as $inst_id => $record) {
                 $inst_group_id = $record['instrument_group_id'];
                 $proposal_id = strval($record['proposal_id']);
                 $earliest_date = clone($record['date_start']);
@@ -429,18 +430,16 @@ class Compliance_model extends CI_Model
                 //check the transaction record for matching entries
                 $eus_objects[$proposal_id][$inst_id]['date_start'] = $record['date_start']->format('Y-m-d');
                 $eus_objects[$proposal_id][$inst_id]['date_finish'] = $record['date_finish']->format('Y-m-d');
-                if(isset($booking_stats_cache[$proposal_id][$inst_id])) {
+                if (isset($booking_stats_cache[$proposal_id][$inst_id])) {
                     $transactions = $booking_stats_cache[$proposal_id][$inst_id]['transaction_list'];
-                    foreach($transactions as $upload_date => $txn_entries){
-                        foreach($txn_entries as $txn_entry){
-                            if($txn_entry['upload_date_obj'] >= $earliest_date && $txn_entry['upload_date_obj'] <= $latest_date) {
+                    foreach ($transactions as $upload_date => $txn_entries) {
+                        foreach ($txn_entries as $txn_entry) {
+                            if ($txn_entry['upload_date_obj'] >= $earliest_date && $txn_entry['upload_date_obj'] <= $latest_date) {
                                 $eus_objects[$proposal_id][$inst_id]['file_count'] += $txn_entry['file_count'];
                             }
                         }
-
                     }
                 }
-
             }
         }
         return $eus_objects;
@@ -460,15 +459,14 @@ class Compliance_model extends CI_Model
             'DATE(MAX(MONTH)) as latest'
         );
         $results_array = array(
-            'earliest' => FALSE,
-            'latest' => FALSE
+            'earliest' => false,
+            'latest' => false
         );
         $query = $this->eusDB->select($column_array)->from("ERS_BOOKING_STATS")->get();
-        if($query && $query->num_rows() > 0) {
+        if ($query && $query->num_rows() > 0) {
             $results = $query->result_array();
             $result = array_pop($results);
         }
         return $result;
     }
-
 }

@@ -24,7 +24,9 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-if (!defined('BASEPATH')) exit('No direct script access allowed');
+if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 
 /**
  * Load JS files as specified
@@ -36,14 +38,14 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  *
  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
-function load_scripts($common_collection, $page_specific_collection = FALSE)
+function load_scripts($common_collection, $page_specific_collection = false)
 {
     $defaults = $common_collection;
-    if($page_specific_collection) {
+    if ($page_specific_collection) {
         $defaults = array_merge($defaults, $page_specific_collection);
     }
     $output_array = array();
-    foreach($defaults as $scriptfile){
+    foreach ($defaults as $scriptfile) {
         $output_array[] = "<script type=\"text/javascript\" src=\"{$scriptfile}\"></script>";
     }
     return implode("\n", $output_array)."\n\n";
@@ -60,25 +62,25 @@ function load_scripts($common_collection, $page_specific_collection = FALSE)
   *
   * @author Ken Auberry <kenneth.auberry@pnnl.gov>
   */
-function load_stylesheets($common_collection, $page_specific_collection = FALSE)
+function load_stylesheets($common_collection, $page_specific_collection = false)
 {
     $CI =& get_instance();
     $my_theme = $CI->config->item('theme_name');
     $defaults = $common_collection;
-    if($page_specific_collection) {
+    if ($page_specific_collection) {
         $defaults = array_merge($defaults, $page_specific_collection);
     }
     $theme_dir_array = array("resources", "stylesheets", "themes", $my_theme);
     $theme_url_path_array = array("project_resources", "stylesheets", "themes", $my_theme);
     $theme_path = APPPATH . implode(DIRECTORY_SEPARATOR, $theme_dir_array) . DIRECTORY_SEPARATOR;
-    if(is_dir($theme_path)) {
-        foreach(glob($theme_path . "*.css") as $theme_file){
+    if (is_dir($theme_path)) {
+        foreach (glob($theme_path . "*.css") as $theme_file) {
             $defaults[] = "/". implode("/", $theme_url_path_array) . "/" . basename($theme_file);
         }
     }
 
     $output_array = array();
-    foreach($defaults as $stylesheet){
+    foreach ($defaults as $stylesheet) {
         $output_array[] = "<link rel=\"stylesheet\" type=\"text/css\" href=\"{$stylesheet}\" />";
     }
     return implode("\n", $output_array)."\n\n";

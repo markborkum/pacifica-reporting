@@ -25,7 +25,9 @@
  *
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
- if (!defined('BASEPATH')) exit('No direct script access allowed');
+if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 
 /**
  *  Recursively construct the proper HTML
@@ -74,7 +76,7 @@ function format_folder_object_json($folder_obj, $folder_name)
 
     if (array_key_exists('folders', $folder_obj)) {
         foreach ($folder_obj['folders'] as $folder_entry => $folder_tree) {
-            $folder_output = array('title' => $folder_entry, 'folder' => TRUE);
+            $folder_output = array('title' => $folder_entry, 'folder' => true);
             $children = format_folder_object_json($folder_tree, $folder_entry);
             if (!empty($children)) {
                 foreach ($children as $child) {

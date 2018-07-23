@@ -25,7 +25,7 @@
  *
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 ?>
 An uncaught Exception was encountered
 
@@ -34,10 +34,9 @@ Message:     <?php echo $message, "\n"; ?>
 Filename:    <?php echo $exception->getFile(), "\n"; ?>
 Line Number: <?php echo $exception->getLine(); ?>
 
-<?php if (defined('SHOW_DEBUG_BACKTRACE') && SHOW_DEBUG_BACKTRACE === TRUE) : ?>
-
+<?php if (defined('SHOW_DEBUG_BACKTRACE') && SHOW_DEBUG_BACKTRACE === true) : ?>
 Backtrace:
-<?php	foreach ($exception->getTrace() as $error): ?>
+<?php	foreach ($exception->getTrace() as $error) : ?>
 <?php	    if (isset($error['file']) && strpos($error['file'], realpath(BASEPATH)) !== 0) : ?>
     File: <?php echo $error['file'], "\n"; ?>
     Line: <?php echo $error['line'], "\n"; ?>

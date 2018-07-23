@@ -26,7 +26,8 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-if(!defined('BASEPATH')) { exit('No direct script access allowed');
+if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
 }
 
 /**
@@ -42,15 +43,15 @@ if(!defined('BASEPATH')) { exit('No direct script access allowed');
 function get_user_details_myemsl($eus_id)
 {
     $CI =& get_instance();
-    $results = FALSE;
+    $results = false;
     $users_table = "users";
-    $DB_eus = $CI->load->database('eus_for_myemsl', TRUE);
+    $DB_eus = $CI->load->database('eus_for_myemsl', true);
 
     $select_array = array('person_id', 'first_name','last_name', 'email_address', 'network_id', 'emsl_employee');
 
     $query = $DB_eus->select($select_array)->get_where($users_table, array('person_id' => $eus_id), 1);
 
-    if($query && $query->num_rows() > 0) {
+    if ($query && $query->num_rows() > 0) {
         $results = $query->row_array();
     }
     return $results;
@@ -71,7 +72,7 @@ function read_myemsl_config_file($file_specifier = 'general')
 {
     $CI =& get_instance();
     $ini_path = $CI->config->item('application_config_file_path');
-    $ini_items = parse_ini_file("{$ini_path}{$file_specifier}.ini", TRUE);
+    $ini_items = parse_ini_file("{$ini_path}{$file_specifier}.ini", true);
     return $ini_items;
 }
 
@@ -88,7 +89,7 @@ function read_myemsl_config_file($file_specifier = 'general')
  *
  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
-function generate_cart_token($item_list,$eus_person_id)
+function generate_cart_token($item_list, $eus_person_id)
 {
     $uuid = "huYNwptYEeGzDAAmucepzw";
     $duration = 3600;
@@ -120,5 +121,4 @@ function generate_cart_token($item_list,$eus_person_id)
     $cart_token_b64 = base64_encode($cart_token);
 
     return $cart_token_b64;
-
 }

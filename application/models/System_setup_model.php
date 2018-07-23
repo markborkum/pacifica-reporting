@@ -56,7 +56,6 @@ class System_setup_model extends CI_Model
             $this->output->set_status_header(500);
         }
         $this->global_try_count = 0;
-
     }
 
     /**
@@ -70,18 +69,18 @@ class System_setup_model extends CI_Model
      */
     private function _check_and_create_database($db_name)
     {
-        if($this->db->platform() != 'sqlite3') {
-            if(!$this->dbutil->database_exists($db_name)) {
+        if ($this->db->platform() != 'sqlite3') {
+            if (!$this->dbutil->database_exists($db_name)) {
                 log_message('info', 'Attempting to create database structure...');
                 //db doesn't already exist, so make it
-                if($this->dbforge->create_database($db_name)) {
+                if ($this->dbforge->create_database($db_name)) {
                     log_message('info', "Created {$db_name} database instance");
-                }else{
+                } else {
                     log_message('error', "Could not create database instance.");
                     $this->output->set_status_header(500);
                 }
             }
-        }else{
+        } else {
             log_message('info', 'DB Type is sqlite3, so we don\'t have to explicitly make the db file');
         }
     }
@@ -158,8 +157,8 @@ class System_setup_model extends CI_Model
                 'reporting_object_groups' => array(
                     'group_id' => array(
                         'type' => 'INTEGER',
-                        'auto_increment' => TRUE,
-                        'unsigned' => TRUE
+                        'auto_increment' => true,
+                        'unsigned' => true
                     ),
                     'person_id' => array(
                         'type' => 'INTEGER'
@@ -183,7 +182,7 @@ class System_setup_model extends CI_Model
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',
-                        'null' => TRUE
+                        'null' => true
                     )
                 ),
                 'reporting_selection_prefs' => array(
@@ -209,7 +208,7 @@ class System_setup_model extends CI_Model
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',
-                        'null' => TRUE
+                        'null' => true
                     )
                 ),
                 'reporting_object_group_option_defaults' => array(
@@ -228,7 +227,7 @@ class System_setup_model extends CI_Model
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',
-                        'null' => TRUE
+                        'null' => true
                     )
                 ),
                 'reporting_object_group_options' => array(
@@ -250,24 +249,24 @@ class System_setup_model extends CI_Model
                     ),
                     'deleted' => array(
                         'type' => 'TIMESTAMP',
-                        'null' => TRUE
+                        'null' => true
                     )
                 )
             )
         );
 
-        foreach($db_create_object['tables'] as $table_name => $table_def){
-            if(!$this->_table_exists($table_name)) {
+        foreach ($db_create_object['tables'] as $table_name => $table_def) {
+            if (!$this->_table_exists($table_name)) {
                 $this->dbforge->add_field($table_def);
-                if(array_key_exists($table_name, $db_create_object['keys'])) {
-                    foreach($db_create_object['keys'][$table_name] as $key){
-                        $this->dbforge->add_key($key, TRUE);
+                if (array_key_exists($table_name, $db_create_object['keys'])) {
+                    foreach ($db_create_object['keys'][$table_name] as $key) {
+                        $this->dbforge->add_key($key, true);
                     }
                 }
-                if($this->dbforge->create_table($table_name)) {
+                if ($this->dbforge->create_table($table_name)) {
                     log_message("info", "Created '{$table_name}' table...");
                 }
-                if(array_key_exists($table_name, $db_create_object['defaults'])) {
+                if (array_key_exists($table_name, $db_create_object['defaults'])) {
                     $this->db->insert_batch($table_name, $db_create_object['defaults'][$table_name]);
                 }
             }
@@ -276,5 +275,4 @@ class System_setup_model extends CI_Model
             touch($this->phpfpm_log_dir."/db_create_completed.txt");
         }
     }
-
 }

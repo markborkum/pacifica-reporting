@@ -52,7 +52,7 @@ class Myemsl_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    function __construct()
+    public function __construct()
     {
         parent::__construct();
         $this->load->helper('myemsl');
@@ -69,7 +69,7 @@ class Myemsl_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    function get_user_info()
+    public function get_user_info()
     {
         // $protocol = isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on" ? "https" : "http";
         $protocol = "http";
@@ -77,28 +77,28 @@ class Myemsl_model extends CI_Model
         // $url_base =  dirname(dirname($this->myemsl_ini['getuser']['prefix']));
         $url_base = "{$protocol}://localhost";
         $options  = array(
-                     'verify'          => FALSE,
+                     'verify'          => false,
                      'timeout'         => 60,
                      'connect_timeout' => 30,
                     );
         $headers  = array();
 
-        foreach($_COOKIE as $cookie_name => $cookie_value){
+        foreach ($_COOKIE as $cookie_name => $cookie_value) {
               $headers[] = "{$cookie_name}={$cookie_value}";
         }
 
         $headers = array('Cookie' => implode(';', $headers));
         $session = new Requests_Session($url_base, $headers, array(), $options);
 
-        try{
+        try {
               $response  = $session->get('/myemsl/userinfo');
-              $user_info = json_decode($response->body, TRUE);
-        }catch(Exception $e){
+              $user_info = json_decode($response->body, true);
+        } catch (Exception $e) {
               $user_info = array('error' => 'Unable to retrieve User Information');
               return $user_info;
         }
 
-        $DB_myemsl = $this->load->database('default', TRUE);
+        $DB_myemsl = $this->load->database('default', true);
 
         // go retrieve the instrument/group lookup table
         $DB_myemsl->like('type', 'Instrument.')->or_like('type', 'omics.dms.instrument');
@@ -106,13 +106,13 @@ class Myemsl_model extends CI_Model
 
         $inst_group_lookup = array();
 
-        if($query && $query->num_rows() > 0) {
-            foreach($query->result() as $row){
-                if($row->type == 'omics.dms.instrument') {
+        if ($query && $query->num_rows() > 0) {
+            foreach ($query->result() as $row) {
+                if ($row->type == 'omics.dms.instrument') {
                     $inst_id = intval($row->group_id);
-                }else if(strpos($row->type, 'Instrument.') >= 0) {
+                } else if (strpos($row->type, 'Instrument.') >= 0) {
                     $inst_id = intval(str_replace('Instrument.', '', $row->type));
-                }else{
+                } else {
                     continue;
                 }
 
@@ -122,11 +122,11 @@ class Myemsl_model extends CI_Model
 
         $new_instruments_list = array();
 
-        foreach($user_info['instruments'] as $eus_instrument_id => $inst_info){
+        foreach ($user_info['instruments'] as $eus_instrument_id => $inst_info) {
               $new_instruments_list[$eus_instrument_id] = $inst_info;
-            if(array_key_exists($eus_instrument_id, $inst_group_lookup)) {
+            if (array_key_exists($eus_instrument_id, $inst_group_lookup)) {
                 $new_instruments_list[$eus_instrument_id]['groups'] = $inst_group_lookup[$eus_instrument_id]['groups'];
-            }else{
+            } else {
                 $new_instruments_list[$eus_instrument_id]['groups'] = array();
             }
         }
@@ -134,7 +134,6 @@ class Myemsl_model extends CI_Model
         $user_info['instruments'] = $new_instruments_list;
 
         return $user_info;
-
     }//end get_user_info()
 
     /**
@@ -148,7 +147,7 @@ class Myemsl_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    function get_object_list($object_type, $search_terms, $my_objects = FALSE)
+    public function get_object_list($object_type, $search_terms, $my_objects = false)
     {
         $acceptable_object_types = array(
             'instrument' => 'instruments',
@@ -156,19 +155,19 @@ class Myemsl_model extends CI_Model
             'user' => 'users'
         );
         $results_json = array(
-            'success' => FALSE,
+            'success' => false,
             'message' => '',
             'results' => array()
         );
-        if(!array_key_exists($object_type, $acceptable_object_types)) {
+        if (!array_key_exists($object_type, $acceptable_object_types)) {
             return array();
         }
-        if(is_array($search_terms)) {
+        if (is_array($search_terms)) {
             $search_term_string = implode('+', $search_terms);
-        }else{
+        } else {
             $search_term_string = $search_terms;
         }
-        if($my_objects) {
+        if ($my_objects) {
             $results_json['results'] = $this->get_my_objects_list($object_type, $my_objects);
         }
         $policy_url = "{$this->policy_url_base}/status";
@@ -180,9 +179,9 @@ class Myemsl_model extends CI_Model
         $query_url .= http_build_query($url_args_array, '', '&');
         $query = Requests::get($query_url, array('Accept' => 'application/json'));
         $results_body = $query->body;
-        if($query->status_code == 200) {
-            $results_json['results'] = array_merge($results_json['results'], json_decode($results_body, TRUE));
-            $results_json['success'] = TRUE;
+        if ($query->status_code == 200) {
+            $results_json['results'] = array_merge($results_json['results'], json_decode($results_body, true));
+            $results_json['success'] = true;
         }
         return $results_json;
     }
@@ -197,18 +196,16 @@ class Myemsl_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    function get_my_objects_list($object_type, $id_list)
+    public function get_my_objects_list($object_type, $id_list)
     {
         $metadata_url = "{$this->metadata_url_base}/{$object_type}info/by_{$object_type}_id/";
         $results = array();
-        foreach($id_list as $id){
+        foreach ($id_list as $id) {
             $query = Requests::get($metadata_url.$id, array('Accept' => 'application/json'));
-            if($query->status_code == 200) {
-                $results[] = json_decode($query->body, TRUE);
+            if ($query->status_code == 200) {
+                $results[] = json_decode($query->body, true);
             }
         }
         return $results;
     }
-
-
 }//end class

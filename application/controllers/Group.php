@@ -23,7 +23,7 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 require_once 'Baseline_api_controller.php';
 
 /**
@@ -42,10 +42,8 @@ require_once 'Baseline_api_controller.php';
  * @license BSD https://opensource.org/licenses/BSD-3-Clause
  * @link    http://github.com/EMSL-MSC/Pacifica-reporting
 
- * @uses   Reporting_model
  * @uses   Group_info_model
  * @uses   Summary_model
- * @uses   EUS               EUS Database access library
  * @see    https://github.com/EMSL-MSC/pacifica-reporting
  * @access public
  */
@@ -67,10 +65,8 @@ class Group extends Baseline_api_controller
     public function __construct()
     {
         parent::__construct();
-        // $this->load->model('Reporting_model', 'rep');
         $this->load->model('Group_info_model', 'gm');
         $this->load->model('Summary_api_model', 'summary');
-        // $this->load->library('EUS', '', 'eus');
         $this->load->helper(
             array(
              'network',
@@ -137,12 +133,11 @@ class Group extends Baseline_api_controller
      */
     public function view(
         $object_type,
-        $time_range = FALSE,
-        $start_date = FALSE,
-        $end_date = FALSE,
-        $time_basis = FALSE
-    )
-    {
+        $time_range = false,
+        $start_date = false,
+        $end_date = false,
+        $time_basis = false
+    ) {
 
         $this->benchmark->mark('controller_view_start');
         $object_type           = singular($object_type);
@@ -152,7 +147,7 @@ class Group extends Baseline_api_controller
                                   'proposal',
                                   'user',
                                  );
-        if(!in_array($object_type, $accepted_object_types)) {
+        if (!in_array($object_type, $accepted_object_types)) {
             redirect('group/view/instrument');
         }
 
@@ -185,17 +180,16 @@ class Group extends Baseline_api_controller
 
         if (empty($my_groups)) {
             $this->page_data['content_view'] = 'object_types/select_some_groups_insert.html';
-        }
-        else {
+        } else {
             $this->page_data['my_groups'] = '';
             foreach ($my_groups as $group_id => $group_info) {
-                $my_start_date = FALSE;
-                $my_end_date = FALSE;
+                $my_start_date = false;
+                $my_end_date = false;
                 $options_list = $group_info['options_list'];
                 $my_start_date = strtotime($start_date) ? $start_date : $options_list['start_time'];
-                $my_start_date = $my_start_date !== 0 ? $my_start_date : FALSE;
+                $my_start_date = $my_start_date !== 0 ? $my_start_date : false;
                 $my_end_date = strtotime($end_date) ? $end_date : $options_list['end_time'];
-                $my_end_date = $my_end_date !== 0 ? $my_end_date : FALSE;
+                $my_end_date = $my_end_date !== 0 ? $my_end_date : false;
                 $time_basis = $options_list['time_basis'];
                 $time_range = $time_range ? $time_range : $options_list['time_range'];
 
@@ -203,10 +197,12 @@ class Group extends Baseline_api_controller
                     $this->gm->change_group_option($group_id, 'time_range', $time_range);
                 }
 
-                $update_start = !$my_start_date ? TRUE : FALSE;
-                $update_end = !$my_end_date ? TRUE : FALSE;
+                $update_start = !$my_start_date ? true : false;
+                $update_end = !$my_end_date ? true : false;
                 $valid_date_range = $this->gm->earliest_latest_data_for_list(
-                    $object_type, $group_info['item_list'], $time_basis
+                    $object_type,
+                    $group_info['item_list'],
+                    $time_basis
                 );
                 $my_times = fix_time_range(
                     $time_range,
@@ -272,7 +268,6 @@ class Group extends Baseline_api_controller
         $this->page_data['js'] = "var object_type = '{$object_type}'; var time_range = '{$time_range}';";
         $this->load->view('reporting_view.html', $this->page_data);
         $this->benchmark->mark('controller_view_end');
-
     }
 
     /**
@@ -289,21 +284,19 @@ class Group extends Baseline_api_controller
     {
         if ($this->input->post()) {
             $transaction_list = $this->input->post();
-        }
-        else if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
+        } else if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
-            $transaction_list   = json_decode($http_raw_post_data, TRUE);
+            $transaction_list   = json_decode($http_raw_post_data, true);
         }
-        if($transaction_list) {
+        if ($transaction_list) {
             $results = $this->summary->detailed_transaction_list($transaction_list);
             $this->page_data['transaction_info'] = $results;
             $this->page_data['status_site_base_url'] = $this->status_site_base_url;
 
             $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
-        }else{
+        } else {
             echo "";
         }
-
     }
 
     /**
@@ -323,16 +316,24 @@ class Group extends Baseline_api_controller
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function get_reporting_info_list(
-        $object_type, $group_id, $time_basis = FALSE,
-        $time_range = FALSE, $start_date = FALSE,
-        $end_date = FALSE, $with_timeline = TRUE
-    )
-    {
+        $object_type,
+        $group_id,
+        $time_basis = false,
+        $time_range = false,
+        $start_date = false,
+        $end_date = false,
+        $with_timeline = true
+    ) {
         $this->_get_reporting_info_list_base(
-            $object_type, $group_id, $time_basis, $time_range,
-            $start_date, $end_date, TRUE, FALSE
+            $object_type,
+            $group_id,
+            $time_basis,
+            $time_range,
+            $start_date,
+            $end_date,
+            true,
+            false
         );
-
     }
 
     /**
@@ -350,16 +351,23 @@ class Group extends Baseline_api_controller
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     public function get_reporting_info_list_no_timeline(
-        $object_type, $group_id, $time_basis = FALSE,
-        $time_range = FALSE, $start_date = FALSE,
-        $end_date = FALSE
-    )
-    {
+        $object_type,
+        $group_id,
+        $time_basis = false,
+        $time_range = false,
+        $start_date = false,
+        $end_date = false
+    ) {
         $this->_get_reporting_info_list_base(
-            $object_type, $group_id, $time_basis, $time_range,
-            $start_date, $end_date, FALSE, FALSE
+            $object_type,
+            $group_id,
+            $time_basis,
+            $time_range,
+            $start_date,
+            $end_date,
+            false,
+            false
         );
-
     }//end get_reporting_info_list_no_timeline()
 
     /**
@@ -379,11 +387,15 @@ class Group extends Baseline_api_controller
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
     private function _get_reporting_info_list_base(
-        $object_type, $group_id, $time_basis, $time_range,
-        $start_date = FALSE, $end_date = FALSE, $with_timeline = TRUE,
-        $full_object = FALSE
-    )
-    {
+        $object_type,
+        $group_id,
+        $time_basis,
+        $time_range,
+        $start_date = false,
+        $end_date = false,
+        $with_timeline = true,
+        $full_object = false
+    ) {
         $this->benchmark->mark('get_group_info_start');
         $group_info = $this->gm->get_group_info($group_id);
         $this->benchmark->mark('get_group_info_end');
@@ -393,8 +405,7 @@ class Group extends Baseline_api_controller
         $available_time_range = $group_info['time_list'];
         if ($time_range && $time_range !== $options_list['time_range']) {
             $this->gm->change_group_option($group_id, 'time_range', $time_range);
-        }
-        else {
+        } else {
             $time_range = $options_list['time_range'];
         }
         $time_basis = !$time_basis ? $options_list['time_basis'] : $time_basis;
@@ -407,7 +418,7 @@ class Group extends Baseline_api_controller
         $this->page_data['object_type']            = $object_type;
         $this->page_data['group_id'] = $group_id;
 
-        $latest_data          = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : FALSE;
+        $latest_data          = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : false;
 
         if (!$latest_data) {
             $this->page_data['results_message'] = 'No Data Available for this group of '.plural(ucwords($object_type));
@@ -451,17 +462,14 @@ class Group extends Baseline_api_controller
                           'latest_available_object'   => $latest_available_object,
                           'message'                   => '<p>Using '.$end_date_object->format('Y-m-d').' as the new origin time</p>',
                          );
-            }
-            else {
+            } else {
                 $time_range = '1 week';
                 $times      = time_range_to_date_pair($time_range, $available_time_range);
             }//end if
-        }
-        else {
+        } else {
             if (($valid_st || $valid_et) && !($valid_st && $valid_et)) {
                 $times = time_range_to_date_pair($time_range, $available_time_range, $start_date, $end_date);
-            }
-            else {
+            } else {
                 $times = time_range_to_date_pair($time_range, $available_time_range);
             }
         }//end if
@@ -476,7 +484,12 @@ class Group extends Baseline_api_controller
         //     $object_id_list, $start_date, $end_date, $with_timeline, $time_basis
         // );
         $transaction_info = $this->summary->summarize_uploads(
-            $object_type, $object_id_list, $start_date, $end_date, $with_timeline, $time_basis
+            $object_type,
+            $object_id_list,
+            $start_date,
+            $end_date,
+            $with_timeline,
+            $time_basis
         );
         // unset($transaction_info['transaction_list']);
         $this->page_data['transaction_info'] = $transaction_info;
@@ -486,11 +499,9 @@ class Group extends Baseline_api_controller
 
         if ($with_timeline) {
             $this->load->view('object_types/group_body_insert.html', $this->page_data);
-        }
-        else {
+        } else {
             $this->load->view('object_types/group_pie_scripts_insert.html', $this->page_data);
         }
-
     }//end _get_reporting_info_list_base()
 
 
@@ -507,14 +518,18 @@ class Group extends Baseline_api_controller
     public function get_group_timeline_data($object_type, $group_id, $start_date, $end_date)
     {
         if (!in_array($object_type, $this->accepted_object_types)) {
-            return FALSE;
+            return false;
         }
 
         $group_info = $this->gm->get_group_info($group_id);
 
         $object_list    = $group_info['item_list'];
         $results        = $this->summary->summarize_uploads(
-            $object_type, $object_list, $start_date, $end_date, TRUE,
+            $object_type,
+            $object_list,
+            $start_date,
+            $end_date,
+            true,
             $group_info['options_list']['time_basis']
         );
         $downselect     = $results['day_graph']['by_date'];
@@ -527,7 +542,6 @@ class Group extends Baseline_api_controller
         $this->gm->change_group_option($group_id, 'start_time', $start_date_obj->format('Y-m-d'));
         $this->gm->change_group_option($group_id, 'end_time', $end_date_obj->format('Y-m-d'));
         transmit_array_with_json_header($return_array);
-
     }//end get_group_timeline_data()
 
 
@@ -547,6 +561,5 @@ class Group extends Baseline_api_controller
     {
         $results = $this->eus->get_proposals_by_name($proposal_name_fragment, $active);
         transmit_array_with_json_header($results);
-
     }//end get_proposals()
 }//end class

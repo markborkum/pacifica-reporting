@@ -26,7 +26,9 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-if (!defined('BASEPATH')) exit('No direct script access allowed');
+if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 
 /**
  *  Takes a given array object and formats it as
@@ -42,7 +44,7 @@ if (!defined('BASEPATH')) exit('No direct script access allowed');
  *
  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
-function transmit_array_with_json_header($response, $statusMessage = '', $operationSuccessful = TRUE)
+function transmit_array_with_json_header($response, $statusMessage = '', $operationSuccessful = true)
 {
     header("Content-type: text/json");
     $headerArray = array();
@@ -52,9 +54,9 @@ function transmit_array_with_json_header($response, $statusMessage = '', $operat
 
     $response = !is_array($response) ? array('results' => $response) : $response;
 
-    if(is_array($response) && sizeof($response) > 0) {
+    if (is_array($response) && sizeof($response) > 0) {
         print(json_encode($response));
-    }else{
+    } else {
         print("0");
     }
 }
@@ -76,18 +78,17 @@ function format_array_for_select2($response)
 
     $results = array();
 
-    foreach($response['items'] as $id => $text){
+    foreach ($response['items'] as $id => $text) {
         $results[] = array('id' => $id, 'text' => $text);
     }
 
     $ret_object = array(
     'total_count' => sizeof($results),
-        'incomplete_results' => $results ? FALSE : TRUE,
+        'incomplete_results' => $results ? false : true,
     'items' => $results
     );
 
     print(json_encode($ret_object));
-
 }
 
 /**
@@ -104,7 +105,7 @@ function format_array_for_select2($response)
  */
 function shorten_string($text, $maxchars)
 {
-    if(strlen($text) > $maxchars) {
+    if (strlen($text) > $maxchars) {
         $text = substr_replace($text, '...', $maxchars/2, strlen($text)-$maxchars);
     }
     return $text;

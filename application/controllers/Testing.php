@@ -57,7 +57,6 @@ class Testing extends Baseline_api_controller
     {
         parent::__construct();
         $this->load->model('Group_info_model', 'gm');
-        // $this->load->model('Summary_model', 'summary');
         $this->load->model('Summary_api_model', 'summary');
         $this->load->model('Myemsl_model', 'myemsl');
         // $this->load->library('EUS', '', 'eus');
@@ -98,9 +97,9 @@ class Testing extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_uploads_for_user($eus_person_id, $start_date = FALSE, $end_date = FALSE)
+    public function get_uploads_for_user($eus_person_id, $start_date = false, $end_date = false)
     {
-        $results = $this->summary->summarize_uploads('user', $eus_person_id, $start_date, $end_date, TRUE, 'modified_time');
+        $results = $this->summary->summarize_uploads('user', $eus_person_id, $start_date, $end_date, true, 'modified_time');
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -119,10 +118,10 @@ class Testing extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function test_get_uploads_for_user_list($eus_person_id_list, $start_date = FALSE, $end_date = FALSE)
+    public function test_get_uploads_for_user_list($eus_person_id_list, $start_date = false, $end_date = false)
     {
         $eus_person_id_list = explode('-', $eus_person_id_list);
-        $results = $this->summary->summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, TRUE);
+        $results = $this->summary->summarize_uploads_by_user_list($eus_person_id_list, $start_date, $end_date, true);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';
@@ -141,10 +140,10 @@ class Testing extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function test_get_uploads_for_instrument($eus_instrument_id_list, $start_date = FALSE, $end_date = FALSE)
+    public function test_get_uploads_for_instrument($eus_instrument_id_list, $start_date = false, $end_date = false)
     {
         $eus_instrument_id_list = explode('-', $eus_instrument_id_list);
-        $results = $this->summary->summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, TRUE, 'modified_time');
+        $results = $this->summary->summarize_uploads_by_instrument_list($eus_instrument_id_list, $start_date, $end_date, true, 'modified_time');
         echo '<pre>';
         var_dump($results);
         echo '</pre>';

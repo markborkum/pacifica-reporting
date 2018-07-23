@@ -83,7 +83,6 @@ class Summary_api_model extends CI_Model
                                                'total_size_string' => "",
                                               ),
                          );
-
     }//end __construct()
 
     /**
@@ -105,7 +104,7 @@ class Summary_api_model extends CI_Model
             json_encode($transaction_list),
             array('timeout' => 240)
         );
-        $results = json_decode($query->body, TRUE);
+        $results = json_decode($query->body, true);
         return $results;
     }
 
@@ -130,13 +129,18 @@ class Summary_api_model extends CI_Model
         extract(canonicalize_date_range($iso_start_date, $iso_end_date));
 
         $summary_info = $this->_generate_summary_totals(
-            $group_type, $id_list, $start_time_object, $end_time_object, $time_basis
+            $group_type,
+            $id_list,
+            $start_time_object,
+            $end_time_object,
+            $time_basis
         );
 
         $this->results['summary_totals'] = $summary_info['summary_totals'];
         $this->results['day_graph']['by_date'] = $summary_info['day_graph']['by_date'];
         $this->results['day_graph']['by_date']['available_dates'] = generate_available_dates(
-            $start_time, $end_time
+            $start_time,
+            $end_time
         );
         $this->results['transaction_info'] = $summary_info['transaction_info'];
 
@@ -160,7 +164,7 @@ class Summary_api_model extends CI_Model
     {
         $time_basis = str_replace('_time', '', $time_basis_type);
         $allowed_group_types = array('instrument', 'proposal', 'user');
-        if(in_array($group_type, $allowed_group_types)) {
+        if (in_array($group_type, $allowed_group_types)) {
             $transaction_url = "{$this->policy_url_base}/reporting/transaction_summary/{$time_basis}/";
             $transaction_url .= "{$group_type}/".$start_date->format('Y-m-d H:i:s')."/";
             $transaction_url .= $end_date->format('Y-m-d H:i:s')."?user={$this->user_id}";
@@ -170,7 +174,7 @@ class Summary_api_model extends CI_Model
                 json_encode($id_list),
                 array('timeout' => 240)
             );
-            $results = json_decode($query->body, TRUE);
+            $results = json_decode($query->body, true);
         }
         $available_dates = $this->_generate_available_dates($start_date, $end_date);
 
@@ -194,16 +198,16 @@ class Summary_api_model extends CI_Model
     private function _temp_stats_to_output($temp_results)
     {
         $available_dates = $temp_results['available_dates'];
-        if(!isset($file_count)) {
+        if (!isset($file_count)) {
             $file_count = array();
         }
 
-        if(!isset($transactions_by_day)) {
+        if (!isset($transactions_by_day)) {
             $transactions_by_day = array();
         }
-        foreach($available_dates as $date_key => $date_string){
+        foreach ($available_dates as $date_key => $date_string) {
             $date_timestamp = (intval(strtotime($date_key)) * 1000);
-            if(array_key_exists($date_key, $temp_results['file_count'])) {
+            if (array_key_exists($date_key, $temp_results['file_count'])) {
                 $file_count[$date_key]  = $temp_results['file_count'][$date_key];
                 $file_volume[$date_key] = $temp_results['file_volume'][$date_key];
                 $transaction_count_array[$date_key] = array(
@@ -215,7 +219,7 @@ class Summary_api_model extends CI_Model
                                                        $temp_results['file_volume'][$date_key],
                                                       );
                 $transactions_by_day[$date_key]     = $temp_results['transactions'][$date_key];
-            }else{
+            } else {
                 $file_volume[$date_key] = 0;
                 $transaction_count_array[$date_key] = array(
                                                        $date_timestamp,
@@ -237,7 +241,6 @@ class Summary_api_model extends CI_Model
                          'transactions_by_day'     => $transactions_by_day,
                         );
         return $return_array;
-
     }//end _temp_stats_to_output()
 
 
@@ -258,7 +261,7 @@ class Summary_api_model extends CI_Model
         $start_date_object = is_object($start_date) ? $start_date : new DateTime($start_date);
         $end_date_object   = is_object($end_date) ? $end_date : new DateTime($end_date);
         $current_date      = clone $start_date_object;
-        while($current_date->getTimestamp() <= $end_date_object->getTimestamp()){
+        while ($current_date->getTimestamp() <= $end_date_object->getTimestamp()) {
             $date_key           = $current_date->format('Y-m-d');
             $date_code          = $current_date->format('D M j');
             $results[$date_key] = $date_code;
@@ -266,8 +269,5 @@ class Summary_api_model extends CI_Model
         }
 
         return $results;
-
     }//end _generate_available_dates()
-
-
 }

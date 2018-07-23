@@ -23,7 +23,7 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 require_once 'Baseline_api_controller.php';
 
 /**
@@ -39,7 +39,6 @@ require_once 'Baseline_api_controller.php';
  * @license BSD https://opensource.org/licenses/BSD-3-Clause
  * @link    http://github.com/EMSL-MSC/Pacifica-reporting
 
- * @uses   Reporting_model
  * @uses   Group_info_model
  * @uses   Summary_model
  * @uses   EUS               EUS Database access library
@@ -63,13 +62,8 @@ class Ajax extends Baseline_api_controller
     public function __construct()
     {
         parent::__construct();
-        // $this->load->model('Reporting_model', 'rep');
         $this->load->model('Group_info_model', 'gm');
         $this->load->model('Myemsl_model', 'myemsl');
-        $this->load->model('Search_model', 'search');
-        // $this->load->model('Summary_model', 'summary');
-        // $this->load->library('EUS', '', 'eus');
-        // $this->load->helper(array('network','file_info','inflector','time','item','search_term','cookie'));
         $this->load->helper(array('network','search_term','inflector','time', 'myemsl'));
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
@@ -91,14 +85,13 @@ class Ajax extends Baseline_api_controller
     {
         if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
-            $post_info = json_decode($http_raw_post_data, TRUE);
+            $post_info = json_decode($http_raw_post_data, true);
             // $post_info = $post_info[0];
-            $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : FALSE;
+            $group_name = array_key_exists('group_name', $post_info) ? $post_info['group_name'] : false;
             $group_info = $this->gm->make_new_group($object_type, $this->user_id, $group_name);
             if ($group_info && is_array($group_info)) {
                 transmit_array_with_json_header($group_info);
-            }
-            else {
+            } else {
                 $this->output->set_status_header(500, "Could not make a new group called '{$group_name}'");
             }
             return;
@@ -118,7 +111,7 @@ class Ajax extends Baseline_api_controller
      */
     public function change_group_name($group_id)
     {
-        $new_group_name = FALSE;
+        $new_group_name = false;
         $group_info = $this->gm->get_group_info($group_id);
         if (!$group_info) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
@@ -130,12 +123,11 @@ class Ajax extends Baseline_api_controller
         // }
         if ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
-            $post_info = json_decode($http_raw_post_data, TRUE);
+            $post_info = json_decode($http_raw_post_data, true);
             if (array_key_exists('group_name', $post_info)) {
                 $new_group_name = $post_info['group_name'];
             }
-        }
-        else {
+        } else {
             $this->output->set_status_header(400, 'No update information was sent');
 
             return;
@@ -157,14 +149,12 @@ class Ajax extends Baseline_api_controller
             $new_group_info = $this->gm->change_group_name($group_id, $new_group_name);
             if ($new_group_info && is_array($new_group_info)) {
                 transmit_array_with_json_header($new_group_info);
-            }
-            else {
+            } else {
                 $this->output->set_status_header(500, 'A database error occurred during the update process');
 
                 return;
             }
-        }
-        else {
+        } else {
             $this->output->set_status_header(400, 'Changed "group_name" attribute was not found');
 
             return;
@@ -182,13 +172,13 @@ class Ajax extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function change_group_option($group_id = FALSE)
+    public function change_group_option($group_id = false)
     {
         if (!$group_id) {
             //send a nice error message about why you should include a group_id
         }
-        $option_type = FALSE;
-        $option_value = FALSE;
+        $option_type = false;
+        $option_value = false;
         $group_info = $this->gm->get_group_info($group_id);
         if (!$group_info) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
@@ -197,12 +187,11 @@ class Ajax extends Baseline_api_controller
         }
         if ($this->input->is_ajax_request() || $this->input->raw_input_stream) {
             $http_raw_post_data = file_get_contents('php://input');
-            $post_info = json_decode($http_raw_post_data, TRUE);
+            $post_info = json_decode($http_raw_post_data, true);
             // $post_info = $post_info[0];
-            $option_type = array_key_exists('option_type', $post_info) ? $post_info['option_type'] : FALSE;
-            $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : FALSE;
-        }
-        elseif ($this->input->post()) {
+            $option_type = array_key_exists('option_type', $post_info) ? $post_info['option_type'] : false;
+            $option_value = array_key_exists('option_value', $post_info) ? $post_info['option_value'] : false;
+        } elseif ($this->input->post()) {
             $option_type = $this->input->post('option_type');
             $option_value = $this->input->post('option_value');
         }
@@ -226,8 +215,7 @@ class Ajax extends Baseline_api_controller
         $success = $this->gm->change_group_option($group_id, $option_type, $option_value);
         if ($success && is_array($success)) {
             transmit_array_with_json_header($success);
-        }
-        else {
+        } else {
             $message = "Could not set options for group ID {$group_id}";
             $this->output->set_status_header('500', $message);
 
@@ -252,10 +240,10 @@ class Ajax extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_group_container($object_type, $group_id, $time_range = FALSE, $start_date = FALSE, $end_date = FALSE, $time_basis = FALSE)
+    public function get_group_container($object_type, $group_id, $time_range = false, $start_date = false, $end_date = false, $time_basis = false)
     {
         $group_info = $this->gm->get_group_info($group_id);
-        if(empty($group_info)) {
+        if (empty($group_info)) {
             $this->output->set_status_header(404, "Group ID {$group_id} was not found");
             transmit_array_with_json_header(array());
             return;
@@ -295,15 +283,13 @@ class Ajax extends Baseline_api_controller
         );
         if (!array_key_exists('my_groups', $this->page_data)) {
             $this->page_data['my_groups'] = array($group_id => $group_info);
-        }
-        else {
+        } else {
             $this->page_data['my_groups'][$group_id] = $group_info;
         }
         $this->page_data['my_object_type'] = $object_type;
         if (empty($item_list)) {
             $this->page_data['examples'] = add_objects_instructions($object_type);
-        }
-        else {
+        } else {
             $this->page_data['placeholder_info'][$group_id]['times'] = fix_time_range($time_range, $start_date, $end_date);
         }
         $this->load->view('object_types/group.html', $this->page_data);
@@ -324,12 +310,10 @@ class Ajax extends Baseline_api_controller
     {
         if ($this->input->post()) {
             $object_list = $this->input->post();
-        }
-        elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
+        } elseif ($this->input->is_ajax_request() || file_get_contents('php://input')) {
             $http_raw_post_data = file_get_contents('php://input');
-            $object_list = json_decode($http_raw_post_data, TRUE);
-        }
-        else {
+            $object_list = json_decode($http_raw_post_data, true);
+        } else {
             //return a 404 error
         }
         $filter = $object_list[0]['current_search_string'];
@@ -349,7 +333,7 @@ class Ajax extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function remove_group($group_id = FALSE)
+    public function remove_group($group_id = false)
     {
         if (!$group_id) {
             $this->output->set_status_header(400, 'No Group ID specified');
@@ -367,7 +351,7 @@ class Ajax extends Baseline_api_controller
 
             return;
         }
-        $results = $this->gm->remove_group_object($group_id, TRUE);
+        $results = $this->gm->remove_group_object($group_id, true);
 
         $this->output->set_status_header(200);
 
@@ -413,5 +397,4 @@ class Ajax extends Baseline_api_controller
         $this->page_data['js'] = $js;
         $this->load->view("object_types/search_results/{$object_type}_results.html", $this->page_data);
     }
-
 }

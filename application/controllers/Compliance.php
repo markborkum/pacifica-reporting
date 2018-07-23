@@ -23,7 +23,7 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
- defined('BASEPATH') OR exit('No direct script access allowed');
+ defined('BASEPATH') or exit('No direct script access allowed');
  require_once 'Baseline_api_controller.php';
 
  /**
@@ -76,8 +76,8 @@ class Compliance extends Baseline_api_controller
            '/project_resources/stylesheets/selector.css',
            '/project_resources/stylesheets/compliance.css'
         );
-        $this->page_data['load_prototype'] = FALSE;
-        $this->page_data['load_jquery'] = TRUE;
+        $this->page_data['load_prototype'] = false;
+        $this->page_data['load_jquery'] = true;
         $this->last_update_time = get_last_update(APPPATH);
         $this->page_data['object_types'] = $this->accepted_object_types;
     }
@@ -122,8 +122,8 @@ class Compliance extends Baseline_api_controller
      */
     public function get_report($object_type, $start_time, $end_time, $output_type = 'screen')
     {
-        if(!in_array($object_type, array('instrument', 'proposal'))) {
-            return FALSE;
+        if (!in_array($object_type, array('instrument', 'proposal'))) {
+            return false;
         }
         $valid_output_types = array('screen', 'csv');
         $output_type = !in_array($output_type, $valid_output_types) ? 'screen' : $output_type;
@@ -149,7 +149,7 @@ class Compliance extends Baseline_api_controller
             'end_date' => $end_time_obj->format('Y-m-d')
         );
 
-        if($output_type == 'csv') {
+        if ($output_type == 'csv') {
             $filename = "Compliance_report_by_proposal_".$start_time_obj->format('Y-m').".csv";
             header('Content-Type: text/csv');
             header('Content-disposition: attachment; filename="'.$filename.'"');
@@ -160,8 +160,8 @@ class Compliance extends Baseline_api_controller
                 "number_of_bookings","data_file_count"
             );
             fputcsv($handle, $field_names);
-            foreach($mappings as $proposal_id => $entry){
-                foreach($entry as $instrument_id => $info){
+            foreach ($mappings as $proposal_id => $entry) {
+                foreach ($entry as $instrument_id => $info) {
                     $data = array(
                         $proposal_id, $instrument_id,
                         $group_name_lookup[$info['instrument_group_id']],
@@ -172,9 +172,8 @@ class Compliance extends Baseline_api_controller
                 }
             }
             fclose($handle);
-        }else{
+        } else {
             $this->load->view('object_types/compliance_reporting/reporting_table_proposal.html', $page_data);
         }
-
     }
 }

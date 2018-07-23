@@ -23,7 +23,8 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-if(!defined('BASEPATH')) { exit('No direct script access allowed');
+if (!defined('BASEPATH')) {
+    exit('No direct script access allowed');
 }
 
 /**
@@ -95,8 +96,7 @@ function get_details($object_type, $object_id)
     $query = Requests::get($query_url, array('Accept' => 'application/json'));
     $results_body = $query->body;
 
-    return json_decode($results_body, TRUE);
-
+    return json_decode($results_body, true);
 }
 
 /**
@@ -131,5 +131,4 @@ function add_objects_instructions($object_type)
                                      );
 
     return $object_examples[$object_type];
-
 }//end add_objects_instructions()

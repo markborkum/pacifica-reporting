@@ -23,7 +23,7 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
- defined('BASEPATH') OR exit('No direct script access allowed');
+ defined('BASEPATH') or exit('No direct script access allowed');
 
  /**
   *  Group Info Model
@@ -45,7 +45,7 @@
 class Group_info_model extends CI_Model
 {
     public $debug;
-    public $group_id_list = FALSE;
+    public $group_id_list = false;
 
     /**
      * Class constructor
@@ -58,7 +58,6 @@ class Group_info_model extends CI_Model
         $this->load->helper(array('item'));
         // $this->load->library('EUS', '', 'eus');
         $this->debug = $this->config->item('debug_enabled');
-        $this->load->database('website_prefs');
         $this->load->library('PHPRequests');
         $this->metadata_url_base = $this->config->item('metadata_server_base_url');
         $this->policy_url_base = $this->config->item('policy_server_base_url');
@@ -83,10 +82,9 @@ class Group_info_model extends CI_Model
     public function get_group_options($group_id)
     {
         $option_defaults = $this->get_group_option_defaults();
-        // $DB_prefs        = $this->load->database('website_prefs', TRUE);
         $query           = $this->db->get_where('reporting_object_groups', array('group_id' => $group_id), 1);
         $options         = array();
-        $group_info = FALSE;
+        $group_info = false;
         if ($query && $query->num_rows() > 0) {
             $options_query = $this->db->get_where('reporting_object_group_options', array('group_id' => $group_id));
             if ($options_query && $options_query->num_rows() > 0) {
@@ -109,7 +107,6 @@ class Group_info_model extends CI_Model
         }//end if
 
         return $group_info;
-
     }//end get_group_options()
 
     /**
@@ -130,7 +127,7 @@ class Group_info_model extends CI_Model
     {
         $group_info = $this->get_group_options($group_id);
 
-        if(!$group_info) {
+        if (!$group_info) {
             return array();
         }
         $earliest_latest = $this->earliest_latest_data_for_list(
@@ -144,7 +141,7 @@ class Group_info_model extends CI_Model
             $today_minus_30 = new DateTime();
             $today_minus_30->modify("-30 days");
             $latest_obj   = new DateTime($latest);
-            if($today_minus_30 > $latest_obj) {
+            if ($today_minus_30 > $latest_obj) {
                 $today_minus_30 = clone($latest_obj);
                 $today_minus_30->modify("-30 days");
             }
@@ -173,12 +170,11 @@ class Group_info_model extends CI_Model
 
             $group_info['options_list']['start_time'] = $start_time_obj->format('Y-m-d');
             $group_info['options_list']['end_time']   = $end_time_obj->format('Y-m-d');
-        }else{
+        } else {
             $group_info['time_list'] = array();
         }//end if
 
         return $group_info;
-
     }//end get_group_info()
 
 
@@ -192,17 +188,16 @@ class Group_info_model extends CI_Model
      */
     public function get_group_option_defaults()
     {
-        // $DB_prefs = $this->load->database('website_prefs', TRUE);
         $query    = $this->db->get('reporting_object_group_option_defaults');
         $defaults = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
-                if($row->option_type == 'start_time' && $row->option_default = 0) {
+                if ($row->option_type == 'start_time' && $row->option_default = 0) {
                     $start_time          = new Datetime();
                     $row->option_default = $start_time->format('Y-m-d');
                 }
 
-                if($row->option_type == 'end_time' && $row->option_default = 0) {
+                if ($row->option_type == 'end_time' && $row->option_default = 0) {
                     $end_time = new Datetime();
                     $end_time->modify('-1 week');
                     $row->option_default = $end_time->format('Y-m-d');
@@ -213,7 +208,6 @@ class Group_info_model extends CI_Model
         }
 
         return $defaults;
-
     }//end get_group_option_defaults()
 
     /**
@@ -228,7 +222,6 @@ class Group_info_model extends CI_Model
      */
     public function get_items_for_group($group_id)
     {
-        // $DB_prefs = $this->load->database('website_prefs', TRUE);
         $this->db->select(array('item_type', 'item_id'));
         $query   = $this->db->get_where('reporting_selection_prefs', array('group_id' => $group_id));
         $results = array();
@@ -239,7 +232,6 @@ class Group_info_model extends CI_Model
         }
 
         return $results;
-
     }//end get_items_for_group()
 
 
@@ -258,9 +250,8 @@ class Group_info_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function make_new_group($object_type, $eus_person_id, $group_name = FALSE)
+    public function make_new_group($object_type, $eus_person_id, $group_name = false)
     {
-        // $DB_prefs   = $this->load->database('website_prefs', TRUE);
         $table_name = 'reporting_object_groups';
         $dt_now = new DateTime();
         $dt_string = $dt_now->format('Y-m-d H:i:s');
@@ -294,8 +285,7 @@ class Group_info_model extends CI_Model
             return $group_info;
         }
 
-        return FALSE;
-
+        return false;
     }//end make_new_group()
 
     /**
@@ -311,8 +301,7 @@ class Group_info_model extends CI_Model
      */
     public function change_group_name($group_id, $group_name)
     {
-        $new_group_info = FALSE;
-        // $DB_prefs       = $this->load->database('website_prefs', TRUE);
+        $new_group_info = false;
         $update_array   = array('group_name' => $group_name);
         $this->db->where('group_id', $group_id)->set('group_name', $group_name);
         $this->db->update('reporting_object_groups', $update_array);
@@ -321,7 +310,6 @@ class Group_info_model extends CI_Model
         }
 
         return $new_group_info;
-
     }//end change_group_name()
 
     /**
@@ -338,7 +326,6 @@ class Group_info_model extends CI_Model
      */
     public function change_group_option($group_id, $option_type, $value)
     {
-        // $DB_prefs     = $this->load->database('website_prefs', TRUE);
         $table_name   = 'reporting_object_group_options';
         $where_array  = array(
                          'group_id'    => $group_id,
@@ -357,8 +344,7 @@ class Group_info_model extends CI_Model
             return ($update_array + $where_array);
         }
 
-        return FALSE;
-
+        return false;
     }//end change_group_option()
 
     /**
@@ -374,9 +360,8 @@ class Group_info_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_selected_objects($eus_person_id, $restrict_type = FALSE, $group_id = FALSE)
+    public function get_selected_objects($eus_person_id, $restrict_type = false, $group_id = false)
     {
-        // $DB_prefs = $this->load->database('website_prefs', TRUE);
         $this->db->select(array('eus_person_id', 'item_type', 'item_id', 'group_id'));
         $this->db->where('deleted is null');
         if (!empty($group_id)) {
@@ -399,7 +384,6 @@ class Group_info_model extends CI_Model
         }
 
         return $results;
-
     }//end get_selected_objects()
 
     /**
@@ -416,11 +400,10 @@ class Group_info_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_selected_groups($eus_person_id, $restrict_type = FALSE, $get_group_info = TRUE)
+    public function get_selected_groups($eus_person_id, $restrict_type = false, $get_group_info = true)
     {
         $this->benchmark->mark('get_selected_groups_start');
         $results  = array();
-        // $DB_prefs = $this->load->database('website_prefs', TRUE);
         $this->db->select('g.group_id');
         $person_array = array($eus_person_id);
         $this->db->where_in('g.person_id', $person_array);
@@ -434,9 +417,9 @@ class Group_info_model extends CI_Model
         $group_id_list = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
-                if($get_group_info) {
+                if ($get_group_info) {
                     $group_info = $this->get_group_info($row->group_id);
-                }else{
+                } else {
                     $group_info = $this->get_group_options($row->group_id);
                 }
 
@@ -448,7 +431,6 @@ class Group_info_model extends CI_Model
         $this->group_id_list = $results;
 
         return $results;
-
     }//end get_selected_groups()
 
     /**
@@ -465,14 +447,13 @@ class Group_info_model extends CI_Model
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function remove_group_object($group_id, $full_delete = FALSE)
+    public function remove_group_object($group_id, $full_delete = false)
     {
         $tables       = array(
                          'reporting_object_group_options',
                          'reporting_selection_prefs',
                          'reporting_object_groups',
                         );
-        // $DB_prefs     = $this->load->database('website_prefs', TRUE);
         $where_clause = array('group_id' => $group_id);
         $now_time = new DateTime();
         if ($full_delete) {
@@ -483,7 +464,6 @@ class Group_info_model extends CI_Model
                 $this->db->update($table_name, array('deleted' => $now_time->format('Y-m-d H:i:s'), $where_clause));
             }
         }
-
     }//end remove_group_object()
 
     /**
@@ -509,7 +489,7 @@ class Group_info_model extends CI_Model
                          'item_type'     => $object_type,
                          'eus_person_id' => $this->user_id,
                         );
-        $status = FALSE;
+        $status = false;
         if ($group_id && is_numeric($group_id)) {
             $where_clause['group_id'] = $group_id;
         }
@@ -546,8 +526,8 @@ class Group_info_model extends CI_Model
                                       'updated'       => $now_utc
                                      );
                     $this->db->insert($table, $insert_object);
-                    if($this->db->affected_rows() > 0) {
-                        $status = TRUE;
+                    if ($this->db->affected_rows() > 0) {
+                        $status = true;
                     }
                 }
             }
@@ -557,15 +537,14 @@ class Group_info_model extends CI_Model
                 foreach ($removals as $object_id) {
                     $my_where['item_id'] = strval($object_id);
                     $this->db->where($my_where)->delete($table);
-                    if($this->db->affected_rows() > 0) {
-                        $status = TRUE;
+                    if ($this->db->affected_rows() > 0) {
+                        $status = true;
                     }
                 }
             }
         }//end foreach
 
         return $status;
-
     }//end update_object_preferences()
 
 
@@ -586,15 +565,15 @@ class Group_info_model extends CI_Model
     public function earliest_latest_data_for_list($object_type, $object_id_list, $time_basis)
     {
         $return_array = array(
-            'earliest' => FALSE,
-            'latest' => FALSE
+            'earliest' => false,
+            'latest' => false
         );
         if (empty($object_id_list)) {
-            return FALSE;
+            return false;
         }
 
-        $latest_time   = FALSE;
-        $earliest_time = FALSE;
+        $latest_time   = false;
+        $earliest_time = false;
 
         $el_url = "{$this->metadata_url_base}/fileinfo/earliest_latest/{$object_type}/{$time_basis}";
         $header_list = array(
@@ -603,11 +582,10 @@ class Group_info_model extends CI_Model
         );
         $query = Requests::post($el_url, $header_list, json_encode($object_id_list));
         if ($query->status_code == 200 && intval($query->headers['content-length']) > 0) {
-            $return_array = json_decode($query->body, TRUE);
+            $return_array = json_decode($query->body, true);
         }
 
         return $return_array;
-
     }//end earliest_latest_data_for_list()
 
     /**
@@ -688,5 +666,4 @@ class Group_info_model extends CI_Model
     //     return $results;
     //
     // }//end get_instrument_group_list()
-
 }//end class

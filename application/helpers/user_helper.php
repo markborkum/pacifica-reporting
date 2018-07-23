@@ -26,7 +26,7 @@
  * @link http://github.com/EMSL-MSC/Pacifica-reporting
  */
 
-if(!defined('BASEPATH')) {
+if (!defined('BASEPATH')) {
     exit('No direct script access allowed');
 }
 
@@ -44,7 +44,7 @@ function get_user()
     $CI =& get_instance();
     $CI->load->library('PHPRequests');
     $md_url = $CI->metadata_url_base;
-    if(isset($_SERVER["REMOTE_USER"])) {
+    if (isset($_SERVER["REMOTE_USER"])) {
         $user = str_replace('@PNL.GOV', '', $_SERVER["REMOTE_USER"]);
     } else if (isset($_SERVER["PHP_AUTH_USER"])) {
         $user = str_replace('@PNL.GOV', '', $_SERVER["PHP_AUTH_USER"]);
@@ -57,10 +57,10 @@ function get_user()
     $query_url .= http_build_query($url_args_array, '', '&');
     $query = Requests::get($query_url, array('Accept' => 'application/json'));
     $results_body = $query->body;
-    $results_json = json_decode($results_body, TRUE);
-    if($query->status_code == 200) {
+    $results_json = json_decode($results_body, true);
+    if ($query->status_code == 200) {
         return strtolower($results_json[0]['_id']);
-    }else{
-        return FALSE;
+    } else {
+        return false;
     }
 }
