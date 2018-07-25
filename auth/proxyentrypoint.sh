@@ -8,12 +8,12 @@ sed 's/${PROXY_ADDR}/'${PROXY_ADDR}'/;'\
 
 sed 's/${BACKEND_ADDR}/'${UPLOAD_STATUS_ADDR}'/;'\
 's/${BACKEND_PORT}/'${UPLOAD_STATUS_PORT}'/;'\
-'s/${SITE_NAME}/status.local/;' \
+'s/${SITE_NAME}/status/;' \
     /etc/nginx/conf.d/codeigniter.template > /etc/nginx/conf.d/upload_status.conf
 
 sed 's/${BACKEND_ADDR}/'${REPORTING_ADDR}'/;'\
 's/${BACKEND_PORT}/'${REPORTING_PORT}'/;'\
-'s/${SITE_NAME}/reporting.local/;' \
+'s/${SITE_NAME}/reporting/;' \
     /etc/nginx/conf.d/codeigniter.template > /etc/nginx/conf.d/reporting.conf
 
 

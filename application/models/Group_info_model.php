@@ -276,13 +276,14 @@ class Group_info_model extends CI_Model
                         'group_type' => $object_type,
                         'ordering' => 0,
                         'created' => $dt_string,
-                        'updated' => $dt_string
-                       );
-        $this->db->insert($table_name, $insert_data);
-        if ($this->db->affected_rows() > 0) {
-            $group_id   = $this->db->insert_id();
-            $group_info = $this->get_group_info($group_id);
+                        'updated' => $dt_string);
 
+        $ins_query_string = $this->db->insert_string($table_name, $insert_data);
+        $ins_query_string .= " RETURNING group_id";
+        $ins_query = $this->db->query($ins_query_string);
+        if ($ins_query->num_rows() > 0) {
+            $group_id = $ins_query->row()->group_id;
+            $group_info = $this->get_group_info($group_id);
             return $group_info;
         }
 
@@ -416,6 +417,7 @@ class Group_info_model extends CI_Model
         $this->db->order_by('ordering ASC');
         $query         = $this->db->get('reporting_object_groups g');
         $group_id_list = array();
+        
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
                 if ($get_group_info) {

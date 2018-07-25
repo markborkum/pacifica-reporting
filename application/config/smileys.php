@@ -11,7 +11,7 @@
  * @link     http://github.com/EMSL-MSC/pacifica-reporting
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------
@@ -27,7 +27,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 */
 $smileys = array(
 
-//	smiley			image name						width	height	alt
+//  smiley          image name                      width   height  alt
 
     ':-)'            =>    array('grin.gif',            '19',    '19',    'grin'),
     ':lol:'            =>    array('lol.gif',            '19',    '19',    'LOL'),

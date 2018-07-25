@@ -132,7 +132,7 @@ class Group extends Baseline_api_controller
      * @return none  sends output to *reporting_view.html*
      */
     public function view(
-        $object_type,
+        $object_type = false,
         $time_range = false,
         $start_date = false,
         $end_date = false,
@@ -400,28 +400,31 @@ class Group extends Baseline_api_controller
         $group_info = $this->gm->get_group_info($group_id);
         $this->benchmark->mark('get_group_info_end');
 
-        $item_list    = $group_info['item_list'];
-        $options_list = $group_info['options_list'];
-        $available_time_range = $group_info['time_list'];
-        if ($time_range && $time_range !== $options_list['time_range']) {
-            $this->gm->change_group_option($group_id, 'time_range', $time_range);
-        } else {
-            $time_range = $options_list['time_range'];
-        }
-        $time_basis = !$time_basis ? $options_list['time_basis'] : $time_basis;
-        $start_date = !$start_date || !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
-        $end_date   = !$end_date || !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;
+        if (!empty($group_info)) {
+            $item_list    = $group_info['item_list'];
+            $options_list = $group_info['options_list'];
+            $available_time_range = $group_info['time_list'];
+            if ($time_range && $time_range !== $options_list['time_range']) {
+                $this->gm->change_group_option($group_id, 'time_range', $time_range);
+            } else {
+                $time_range = $options_list['time_range'];
+            }
+            $time_basis = !$time_basis ? $options_list['time_basis'] : $time_basis;
+            $start_date = !$start_date || !strtotime($options_list['start_time']) ? $options_list['start_time'] : $start_date;
+            $end_date   = !$end_date || !strtotime($options_list['end_time']) ? $options_list['end_time'] : $end_date;
 
-        $object_id_list = array_values($item_list);
-        $this->page_data['object_id_list']         = $object_id_list;
-        $this->page_data["{$object_type}_id_list"] = $object_id_list;
+            $object_id_list = array_values($item_list);
+            $this->page_data['object_id_list']         = $object_id_list;
+            $this->page_data["{$object_type}_id_list"] = $object_id_list;
+
+            $latest_data          = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : false;
+        }
+
         $this->page_data['object_type']            = $object_type;
         $this->page_data['group_id'] = $group_id;
-
-        $latest_data          = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : false;
-
-        if (!$latest_data) {
+        if (!$latest_data || empty($group_info)) {
             $this->page_data['results_message'] = 'No Data Available for this group of '.plural(ucwords($object_type));
+            $this->page_data['object_id_list'] = [];
             $this->load->view('object_types/group_body_insert.html', $this->page_data);
             return;
         }

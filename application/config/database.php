@@ -11,7 +11,9 @@
  * @link     http://github.com/EMSL-MSC/pacifica-reporting
  */
 
- if (! defined('BASEPATH')) exit('No direct script access allowed');
+if (! defined('BASEPATH')) {
+    exit('No direct script access allowed');
+}
 /*
 | -------------------------------------------------------------------
 | DATABASE CONNECTIVITY SETTINGS
@@ -30,7 +32,7 @@
 | ['password'] The password used to connect to the database
 | ['database'] The name of the database you want to connect to
 | ['dbdriver'] The database type. ie: mysql.  Currently supported:
-		 mysql, mysqli, postgre, odbc, mssql, sqlite, oci8
+         mysql, mysqli, postgre, odbc, mssql, sqlite, oci8
 | ['dbprefix'] You can add an optional prefix, which will be added
 |        to the table name when using the  Active Record class
 | ['pconnect'] TRUE/FALSE - Whether to use a persistent connection
@@ -66,9 +68,9 @@ $db['default'] = array(
   'database' => getenv('PREFSDB_DB_NAME'),
   'dbdriver' => "postgre",
   'dbprefix' => "",
-  'pconnect' => FALSE,
-  'db_debug' => TRUE,
-  'cache_on' => FALSE,
+  'pconnect' => false,
+  'db_debug' => true,
+  'cache_on' => false,
   'cachedir' => ""
 );
 
@@ -89,8 +91,8 @@ $db['eus'] = array(
   'password' => getenv('EUSDB_PASSWORD'),
   'database' => getenv('EUSDB_NAME'),
   'dbdriver' => "mysqli",
-  'db_debug' => TRUE,
-  'pconnect' => FALSE
+  'db_debug' => true,
+  'pconnect' => false
 );
 
 // $db['default'] = array(
@@ -108,4 +110,4 @@ $db['eus'] = array(
 
 
 // $active_record = TRUE;
-$query_builder = TRUE;
+$query_builder = true;

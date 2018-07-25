@@ -11,7 +11,7 @@
  * @link     http://github.com/EMSL-MSC/pacifica-reporting
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------

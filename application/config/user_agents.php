@@ -11,7 +11,7 @@
  * @link     http://github.com/EMSL-MSC/pacifica-reporting
  */
 
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
 /*
 | -------------------------------------------------------------------
@@ -105,19 +105,19 @@ $browsers = array(
 $mobiles = array(
     // legacy array, old values commented out
     'mobileexplorer'    => 'Mobile Explorer',
-//  'openwave'			=> 'Open Wave',
-//	'opera mini'		=> 'Opera Mini',
-//	'operamini'			=> 'Opera Mini',
-//	'elaine'			=> 'Palm',
+//  'openwave'          => 'Open Wave',
+//  'opera mini'        => 'Opera Mini',
+//  'operamini'         => 'Opera Mini',
+//  'elaine'            => 'Palm',
     'palmsource'        => 'Palm',
-//	'digital paths'		=> 'Palm',
-//	'avantgo'			=> 'Avantgo',
-//	'xiino'				=> 'Xiino',
+//  'digital paths'     => 'Palm',
+//  'avantgo'           => 'Avantgo',
+//  'xiino'             => 'Xiino',
     'palmscape'            => 'Palmscape',
-//	'nokia'				=> 'Nokia',
-//	'ericsson'			=> 'Ericsson',
-//	'blackberry'		=> 'BlackBerry',
-//	'motorola'			=> 'Motorola'
+//  'nokia'             => 'Nokia',
+//  'ericsson'          => 'Ericsson',
+//  'blackberry'        => 'BlackBerry',
+//  'motorola'          => 'Motorola'
 
     // Phones and Manufacturers
     'motorola'        => 'Motorola',
