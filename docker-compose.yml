@@ -183,9 +183,28 @@ services:
       POSTGRES_PORT_5432_TCP_PORT: 5432
       POSTGRES_ENV_POSTGRES_PASSWORD: pacifica
 
-  reportingprefsdb:
-    container_name: reporting_prefsdb
+    policyserver:
+        build:
+            context: ../policy
+            dockerfile: Dockerfile
+        container_name: reporting_policyserver
+        restart: unless-stopped
+        links:
+            - metadataserver:metadata
+        ports:
+            - 8181:8181
+        environment:
+            METADATA_PORT: tcp://metadata:8121
+
+    elasticdb:
+        image: elasticsearch:2.4
+        container_name: reporting_elasticdb
+        ports:
+            - 9200:9200
+
+    metadatadb:
     image: postgres
+        container_name: reporting_metadatadb
     environment:
       POSTGRES_PASSWORD: pacifica
       POSTGRES_DB: pacifica_reporting

@@ -112,18 +112,21 @@ class Compliance_model extends CI_Model
      */
     public function retrieve_active_proposal_list_from_eus($start_date_obj, $end_date_obj)
     {
-        $column_array = array(
+        // get month boundaries
+        $first_of_month = $start_date_obj->modify('first day of this month');
+        $end_of_month = $end_date_obj->modify('last day of this month');
+
+        //get booking stats
+        $booking_stats_columns = [
             'COUNT(`BOOKING_STATS_ID`) as booking_count',
             '`RESOURCE_ID` as instrument_id',
             '`PROPOSAL_ID` as proposal_id',
             'MIN(`MONTH`) as query_month',
             'MIN(`DATE_START`) as date_start',
             'MAX(`DATE_FINISH`) as date_finish'
-        );
+        ];
 
-        $first_of_month = $start_date_obj->modify('first day of this month');
-
-        $query = $this->eusDB->select($column_array)->from("ERS_BOOKING_STATS")
+        $booking_stats_query = $this->eusDB->select($booking_stats_columns)->from("ERS_BOOKING_STATS")
             ->where('NOT ISNULL(`PROPOSAL_ID`)')
             ->group_by(array('PROPOSAL_ID', 'RESOURCE_ID'))
             ->having('MIN(`MONTH`)', $first_of_month->format('Y-m-d'))
@@ -131,12 +134,12 @@ class Compliance_model extends CI_Model
             ->get();
 
         $usage = array(
-            'by_instrument' => array(),
-            'by_proposal' => array()
+            'by_instrument' => [],
+            'by_proposal' => []
         );
-        $instrument_group_lookup = array();
+        $instrument_group_lookup = [];
 
-        foreach ($query->result() as $row) {
+        foreach ($booking_stats_query->result() as $row) {
             $inst_id = intval($row->instrument_id);
             if (!array_key_exists($inst_id, $instrument_group_lookup)) {
                 $group_id = $this->get_group_id($inst_id);
@@ -181,7 +184,40 @@ class Compliance_model extends CI_Model
             $usage['by_proposal'][$proposal_id][$inst_id] = $new_entry;
         }
 
+        //get active proposals for MONTH
+        $proposal_columns = [
+            'prop.`PROPOSAL_ID` as proposal_id',
+            'prop.`TITLE` as title',
+            'prop.`LAST_CHANGE_DATE` as last_change_date',
+            'prop.`ACTUAL_START_DATE` as actual_start_date',
+            'prop.`ACTUAL_END_DATE` as actual_end_date',
+            'prop.`CLOSED_DATE` as closed_date'
+        ];
+
+        $prop_query = $this->eusDB->select($proposal_columns)->from('UP_PROPOSALS prop')
+            ->where_not_in('prop.`PROPOSAL_ID`', array_keys($usage['by_proposal']))
+            ->where('prop.`WITHDRAWN_DATE` IS NULL')
+            ->where('prop.`DENIED_DATE` IS NULL')
+            ->where('prop.`ACCEPTED_DATE` IS NOT NULL')
+            ->where('prop.`ACCEPTED_DATE` <', $end_of_month->format('Y-m-d'))
+            ->where('prop.`ACTUAL_START_DATE` <', $end_of_month->format('Y-m-d'))
+            ->group_start()
+                ->or_where('prop.`ACTUAL_END_DATE` >=', $end_of_month->format('Y-m-d'))
+                ->or_where('prop.`ACTUAL_END_DATE` IS NULL')
+                ->or_where('prop.`CLOSED_DATE` >=', $first_of_month->format('Y-m-d'))
+            ->group_end()
+            ->group_start()
+                ->or_where('prop.`CLOSED_DATE` >=', $first_of_month->format('Y-m-d'))
+                ->or_where('prop.`CLOSED_DATE` IS NULL')
+            ->group_end()
+            ->order_by('(prop.`PROPOSAL_ID` * 1)')
+            ->get();
+
+        // echo $this->eusDB->last_query();
+        // exit();
+
         $usage['instrument_group_compilation'] = array_unique($inst_group_comp);
+        $usage['unbooked_proposals'] = $prop_query->result_array();
         return $usage;
     }
 

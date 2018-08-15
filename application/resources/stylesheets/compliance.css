@@ -12,6 +12,17 @@
     border-radius: 4px;
 }
 
+.booking_results_header {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: white;
+    text-align: center;
+    border-bottom: 2px solid rgb(82, 82, 82);
+    margin-left: 2em;
+    margin-right: 2em;
+    padding-bottom: 0.25em;
+}
+
 .green {
     background-color: rgb(150, 230, 150);
 }
