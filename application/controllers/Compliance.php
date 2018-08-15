@@ -57,7 +57,7 @@ class Compliance extends Baseline_api_controller
         // $this->load->model('Summary_api_model', 'summary');
         $this->load->model('Compliance_model', 'compliance');
         $this->load->helper(
-            ['network', 'theme', 'search_term', 'form']
+            ['network', 'theme', 'search_term', 'form', 'time']
         );
         $this->accepted_object_types = array('instrument', 'user', 'proposal');
         sort($this->accepted_object_types);
@@ -101,7 +101,7 @@ class Compliance extends Baseline_api_controller
         $report_type = !in_array($report_type, $valid_report_types) ? 'proposal' : $report_type;
         $this->page_data['script_uris'] = load_scripts($this->page_data['script_uris']);
         $this->page_data['css_uris'] = load_stylesheets($this->page_data['css_uris']);
-        
+
         $earliest_latest = $this->compliance->earliest_latest_booking_periods();
         $js = "var earliest_available = '{$earliest_latest['earliest']}'; var latest_available = '{$earliest_latest['latest']}'";
         $this->page_data['js'] = $js;
@@ -144,6 +144,7 @@ class Compliance extends Baseline_api_controller
 
         $page_data = array(
             'results_collection' => $mappings,
+            'unused_proposals' => $eus_booking_records['unbooked_proposals'],
             'group_name_lookup' => $group_name_lookup,
             'object_type' => $object_type,
             'start_date' => $start_time_obj->format('Y-m-d'),
