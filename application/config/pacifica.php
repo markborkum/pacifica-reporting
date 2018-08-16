@@ -18,8 +18,8 @@ $config['local_timezone'] = 'America/Los_Angeles';
 $config['application_config_file_path'] = '/etc/myemsl/';
 
 $config['template'] = 'emsl';
-$config['theme_name'] = 'datahub';
-$config['site_identifier'] = 'DataHub';
+$config['theme_name'] = 'myemsl';
+$config['site_identifier'] = 'MyEMSL';
 $config['site_slogan'] = 'Data Management for Science';
 // $config['theme_name'] = 'pacifica';
 // $config['site_identifier'] = 'dēmos';
