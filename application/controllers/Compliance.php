@@ -129,17 +129,14 @@ class Compliance extends Baseline_api_controller
         $valid_output_types = array('screen', 'csv');
         $output_type = !in_array($output_type, $valid_output_types) ? 'screen' : $output_type;
 
-        $t_first_day = new DateTime('first day of this month');
-        $t_last_day = new DateTime('last day of this month');
+        $start_time_obj = strtotime($start_time) ? new DateTime($start_time) : new DateTime('first day of this month');
+        $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : new DateTime('last day of this month');
 
-        // header('Content-Type: application/json');
-        $start_time_obj = strtotime($start_time) ? new DateTime($start_time) : $t_first_day;
-        $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : $t_last_day;
         $eus_booking_records
             = $this->compliance->retrieve_active_proposal_list_from_eus($start_time_obj, $end_time_obj);
 
         $group_name_lookup = $this->compliance->get_group_name_lookup();
-        $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, $start_time_obj, $end_time_obj);
+        $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, clone $start_time_obj, clone $end_time_obj);
         ksort($mappings);
 
         $page_data = array(
@@ -153,7 +150,8 @@ class Compliance extends Baseline_api_controller
 
         if ($output_type == 'csv') {
             $filename = "Compliance_report_by_proposal_".$start_time_obj->format('Y-m').".csv";
-            header('Content-Type: text/csv');
+
+            header('Content-Type: application/octet-stream');
             header('Content-disposition: attachment; filename="'.$filename.'"');
             $export_data = array();
             $handle = fopen('php://output', 'w');
@@ -164,16 +162,23 @@ class Compliance extends Baseline_api_controller
             fputcsv($handle, $field_names);
             foreach ($mappings as $proposal_id => $entry) {
                 foreach ($entry as $instrument_id => $info) {
-                    $data = array(
+                    $data = [
                         $proposal_id, $instrument_id,
                         $group_name_lookup[$info['instrument_group_id']],
                         $this->compliance->get_instrument_name($instrument_id),
                         $info['booking_count'], $info['file_count']
-                    );
+                    ];
                     fputcsv($handle, $data);
                 }
             }
+            foreach ($eus_booking_records['unbooked_proposals'] as $prop_entry) {
+                $data = [
+                $prop_entry['proposal_id'], null, null, null, 0, 0
+                ];
+                fputcsv($handle, $data);
+            }
             fclose($handle);
+            exit();
         } else {
             $this->load->view('object_types/compliance_reporting/reporting_table_proposal.html', $page_data);
         }

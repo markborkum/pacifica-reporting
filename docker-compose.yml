@@ -87,7 +87,7 @@ services:
     container_name: reporting_uploadstatus
     build:
       context: ../upload-status
-      dockerfile: Dockerfile.dev
+      dockerfile: Dockerfile-php7
     volumes:
       - ../upload-status/:/var/www/html
     links:
