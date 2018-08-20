@@ -52,23 +52,28 @@
   <table class="compliance_table">
     <thead>
       <tr style="border-top: 1px solid rgb(103, 103, 103);">
+        <th>Proposal Type</th>
         <th>Proposal ID</th>
-        <th>Valid Dates</th>
-        <th>Closing Date</th>
-        <th>Last Updated</th>
+        <th class="date_right">Actual Start Date</th>
+        <th class="date_right">Actual End Date</th>
+        <th class="date_right">Closing Date</th>
+        <th class="date_right">Last Updated</th>
       </tr>
     </thead>
     <tbody>
       <?php foreach($unused_proposals as $prop_entry): ?>
         <?php $sd = strtotime($prop_entry['actual_start_date']) ? new DateTime($prop_entry['actual_start_date']) : ''; ?>
         <?php $ed = strtotime($prop_entry['actual_end_date']) ? new DateTime($prop_entry['actual_end_date']) : ''; ?>
-        <?php $cd = strtotime($prop_entry['closed_date']) ? new DateTime($prop_entry['closed_date']) : '&mdash; &mdash;'; ?>
-        <?php $chd = strtotime($prop_entry['last_change_date']) ? new DateTime($prop_entry['last_change_date']) : '&mdash; &mdash;'; ?>
+        <?php $cd = strtotime($prop_entry['closed_date']) ? new DateTime($prop_entry['closed_date']) : '&mdash; &mdash; &mdash; &mdash;'; ?>
+        <?php $chd = strtotime($prop_entry['last_change_date']) ? new DateTime($prop_entry['last_change_date']) : '&mdash; &mdash; &mdash; &mdash;'; ?>
       <tr>
+        <?php $pt_class = $prop_entry['proposal_type'] == 'emsl' ? ' class="proposal_type_upper"' : ' class="proposal_type_title"'; ?>
+        <td<?= $pt_class ?>><?= $prop_entry['proposal_type'] ?></td>
         <td title="<?= $prop_entry['title'] ?>"><?= $prop_entry['proposal_id'] ?></td>
-        <td><?= verbose_date_range($sd, $ed) ?></td>
-        <td><?= is_string($cd) ? $cd : $cd->format('F j, Y') ?></td>
-        <td><?= is_string($chd) ? $chd : $chd->format('F j, Y') ?></td>
+        <td class="date_right"><?= is_string($sd) ? $sd : $sd->format('F d, Y') ?></td>
+        <td class="date_right"><?= is_string($ed) ? $ed : $ed->format('F d, Y') ?></td>
+        <td class="date_right"><?= is_string($cd) ? $cd : $cd->format('F d, Y') ?></td>
+        <td class="date_right"><?= is_string($chd) ? $chd : $chd->format('F d, Y') ?></td>
       </tr>
       <?php endforeach; ?>
     </tbody>

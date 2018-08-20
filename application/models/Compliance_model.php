@@ -187,6 +187,7 @@ class Compliance_model extends CI_Model
         //get active proposals for MONTH
         $proposal_columns = [
             'prop.`PROPOSAL_ID` as proposal_id',
+            'IFNULL(REPLACE(LOWER(`prop`.`PROPOSAL_TYPE`),\'_\', \' \'), \'standard\') as `proposal_type`',
             'prop.`TITLE` as title',
             'prop.`LAST_CHANGE_DATE` as last_change_date',
             'prop.`ACTUAL_START_DATE` as actual_start_date',
@@ -194,8 +195,17 @@ class Compliance_model extends CI_Model
             'prop.`CLOSED_DATE` as closed_date'
         ];
 
+        $excluded_proposal_types = [
+            'resource_owner'
+        ];
+
+        $excluded_proposal_types = array_map('strtolower', $excluded_proposal_types);
         $prop_query = $this->eusDB->select($proposal_columns)->from('UP_PROPOSALS prop')
             ->where_not_in('prop.`PROPOSAL_ID`', array_keys($usage['by_proposal']))
+            ->group_start()
+                ->where_not_in('prop.`PROPOSAL_TYPE`', $excluded_proposal_types)
+                ->or_where('prop.`PROPOSAL_TYPE` IS NULL')
+            ->group_end()
             ->where('prop.`WITHDRAWN_DATE` IS NULL')
             ->where('prop.`DENIED_DATE` IS NULL')
             ->where('prop.`ACCEPTED_DATE` IS NOT NULL')
@@ -210,7 +220,7 @@ class Compliance_model extends CI_Model
                 ->or_where('prop.`CLOSED_DATE` >=', $first_of_month->format('Y-m-d'))
                 ->or_where('prop.`CLOSED_DATE` IS NULL')
             ->group_end()
-            ->order_by('(prop.`PROPOSAL_ID` * 1)')
+            ->order_by('prop.`PROPOSAL_TYPE`, (prop.`PROPOSAL_ID` * 1) DESC')
             ->get();
 
         // echo $this->eusDB->last_query();

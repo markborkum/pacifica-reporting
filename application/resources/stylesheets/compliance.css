@@ -23,6 +23,19 @@
     padding-bottom: 0.25em;
 }
 
+.date_right {
+    text-align: right !important;
+    padding-right: 1em;
+}
+
+.proposal_type_upper {
+    text-transform: uppercase;
+}
+
+.proposal_type_title {
+    text-transform: capitalize;
+}
+
 .green {
     background-color: rgb(150, 230, 150);
 }

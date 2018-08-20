@@ -29,7 +29,7 @@ $(function(){
             $('#tp_year_selector').val()
         )
     });
-})
+});
 
 var load_compliance_report = function(destination_object, month, year){
     $('#compliance_loading_screen').show();
