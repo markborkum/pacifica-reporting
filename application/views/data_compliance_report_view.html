@@ -12,7 +12,14 @@
         <?php $this->load->view("object_types/compliance_reporting/time_period_bar_contents.html") ?>
         <?php $this->load->view('object_types/compliance_reporting/loading_screen.html', array('object_type' => $object_type)) ?>
       </div>
-      <div id="search_results_display" class="form_container"></div>
+      <div id="search_results_display" class="search_results_display form_container" style="display:none;">
+        <div class="booking_results_header" style="display:none;">Proposals / Instruments with Booking Data</div>
+        <div id="booking_results_display"></div>
+      </div>
+      <div id="search_results_display" class="search_results_display form_container" style="display:none;">
+        <div class="booking_results_header" style="display:none;">Proposals with No Bookings or Data</div>
+        <div id="no_booking_results_display"></div>
+      </div>
     </div>
   </div>
   <?php $this->load->view("{$this->template_version}_template/view_footer_short"); ?>

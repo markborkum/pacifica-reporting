@@ -555,11 +555,11 @@ div.form_container tr:hover {
     background-color: rgb(239, 239, 239);
 }
 
-div.form_container tr:nth-child(2n+1) {
+div.form_container tr:nth-child(2n+1), .jsgrid-row {
     background-color: rgb(255, 255, 255);
 }
 
-div.form_container tr:nth-child(2n) {
+div.form_container tr:nth-child(2n), .jsgrid-alt-row {
     background-color: rgb(239, 239, 239);
 }
 

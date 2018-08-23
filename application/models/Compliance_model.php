@@ -515,4 +515,51 @@ class Compliance_model extends CI_Model
         }
         return $result;
     }
+
+    /**
+     * [format_bookings_for_jsgrid description]
+     *
+     * @param  [type] $mapping_data [description]
+     *
+     * @return [type] [description]
+     *
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     */
+    public function format_bookings_for_jsgrid($mapping_data)
+    {
+        $instrument_group_cache = $this->compliance->get_group_id_cache();
+        $group_name_lookup = $this->get_group_name_lookup();
+        $booking_results = [];
+        foreach ($mapping_data as $proposal_id => $booking_info) {
+            $proposal_file_count = 0;
+            $code_yellow = false;
+            // pre-scan for proposal-level coloring
+            foreach ($booking_info as $instrument_id => $info) {
+                $code_yellow = empty($info['file_count']) || $code_yellow ? true : false;
+                $proposal_file_count += $info['file_count'];
+            }
+
+            foreach ($booking_info as $instrument_id => $info) {
+                $inst_color_class = $info['file_count'] > 0 ? "green" : "red";
+                $proposal_color_class = "yellow";
+                if ($code_yellow && $proposal_file_count <= 0) {
+                    $proposal_color_class = "red";
+                } elseif (!$code_yellow && $proposal_file_count > 0) {
+                    $proposal_color_class = "green";
+                }
+                $booking_results[] = [
+                    'proposal_id' => $proposal_id,
+                    'proposal_title' => $this->get_proposal_name($proposal_id),
+                    'instrument_id' => $instrument_id,
+                    'instrument_group' => $group_name_lookup[$instrument_group_cache[$instrument_id]],
+                    'instrument_name' => $this->get_instrument_name($instrument_id),
+                    'booking_count' => $info['booking_count'],
+                    'file_count' => $info['file_count'],
+                    'proposal_color_class' => $proposal_color_class,
+                    'instrument_color_class' => $inst_color_class
+                ];
+            }
+        }
+        return $booking_results;
+    }
 }

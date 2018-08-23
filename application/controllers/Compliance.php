@@ -99,6 +99,8 @@ class Compliance extends Baseline_api_controller
         $this->page_data['page_header'] = "Compliance Reporting";
         $valid_report_types = array('proposal', 'instrument');
         $report_type = !in_array($report_type, $valid_report_types) ? 'proposal' : $report_type;
+        $this->page_data['script_uris'][] = '/project_resources/scripts/jsgrid/jsgrid.min.js';
+        $this->page_data['css_uris'][] = '/project_resources/scripts/jsgrid/jsgrid.min.css';
         $this->page_data['script_uris'] = load_scripts($this->page_data['script_uris']);
         $this->page_data['css_uris'] = load_stylesheets($this->page_data['css_uris']);
 
@@ -179,6 +181,15 @@ class Compliance extends Baseline_api_controller
             }
             fclose($handle);
             exit();
+        } elseif ($output_type = 'json') {
+            $booking_results = $this->compliance->format_bookings_for_jsgrid($mappings);
+            $no_booking_results = $eus_booking_records['unbooked_proposals'];
+            header("Content-Type: text/json");
+            $response = [
+                'booking_results' => $booking_results,
+                'no_booking_results' => $no_booking_results
+            ];
+            print(json_encode($response));
         } else {
             $this->load->view('object_types/compliance_reporting/reporting_table_proposal.html', $page_data);
         }
