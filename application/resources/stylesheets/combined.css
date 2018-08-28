@@ -241,7 +241,7 @@ button:hover, .buttons input[type="button"]:hover {
     margin-left: auto;
     margin-right: auto;
     margin-bottom: 10em;
-    width: 960px;
+    width: 95%;
 }
 
 .menu_separator {
@@ -372,6 +372,8 @@ dl.metadata_description_list {
         width: 100%;
     }
 
+
+
     .form_container .right_block {
         position: relative;
         width: 100%;
@@ -379,10 +381,19 @@ dl.metadata_description_list {
         margin-top: 1em;
     }
     .underline {
-        font-size: 0.85em;
+        font-size: 0.85em !important;
+        border-radius: 0 !important;
+        font-size: auto;
+    }
+    .staging_buttons {
+        right: 2em;
+    }
+    .staging_button, .doi_staging_button {
+        height: 3em;
+        width: 125%;
     }
     #login_id_container {
-        bottom: 1px !important;
+        top: 3px !important;
         right: 5px;
         font-size: 0.75em;
     }
@@ -392,7 +403,7 @@ dl.metadata_description_list {
     .site_slogan {
         display:none;
     }
-    .text_logo {
+    .logo_container {
         font-size: 1.25em;
     }
     .metadata_container {
@@ -406,6 +417,21 @@ dl.metadata_description_list {
     }
     .info_message {
         font-size: 1.2em;
+    }
+    .folder_size_summary {
+        display: none;
+    }
+    .ribbon {
+        transition: all 0.25s ease-in-out;
+    }
+
+    .ribbon span {
+        transition: all 0.25s ease-in-out;
+        font-size: 9px;
+        width: 100px;
+        line-height: 15px;
+        top: 17px;
+        right: -25px;
     }
 
 

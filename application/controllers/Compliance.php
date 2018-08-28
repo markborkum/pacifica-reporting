@@ -183,7 +183,7 @@ class Compliance extends Baseline_api_controller
             exit();
         } elseif ($output_type = 'json') {
             $booking_results = $this->compliance->format_bookings_for_jsgrid($mappings);
-            $no_booking_results = $eus_booking_records['unbooked_proposals'];
+            $no_booking_results = $this->compliance->format_no_bookings_for_jsgrid($eus_booking_records['unbooked_proposals']);
             header("Content-Type: text/json");
             $response = [
                 'booking_results' => $booking_results,

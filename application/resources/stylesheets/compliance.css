@@ -30,11 +30,11 @@
 .jsgrid-header-sort:before {
     content: " ";
     display: block;
-    float: left;
     width: 0;
     height: 0;
     border-style: solid;
-    margin-left: 1em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 .jsgrid-header-sort-asc:before {
@@ -46,7 +46,6 @@
     border-width: 8px 6px 0 6px;
     border-color: #efefef transparent transparent transparent;
 }
-
 
 .date_right {
     text-align: right !important;
@@ -263,7 +262,17 @@ input.search_button:active {
 
 
 @media (max-width:640px){
+    .search_term_container {
+        border-radius: 0;
+        border: none;
+        background-color: white;
+    }
+    #generate_report_button {
+        width: 27em;
+        margin-top: 1em;
+        margin-left: 0;
 
+    }
 }
 
 .select2-container .select2-choice, .select2-result-label {
