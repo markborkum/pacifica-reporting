@@ -64,3 +64,5 @@ defined('BASEPATH') or exit('No direct script access allowed');
 $route['default_controller'] = 'group';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = false;
+$route['activity_report'] = "compliance/activity_report";
+$route['activity_report/(:any)'] = "compliance/activity_report/$1";

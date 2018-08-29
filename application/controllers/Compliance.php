@@ -59,23 +59,24 @@ class Compliance extends Baseline_api_controller
         $this->load->helper(
             ['network', 'theme', 'search_term', 'form', 'time']
         );
-        $this->accepted_object_types = array('instrument', 'user', 'proposal');
+        $this->accepted_object_types = ['instrument', 'user', 'proposal'];
         sort($this->accepted_object_types);
-        $this->page_data['script_uris'] = array(
+        $this->page_data['script_uris'] = [
            '/resources/scripts/spinner/spin.min.js',
            '/resources/scripts/spinner/jquery.spin.js',
            '/resources/scripts/select2-4/dist/js/select2.js',
            '/resources/scripts/moment.min.js',
            '/resources/scripts/js-cookie/src/js.cookie.js',
-           '/project_resources/scripts/compliance.js'
-
-        );
-        $this->page_data['css_uris'] = array(
+           '/project_resources/scripts/jsgrid/jsgrid.min.js',
+           '/project_resources/scripts/compliance_common.js'
+        ];
+        $this->page_data['css_uris'] = [
            '/resources/scripts/select2-4/dist/css/select2.css',
            '/project_resources/stylesheets/combined.css',
            '/project_resources/stylesheets/selector.css',
-           '/project_resources/stylesheets/compliance.css'
-        );
+           '/project_resources/stylesheets/compliance.css',
+           '/project_resources/scripts/jsgrid/jsgrid.min.css'
+        ];
         $this->page_data['load_prototype'] = false;
         $this->page_data['load_jquery'] = true;
         $this->last_update_time = get_last_update(APPPATH);
@@ -100,6 +101,7 @@ class Compliance extends Baseline_api_controller
         $valid_report_types = array('proposal', 'instrument');
         $report_type = !in_array($report_type, $valid_report_types) ? 'proposal' : $report_type;
         $this->page_data['script_uris'][] = '/project_resources/scripts/jsgrid/jsgrid.min.js';
+        $this->page_data['script_uris'][] = '/project_resources/scripts/compliance.js';
         $this->page_data['css_uris'][] = '/project_resources/scripts/jsgrid/jsgrid.min.css';
         $this->page_data['script_uris'] = load_scripts($this->page_data['script_uris']);
         $this->page_data['css_uris'] = load_stylesheets($this->page_data['css_uris']);
@@ -109,6 +111,29 @@ class Compliance extends Baseline_api_controller
         $this->page_data['js'] = $js;
         $this->page_data['object_type'] = $report_type;
         $this->load->view("data_compliance_report_view.html", $this->page_data);
+    }
+
+    /**
+     * [activity_report description]
+     *
+     * @param  boolean $start_date Date to start reporting (YYYY-MM-DD ISO format)
+     * @param  boolean $end_date Date to end reporting (YYYY-MM-DD ISO format)
+     *
+     * @return [type] [description]
+     *
+     * @author Ken Auberry <kenneth.auberry@pnnl.gov>
+     */
+    public function activity_report($start_date = false, $end_date = false)
+    {
+        $this->page_data['page_header'] = "Project Activity Report";
+        $this->page_data['script_uris'][] = '/project_resources/scripts/activity_report.js';
+        $this->page_data['script_uris'] = load_scripts($this->page_data['script_uris']);
+        $this->page_data['css_uris'] = load_stylesheets($this->page_data['css_uris']);
+        $earliest_latest = $this->compliance->earliest_latest_booking_periods();
+        $js = "var earliest_available = '{$earliest_latest['earliest']}'; var latest_available = '{$earliest_latest['latest']}'";
+        $this->page_data['js'] = $js;
+        // $this->page_data['js'] = $js;
+        $this->load->view("activity_report_view.html", $this->page_data);
     }
 
     /**
@@ -123,7 +148,7 @@ class Compliance extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_report($object_type, $start_time, $end_time, $output_type = 'screen')
+    public function get_booking_report($object_type, $start_time, $end_time, $output_type = 'screen')
     {
         if (!in_array($object_type, array('instrument', 'proposal'))) {
             return false;
@@ -141,14 +166,13 @@ class Compliance extends Baseline_api_controller
         $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, clone $start_time_obj, clone $end_time_obj);
         ksort($mappings);
 
-        $page_data = array(
+        $page_data = [
             'results_collection' => $mappings,
-            'unused_proposals' => $eus_booking_records['unbooked_proposals'],
             'group_name_lookup' => $group_name_lookup,
             'object_type' => $object_type,
             'start_date' => $start_time_obj->format('Y-m-d'),
             'end_date' => $end_time_obj->format('Y-m-d')
-        );
+        ];
 
         if ($output_type == 'csv') {
             $filename = "Compliance_report_by_proposal_".$start_time_obj->format('Y-m').".csv";
@@ -173,25 +197,82 @@ class Compliance extends Baseline_api_controller
                     fputcsv($handle, $data);
                 }
             }
-            foreach ($eus_booking_records['unbooked_proposals'] as $prop_entry) {
-                $data = [
-                $prop_entry['proposal_id'], null, null, null, 0, 0
-                ];
-                fputcsv($handle, $data);
-            }
             fclose($handle);
             exit();
         } elseif ($output_type = 'json') {
             $booking_results = $this->compliance->format_bookings_for_jsgrid($mappings);
-            $no_booking_results = $this->compliance->format_no_bookings_for_jsgrid($eus_booking_records['unbooked_proposals']);
             header("Content-Type: text/json");
             $response = [
                 'booking_results' => $booking_results,
-                'no_booking_results' => $no_booking_results
             ];
             print(json_encode($response));
         } else {
             $this->load->view('object_types/compliance_reporting/reporting_table_proposal.html', $page_data);
+        }
+    }
+
+    public function get_activity_report($start_time, $end_time)
+    {
+        // $valid_output_types = array('screen', 'csv', 'json');
+        $requested_type = $this->input->get_request_header('Accept', true);
+        $valid_requested_types = [
+            "text/csv" => "csv",
+            "text/json" => "json",
+            "application/json" => "json"
+        ];
+        $object_type = "proposal";
+        $output_type = array_key_exists($requested_type, $valid_requested_types) ? $valid_requested_types[$requested_type] : 'screen';
+        // $output_type = !in_array($output_type, $valid_output_types) ? 'screen' : $output_type;
+        $start_time_obj = strtotime($start_time) ? new DateTime($start_time) : new DateTime('first day of this month');
+        $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : new DateTime('last day of this month');
+
+        $eus_booking_records
+            = $this->compliance->retrieve_active_proposal_list_from_eus($start_time_obj, $end_time_obj);
+
+        $group_name_lookup = $this->compliance->get_group_name_lookup();
+        $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, clone $start_time_obj, clone $end_time_obj);
+
+        $exclusion_list = array_keys($mappings);
+
+        $eus_records = $this->compliance->get_unbooked_proposals($start_time_obj, $end_time_obj, $exclusion_list);
+
+        $page_data = [
+            'unused_proposals' => $eus_records,
+            'start_date' => $start_time_obj->format('Y-m-d'),
+            'end_date' => $end_time_obj->format('Y-m-d')
+        ];
+
+        if ($output_type == 'csv') {
+            $filename = "Proposal_activity_report_".$start_time_obj->format('Y-m')."-".$end_time_obj->format('Y-m').".csv";
+            header('Content-Type: application/octet-stream');
+            header('Content-disposition: attachment; filename="'.$filename.'"');
+            $export_data = array();
+            $handle = fopen('php://output', 'w');
+            $field_names = array(
+                "proposal_id","proposal_type","principal_investigator",
+                "start_date","end_date","closing_date"
+            );
+            fputcsv($handle, $field_names);
+            foreach ($mappings as $proposal_id => $entry) {
+                foreach ($entry as $instrument_id => $info) {
+                    $data = [
+                        $proposal_id, $info['proposal_type'],
+                        $info['principal_investigator'],
+                        $info['actual_start_date'],
+                        $info['actual_end_date'],
+                        $info['closing_date']
+                    ];
+                    fputcsv($handle, $data);
+                }
+            }
+            fclose($handle);
+            exit();
+        } elseif ($output_type = 'json') {
+            $no_booking_results = $this->compliance->format_no_bookings_for_jsgrid($eus_records);
+            header("Content-Type: text/json");
+            print(json_encode($no_booking_results));
+        } else {
+            $this->load->view('object_types/compliance_reporting/proposal_activity_table.html', $page_data);
         }
     }
 }

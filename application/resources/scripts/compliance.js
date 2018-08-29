@@ -30,24 +30,6 @@ $(function(){
         );
     });
 
-    var ComplianceDateField = function(config) {
-        jsGrid.Field.call(this, config);
-    };
-
-    ComplianceDateField.prototype = new jsGrid.Field({
-        sorter: function(date1, date2) {
-            return new Date(date1) - new Date(date2);
-        },
-        itemTemplate: function(value, item) {
-            if (typeof value != "undefined" && value !== null) {
-                return moment(value).format("MMMM DD, YYYY");
-            }else{
-                return "&mdash; &mdash; &mdash; &mdash;";
-            }
-        }
-    });
-
-    jsGrid.fields.complianceDateField = ComplianceDateField;
 
 });
 
@@ -59,7 +41,7 @@ var load_compliance_report = function(destination_object, month, year){
     var start_date = moment().year(year).month(month - 1).date(1).hour(0).minute(0).seconds(0);
     var end_date = moment(start_date);
     end_date.add(1, "months").subtract(1, "days");
-    var report_url = "/compliance/get_report/proposal/";
+    var report_url = "/compliance/get_booking_report/proposal/";
     report_url += start_date.format("YYYY-MM-DD") + "/";
     report_url += end_date.format("YYYY-MM-DD");
     report_url += "/json";

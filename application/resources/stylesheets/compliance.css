@@ -47,6 +47,33 @@
     border-color: #efefef transparent transparent transparent;
 }
 
+.year_month_container_label {
+    font-weight: bold;
+    margin-top: 0;
+}
+
+.has-error ~ .select2 .select2-selection {
+    transition: all 0.5s;
+    border-color: rgb(185, 74, 72) !important;
+    border-width: 2px !important;
+    background-color: rgb(227,152,154) !important;
+}
+
+.time_period_options > .error_message {
+    transition: all 0.5s;
+    position:absolute;
+    right: 1em;
+    width: 20%;
+    border: 2px solid rgb(185, 74, 72);
+    border-radius: 4px;
+    color: rgb(185, 74, 72);
+    background-color: rgb(254, 170, 172) !important;
+    font-size: 1.1em;
+    font-weight: bold;
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
 .date_right {
     text-align: right !important;
     padding-right: 1em;
@@ -109,6 +136,13 @@
     position:absolute;
     right:10px;
     bottom: 0;
+}
+
+.disabled_button, .disabled_button:hover {
+    color:#aaaaaa !important;
+    background-color: #dddddd !important;
+    border-color: #aaaaaa !important;
+    box-shadow: none;
 }
 
 .timeline_week_container:first-of-type {
@@ -297,6 +331,9 @@ input.search_button:active {
 
 .tp_selector {
     width: 10em;
+    font-size: 1.25em;
+    font-weight: bold;
+    color: #656565;
 }
 
 .emsl_staff_logo {

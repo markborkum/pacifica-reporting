@@ -1,0 +1,40 @@
+<div class="themed" id="search_boxes">
+  <form id="search_terms">
+    <div id="search_term_container" class="search_term_container" style="text-align: center;">
+      <div class="time_period_instructions">
+        <h3>Select a Time Range for this Report</h3>
+      </div>
+      <div class="time_period_options" style="text-align: center; position:relative;">
+        <div class="error_message" style="display:none;">Test Error Message</div>
+        <div class="year_month_container start" id="start_time_container" style="position:absolute; right: 52%;">
+          <p class="year_month_container_label">Starting Month</p>
+          <select class="tp_selector month_selector" id="start_month_selector" name="start_month_selector">
+            <option />
+          </select>
+          &nbsp;
+          <select class="tp_selector year_selector" id="start_year_selector" name="start_year_selector">
+            <option />
+          </select>
+        </div>
+        <div class="year_month_container end" id="end_time_container" style="position:absolute; left: 52%;">
+          <p class="year_month_container_label">Ending Month</p>
+          <select class="tp_selector month_selector" id="end_month_selector" name="end_month_selector">
+            <option />
+          </select>
+          &nbsp;
+          <select class="tp_selector year_selector" id="end_year_selector" name="end_year_selector">
+            <option />
+          </select>
+        </div>
+      </div>
+      <input
+        type="button"
+        class="search_button"
+        id="generate_report_button"
+        name="generate_report_button"
+        value="Generate Report"
+        style="margin-top: 6em; width: 20em;"
+      />
+    </div>
+  </form>
+</div>
