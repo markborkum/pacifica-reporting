@@ -4,3 +4,5 @@
 .atomignore
 .gitignore
 *.sqlite3
+application/config/production/*
+application/config/development/*
