@@ -34,7 +34,7 @@
           <form onsubmit="return false;" id="group_search_form_<?= $id ?>" class="group_search_form">
             <h4 class="group_edit_section_name">Edit Group Name</h4>
             <div class="group_name_edit_container" id="group_name_edit_container_<?= $id ?>">
-              <input type="text" class="group_name_editor flat_right_side" id="group_name_editor_<?= $id ?>" name="group_name_editor_<?= $id ?>" placeholder="<?= $group_info['group_name'] ?>" />
+              <input type="text" class="group_name_editor" id="group_name_editor_<?= $id ?>" name="group_name_editor_<?= $id ?>" placeholder="<?= $group_info['group_name'] ?>" />
               <div class="group_edit_confirm_buttons" style="display:none;">
                 <div class="group_name_editor_commit change_icon_accept_reject accept" id="group_name_edit_done_button_<?= $id ?>" >&nbsp;</div>
                 <div class="group_name_editor_commit change_icon_accept_reject reject" id="group_name_edit_cancel_button_<?= $id ?>" >&nbsp;</div>
@@ -45,7 +45,7 @@
             <div class="search_input_container">
               <div class='magnifying_glass_icon' id='magnifying_glass_icon_<?= $id ?>'>&nbsp;</div>
               <div class='clear_field_icon' id='clear_field_icon_<?= $id ?>' style="display:none;">&nbsp;</div>
-              <input class='object_search_box flat_right_side' id='object_search_box_<?= $id ?>' type='text' placeholder="Search for a(n) <?= $my_object_type ?> to add to the report" />
+              <input class='object_search_box' id='object_search_box_<?= $id ?>' type='text' style="padding-right: 150px;" placeholder="Search for a(n) <?= $my_object_type ?> to add to the report" />
               <input type="button" class='edit_button right_side_button refresh_data_button' id="refresh_data_display_button_<?= $id ?>" name="refresh_data_display_button_<?= $id ?>" value="Refresh Data Pane" />
               <input type="hidden" id="group_name_<?= $id ?>" name="group_name_<?= $id ?>" class="group_name" value="<?= $group_info['group_name'] ?>" />
               <input type="hidden" id="group_id_<?= $id ?>" name="group_id_<?= $id ?>" class="group_id" value="<?= $id ?>" />

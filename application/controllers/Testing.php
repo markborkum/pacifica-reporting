@@ -61,26 +61,26 @@ class Testing extends Baseline_api_controller
         $this->load->model('Myemsl_model', 'myemsl');
         // $this->load->library('EUS', '', 'eus');
         $this->load->helper(array('network', 'file_info', 'inflector', 'time', 'item', 'search_term', 'cookie'));
-        $this->accepted_object_types = array('instrument', 'user', 'proposal');
+        $this->accepted_object_types = array('instrument', 'user', 'project');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
         $this->local_resources_folder = $this->config->item('local_resources_folder');
     }
 
     /**
-     * Test proposal retrieval from EUS
+     * Test project retrieval from EUS
      *
-     * @param string $proposal_name_fragment search term for
-     *                                       finding a proposal
+     * @param string $project_name_fragment search term for
+     *                                       finding a project
      * @param string $active                 retrieve only
-     *                                       active proposals?
+     *                                       active projects?
      *
      * @return void
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function test_get_proposals($proposal_name_fragment, $active = 'active')
+    public function test_get_projects($project_name_fragment, $active = 'active')
     {
-        $results = $this->eus->get_proposals_by_name($proposal_name_fragment, $active);
+        $results = $this->eus->get_projects_by_name($project_name_fragment, $active);
         echo '<pre>';
         var_dump($results);
         echo '</pre>';

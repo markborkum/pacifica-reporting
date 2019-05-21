@@ -212,7 +212,7 @@ class Group_info_model extends CI_Model
     }//end get_group_option_defaults()
 
     /**
-     * Retrieve a list of instruments/proposals/users
+     * Retrieve a list of instruments/projects/users
      * for a specifid group.
      *
      * @param integer $group_id group_id to retrieve
@@ -242,7 +242,7 @@ class Group_info_model extends CI_Model
      * owned by the specified user. If no group name is
      * supplied, generate a generic name using the object type.
      *
-     * @param string  $object_type   instrument/proposal/user
+     * @param string  $object_type   instrument/project/user
      * @param integer $eus_person_id person_id for ownership
      * @param string  $group_name    optional group name for
      *                               later identification/display
@@ -394,7 +394,7 @@ class Group_info_model extends CI_Model
      * well as limited in scope to exclude full group info
      *
      * @param integer $eus_person_id  person_id to search
-     * @param string  $restrict_type  instrument/proposal/user
+     * @param string  $restrict_type  instrument/project/user
      * @param boolean $get_group_info toggle to control depth
      *                                of information returned
      *
@@ -473,7 +473,7 @@ class Group_info_model extends CI_Model
      * Backend database function to to add/remove objects
      * as part of a specified group.
      *
-     * @param string  $object_type instrument/proposal/user
+     * @param string  $object_type instrument/project/user
      * @param array   $object_list contains items with
      *                             associated actions
      * @param integer $group_id    group on which to operate
@@ -556,7 +556,7 @@ class Group_info_model extends CI_Model
      * and time_basis within a group of object_id's
      *
      * @param string $object_type    the type of object to retrieve
-     *                               [instrument/proposal/user]
+     *                               [instrument/project/user]
      * @param array  $object_id_list array of object id's to affect
      * @param string $time_basis     one of created_date, modified_date
      *                               submitted_date
@@ -593,51 +593,51 @@ class Group_info_model extends CI_Model
 
     /**
      * Retrieve a list of pertinent Myemsl internal groups
-     * for a given proposal name search term.
+     * for a given project name search term.
      * Further limits based on staff/non-staff classifications
      *
-     * @param string $proposal_id_filter search term to filter on
+     * @param string $project_id_filter search term to filter on
      *
      * @return array
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    // public function get_proposal_group_list($proposal_id_filter = '')
+    // public function get_project_group_list($project_id_filter = '')
     // {
     //     $is_emsl_staff = $this->is_emsl_staff;
     //     $DB_myemsl = $this->load->database('default', TRUE);
-    //     $DB_myemsl->select(array('group_id', 'name as proposal_id'))->where('type', 'proposal');
-    //     $proposals_available = FALSE;
+    //     $DB_myemsl->select(array('group_id', 'name as project_id'))->where('type', 'project');
+    //     $projects_available = FALSE;
     //     if(!$is_emsl_staff) {
-    //         $proposals_available = $this->eus->get_proposals_for_user($this->user_id);
+    //         $projects_available = $this->eus->get_projects_for_user($this->user_id);
     //     }
     //
-    //     if (!empty($proposal_id_filter)) {
-    //         if (is_array($proposal_id_filter)) {
-    //             $DB_myemsl->where_in('name', $proposal_id_filter);
+    //     if (!empty($project_id_filter)) {
+    //         if (is_array($project_id_filter)) {
+    //             $DB_myemsl->where_in('name', $project_id_filter);
     //         } else {
-    //             $DB_myemsl->where('name', $proposal_id_filter);
+    //             $DB_myemsl->where('name', $project_id_filter);
     //         }
     //     }
     //
     //     $query = $DB_myemsl->get('groups');
     //
-    //     $results_by_proposal = array();
+    //     $results_by_project = array();
     //     if ($query && $query->num_rows()) {
     //         foreach ($query->result() as $row) {
-    //             if(!$is_emsl_staff && in_array($row->proposal_id, $proposals_available)) {
-    //                 $results_by_proposal[$row->group_id] = $row->proposal_id;
+    //             if(!$is_emsl_staff && in_array($row->project_id, $projects_available)) {
+    //                 $results_by_project[$row->group_id] = $row->project_id;
     //             }else if($is_emsl_staff) {
-    //                 $results_by_proposal[$row->group_id] = $row->proposal_id;
+    //                 $results_by_project[$row->group_id] = $row->project_id;
     //             }
     //         }
     //     }
     //
-    //     $this->group_id_list = $results_by_proposal;
+    //     $this->group_id_list = $results_by_project;
     //
-    //     return $results_by_proposal;
+    //     return $results_by_project;
     //
-    // }//end get_proposal_group_list()
+    // }//end get_project_group_list()
 
 
     /**

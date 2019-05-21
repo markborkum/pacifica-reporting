@@ -31,7 +31,7 @@ require_once 'Baseline_api_controller.php';
  *
  *  The *Group* class contains user-interaction logic for a set of CI pages.
  *  It interfaces with several different models to retrieve information about
- *  groups of instruments/proposals/users so that they can be displayed on
+ *  groups of instruments/projects/users so that they can be displayed on
  *  a reporting page with pie charts and line graphs that represent the amount
  *  and distribution of data upload to Pacifica by its users.
  *
@@ -76,7 +76,7 @@ class Group extends Baseline_api_controller
              'item',
              'search_term',
              'cookie',
-             'proposal',
+             'project',
              'myemsl_api',
              'theme'
             )
@@ -85,7 +85,7 @@ class Group extends Baseline_api_controller
         $this->accepted_object_types = array(
                                         'instrument',
                                         'user',
-                                        'proposal'
+                                        'project'
                                        );
         $this->accepted_time_basis_types = array(
                                             'submit_time',
@@ -119,7 +119,7 @@ class Group extends Baseline_api_controller
     /**
      *  Constructs the main report viewing page
      *
-     * @param string $object_type classification of the object of interest [proposal/instrument/user]
+     * @param string $object_type classification of the object of interest [project/instrument/user]
      * @param string $time_range  parsable string to specify how far back to look from the current date [e.g. 3-months, 1-week, custom, etc]
      * @param string $start_date  beginning date for data collection in YYYY-MM-DD format
      * @param string $end_date    end date for data collection in YYYY-MM-DD format
@@ -144,7 +144,7 @@ class Group extends Baseline_api_controller
         $time_basis            = ! empty($time_basis) ? $time_basis : 'modification_time';
         $accepted_object_types = array(
                                   'instrument',
-                                  'proposal',
+                                  'project',
                                   'user',
                                  );
         if (!in_array($object_type, $accepted_object_types)) {
@@ -400,7 +400,7 @@ class Group extends Baseline_api_controller
         $group_info = $this->gm->get_group_info($group_id);
         $this->benchmark->mark('get_group_info_end');
 
-        if (!empty($group_info)) {
+        if (!empty($group_info) || !$group_info['time_list']['earliest'] || !$group_info['time_list']['latest']) {
             $item_list    = $group_info['item_list'];
             $options_list = $group_info['options_list'];
             $available_time_range = $group_info['time_list'];
@@ -417,10 +417,10 @@ class Group extends Baseline_api_controller
             $this->page_data['object_id_list']         = $object_id_list;
             $this->page_data["{$object_type}_id_list"] = $object_id_list;
 
-            $latest_data          = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : false;
+            $latest_data = is_array($available_time_range) && array_key_exists('latest', $available_time_range) ? $available_time_range['latest'] : false;
         }
 
-        $this->page_data['object_type']            = $object_type;
+        $this->page_data['object_type'] = $object_type;
         $this->page_data['group_id'] = $group_id;
         if (!$latest_data || empty($group_info)) {
             $this->page_data['results_message'] = 'No Data Available for this group of '.plural(ucwords($object_type));
@@ -549,20 +549,20 @@ class Group extends Baseline_api_controller
 
 
     /**
-     * Retrieves a set of proposals and their accompanying info to be used in a dropdown menu
+     * Retrieves a set of projects and their accompanying info to be used in a dropdown menu
      * in the UI. Doesn't actually return anything, but hands the array off to a helper function
      * that formats it into a json object for return through AJAX
      *
-     * @param string $proposal_name_fragment the search term to use
-     * @param string $active                 active/inactive proposal switch (active/inactive)
+     * @param string $project_name_fragment the search term to use
+     * @param string $active                active/inactive project switch (active/inactive)
      *
-     * @uses EUS::get_proposals_by_name to get proposal list from the EUS Database clone
+     * @uses EUS::get_projects_by_name to get project list from the EUS Database clone
      *
      * @return none
      */
-    public function get_proposals($proposal_name_fragment, $active = 'active')
+    public function get_projects($project_name_fragment, $active = 'active')
     {
-        $results = $this->eus->get_proposals_by_name($proposal_name_fragment, $active);
+        $results = $this->eus->get_projects_by_name($project_name_fragment, $active);
         transmit_array_with_json_header($results);
-    }//end get_proposals()
+    }//end get_projects()
 }//end class

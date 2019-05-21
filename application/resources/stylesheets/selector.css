@@ -1,16 +1,16 @@
-.active_proposal {
+.active_project {
     color:rgb(0, 175, 0);;
 }
 
-.select2-results__option--highlighted .active_proposal {
+.select2-results__option--highlighted .active_project {
     color:rgb(138, 255, 132);
 }
 
-.inactive_proposal {
+.inactive_project {
     color: rgb(227, 65, 61);
 }
 
-.select2-results__option--highlighted .inactive_proposal {
+.select2-results__option--highlighted .inactive_project {
     color: rgb(255, 147, 161);
 }
 

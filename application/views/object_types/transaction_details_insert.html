@@ -5,7 +5,7 @@
                 <th>Upload ID</th>
                 <th>Upload Time</th>
                 <th>File Date(s)</th>
-                <th>Proposal ID</th>
+                <th>Project ID</th>
                 <th>Instrument ID</th>
                 <th>Uploaded By</th>
                 <th>Bundle Size</th>
@@ -36,7 +36,7 @@
                 <td><a href="<?= $status_site_base_url ?>/view/<?= $id ?>" target="_blank"><?= $id ?></a></td>
                 <td><?= $ul_time->format('m/d/Y g:ia') ?></td>
                 <td><?= $ul_mod_string ?></td>
-                <td><?= array_key_exists('proposal_id',$item) && !empty($item['proposal_id']) ? $item['proposal_id'] : "N/A" ?></td>
+                <td><?= array_key_exists('project_id',$item) && !empty($item['project_id']) ? $item['project_id'] : "N/A" ?></td>
                 <td><?= array_key_exists('instrument_id',$item) && !empty($item['instrument_id']) ? $item['instrument_id'] : "N/A" ?></td>
                 <td><?= $ul_user ?></td>
                 <td><?= $friendly_file_size ?></td>

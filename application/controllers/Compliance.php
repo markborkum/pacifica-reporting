@@ -59,7 +59,7 @@ class Compliance extends Baseline_api_controller
         $this->load->helper(
             ['network', 'theme', 'search_term', 'form', 'time']
         );
-        $this->accepted_object_types = ['instrument', 'user', 'proposal'];
+        $this->accepted_object_types = ['instrument', 'user', 'project'];
         sort($this->accepted_object_types);
         $this->page_data['script_uris'] = [
            '/resources/scripts/spinner/spin.min.js',
@@ -87,7 +87,7 @@ class Compliance extends Baseline_api_controller
      *  Grabs the base-level call to this controller and loads up
      *  the compliance report default page
      *
-     * @param string $report_type The object type (proposal or instrument) to anchor the report with\
+     * @param string $report_type The object type (project or instrument) to anchor the report with\
      *
      * @method index
      *
@@ -95,11 +95,11 @@ class Compliance extends Baseline_api_controller
      *
      * @return none
      */
-    public function index($report_type = 'proposal')
+    public function index($report_type = 'project')
     {
         $this->page_data['page_header'] = "Compliance Reporting";
-        $valid_report_types = array('proposal', 'instrument');
-        $report_type = !in_array($report_type, $valid_report_types) ? 'proposal' : $report_type;
+        $valid_report_types = array('project', 'instrument');
+        $report_type = !in_array($report_type, $valid_report_types) ? 'project' : $report_type;
         $this->page_data['script_uris'][] = '/project_resources/scripts/jsgrid/jsgrid.min.js';
         $this->page_data['script_uris'][] = '/project_resources/scripts/compliance.js';
         $this->page_data['css_uris'][] = '/project_resources/scripts/jsgrid/jsgrid.min.css';
@@ -116,8 +116,8 @@ class Compliance extends Baseline_api_controller
     /**
      * [activity_report description]
      *
-     * @param  boolean $start_date Date to start reporting (YYYY-MM-DD ISO format)
-     * @param  boolean $end_date Date to end reporting (YYYY-MM-DD ISO format)
+     * @param boolean $start_date Date to start reporting (YYYY-MM-DD ISO format)
+     * @param boolean $end_date   Date to end reporting (YYYY-MM-DD ISO format)
      *
      * @return [type] [description]
      *
@@ -139,7 +139,7 @@ class Compliance extends Baseline_api_controller
     /**
      * Ajax catcher to generate the guts of the actual compliance report
      *
-     * @param string $object_type The object type (proposal or instrument) to anchor the report with
+     * @param string $object_type The object type (project or instrument) to anchor the report with
      * @param string $start_time  [description] earliest date to grab
      * @param string $end_time    [description] latest date to grab
      * @param string $output_type should the output go to screen or csv file
@@ -150,7 +150,7 @@ class Compliance extends Baseline_api_controller
      */
     public function get_booking_report($object_type, $start_time, $end_time, $output_type = 'screen')
     {
-        if (!in_array($object_type, array('instrument', 'proposal'))) {
+        if (!in_array($object_type, array('instrument', 'project'))) {
             return false;
         }
         $valid_output_types = array('screen', 'csv');
@@ -160,7 +160,7 @@ class Compliance extends Baseline_api_controller
         $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : new DateTime('last day of this month');
 
         $eus_booking_records
-            = $this->compliance->retrieve_active_proposal_list_from_eus($start_time_obj, $end_time_obj);
+            = $this->compliance->retrieve_active_project_list_from_eus($start_time_obj, $end_time_obj);
 
         $group_name_lookup = $this->compliance->get_group_name_lookup();
         $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, clone $start_time_obj, clone $end_time_obj);
@@ -175,21 +175,21 @@ class Compliance extends Baseline_api_controller
         ];
 
         if ($output_type == 'csv') {
-            $filename = "Compliance_report_by_proposal_".$start_time_obj->format('Y-m').".csv";
+            $filename = "Compliance_report_by_project_".$start_time_obj->format('Y-m').".csv";
 
             header('Content-Type: application/octet-stream');
             header('Content-disposition: attachment; filename="'.$filename.'"');
             $export_data = array();
             $handle = fopen('php://output', 'w');
             $field_names = array(
-                "proposal_id","instrument_id","group","instrument_name",
+                "project_id","instrument_id","group","instrument_name",
                 "number_of_bookings","data_file_count"
             );
             fputcsv($handle, $field_names);
-            foreach ($mappings as $proposal_id => $entry) {
+            foreach ($mappings as $project_id => $entry) {
                 foreach ($entry as $instrument_id => $info) {
                     $data = [
-                        $proposal_id, $instrument_id,
+                        $project_id, $instrument_id,
                         $group_name_lookup[$info['instrument_group_id']],
                         $this->compliance->get_instrument_name($instrument_id),
                         $info['booking_count'], $info['file_count']
@@ -207,7 +207,7 @@ class Compliance extends Baseline_api_controller
             ];
             print(json_encode($response));
         } else {
-            $this->load->view('object_types/compliance_reporting/reporting_table_proposal.html', $page_data);
+            $this->load->view('object_types/compliance_reporting/reporting_table_project.html', $page_data);
         }
     }
 
@@ -220,43 +220,43 @@ class Compliance extends Baseline_api_controller
             "text/json" => "json",
             "application/json" => "json"
         ];
-        $object_type = "proposal";
+        $object_type = "project";
         $output_type = array_key_exists($requested_type, $valid_requested_types) ? $valid_requested_types[$requested_type] : 'screen';
         // $output_type = !in_array($output_type, $valid_output_types) ? 'screen' : $output_type;
         $start_time_obj = strtotime($start_time) ? new DateTime($start_time) : new DateTime('first day of this month');
         $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : new DateTime('last day of this month');
 
         $eus_booking_records
-            = $this->compliance->retrieve_active_proposal_list_from_eus($start_time_obj, $end_time_obj);
+            = $this->compliance->retrieve_active_project_list_from_eus($start_time_obj, $end_time_obj);
 
         $group_name_lookup = $this->compliance->get_group_name_lookup();
         $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, clone $start_time_obj, clone $end_time_obj);
 
         $exclusion_list = array_keys($mappings);
 
-        $eus_records = $this->compliance->get_unbooked_proposals($start_time_obj, $end_time_obj, $exclusion_list);
+        $eus_records = $this->compliance->get_unbooked_projects($start_time_obj, $end_time_obj, $exclusion_list);
 
         $page_data = [
-            'unused_proposals' => $eus_records,
+            'unused_projects' => $eus_records,
             'start_date' => $start_time_obj->format('Y-m-d'),
             'end_date' => $end_time_obj->format('Y-m-d')
         ];
 
         if ($output_type == 'csv') {
-            $filename = "Proposal_activity_report_".$start_time_obj->format('Y-m')."-".$end_time_obj->format('Y-m').".csv";
+            $filename = "Project_activity_report_".$start_time_obj->format('Y-m')."-".$end_time_obj->format('Y-m').".csv";
             header('Content-Type: application/octet-stream');
             header('Content-disposition: attachment; filename="'.$filename.'"');
             $export_data = array();
             $handle = fopen('php://output', 'w');
             $field_names = array(
-                "proposal_id","proposal_type","principal_investigator",
+                "project_id","project_type","principal_investigator",
                 "start_date","end_date","closing_date"
             );
             fputcsv($handle, $field_names);
-            foreach ($mappings as $proposal_id => $entry) {
+            foreach ($mappings as $project_id => $entry) {
                 foreach ($entry as $instrument_id => $info) {
                     $data = [
-                        $proposal_id, $info['proposal_type'],
+                        $project_id, $info['project_type'],
                         $info['principal_investigator'],
                         $info['actual_start_date'],
                         $info['actual_end_date'],
@@ -272,7 +272,7 @@ class Compliance extends Baseline_api_controller
             header("Content-Type: text/json");
             print(json_encode($no_booking_results));
         } else {
-            $this->load->view('object_types/compliance_reporting/proposal_activity_table.html', $page_data);
+            $this->load->view('object_types/compliance_reporting/project_activity_table.html', $page_data);
         }
     }
 }

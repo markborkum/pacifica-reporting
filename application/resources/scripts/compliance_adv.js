@@ -69,8 +69,8 @@ var formatSearchResult = function(item){
     if (item.loading) return item.text;
     switch(current_object_type)
     {
-    case "proposal":
-        markup = formatProposal(item);
+    case "project":
+        markup = formatProject(item);
         break;
     case "instrument":
         markup = formatInstrument(item);
@@ -87,11 +87,11 @@ var formatSearchResult = function(item){
 var formatSearchSelection = function(item){
     current_object_type = getCurrentObjectType();
     if(!item.id) return false;
-    var markup = "Please Select a Proposal/Project...";
+    var markup = "Please Select a Project/Project...";
     switch(current_object_type)
     {
-    case "proposal":
-        markup = "<span title=\"" + item.title + "\">Proposal: " + item.id + "</span>";
+    case "project":
+        markup = "<span title=\"" + item.title + "\">Project: " + item.id + "</span>";
         break;
     case "instrument":
         markup = "<span title=\"" + item.display_name + "\">Instrument: " + item.id + "</span>";
@@ -106,7 +106,7 @@ var formatSearchSelection = function(item){
     return markup;
 };
 
-var formatProposal = function(item) {
+var formatProject = function(item) {
     var markup = false;
     var start_date = moment(item.start_date);
     var end_date = moment(item.end_date);
@@ -118,7 +118,7 @@ var formatProposal = function(item) {
     markup = "<div id=\"prop_info_" + item.id + "\" class=\"prop_info\">";
     markup += "   <div class=\"";
     markup += item.currently_active == true ? "active" : "inactive";
-    markup += "_proposal\"><strong>Proposal " + item.id + "</strong>";
+    markup += "_project\"><strong>Project " + item.id + "</strong>";
     markup += "   </div>";
     markup += "   <div style=\"float:right;\">";
     markup += "     <span class=\"active_dates\">";

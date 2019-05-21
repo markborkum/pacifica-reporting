@@ -331,7 +331,7 @@ var options = {
     },
     wait: 500,
     highlight: true,
-    captureLength: 3
+    captureLength: 2
 };
 
 var clear_results = function() {

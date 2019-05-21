@@ -17,18 +17,18 @@
     // Build the chart
 
     <?php
-    $proposal_data = array();
-    foreach($summary_totals['upload_stats']['proposal'] as $proposal_id => $proposal_count){
-      $proposal_data[] = array('name' => $proposal_id, 'y' => round($proposal_count / $summary_totals['total_file_count'],2));
-      $proposal_name = strtolower($proposal_id) != "other" ? $transaction_info['proposal'][$proposal_id] : "Other";
-      if(!$proposal_name){
-          $proposal_name = "Unknown Proposal";
+    $project_data = array();
+    foreach($summary_totals['upload_stats']['project'] as $project_id => $project_count){
+      $project_data[] = array('name' => $project_id, 'y' => round($project_count / $summary_totals['total_file_count'],2));
+      $project_name = strtolower($project_id) != "other" ? $transaction_info['project'][$project_id] : "Other";
+      if(!$project_name){
+          $project_name = "Unknown Project";
       }
-      $proposal_lookup[$proposal_id] = $proposal_name;
+      $project_lookup[$project_id] = $project_name;
     }
     ?>
 
-    var proposal_options_<?= $group_id ?> = {
+    var project_options_<?= $group_id ?> = {
       chart: {
         events: {
           load: function () {
@@ -38,7 +38,7 @@
               (function(i) {
                 var item = legend.allItems[i].legendItem;
                 item.on('mouseover', function (e) {
-                  var item_info = proposal_lookup_<?= $group_id ?>[e.target.textContent];
+                  var item_info = project_lookup_<?= $group_id ?>[e.target.textContent];
                   $(e.target).parents('.object_body_container').find('.legend_description').html(item_info);
                 }).on('mouseout', function (e) {
                   $(e.target).parents('.object_body_container').find('.legend_description').html('');
@@ -49,10 +49,10 @@
         }
       },
       title: {
-        text: 'Uploads by Proposal',
+        text: 'Uploads by Project',
       },
       tooltip: {
-        pointFormat: 'Proposal {point.name}: <b>{point.percentage:.1f}%</b>'
+        pointFormat: 'Project {point.name}: <b>{point.percentage:.1f}%</b>'
       },
       plotOptions: {
         series: {
@@ -60,7 +60,7 @@
           point: {
             events: {
               mouseOver: function () {
-                var item_info = proposal_lookup_<?= $group_id ?>[this.options.name];
+                var item_info = project_lookup_<?= $group_id ?>[this.options.name];
                 $(event.target).parents('.object_body_container').find('.legend_description').html(item_info);
               },
               mouseOut: function () {
@@ -71,10 +71,10 @@
         }
       },
       series: [{
-        data: <?= json_encode($proposal_data); ?>
+        data: <?= json_encode($project_data); ?>
       }]
     };
-    var proposal_chart_<?= $group_id ?> = $('#proposal_stats_graph_<?= $group_id ?>').highcharts($.extend(true, {}, hc_pie_options,proposal_options_<?= $group_id ?>));
+    var project_chart_<?= $group_id ?> = $('#project_stats_graph_<?= $group_id ?>').highcharts($.extend(true, {}, hc_pie_options,project_options_<?= $group_id ?>));
 
     <?php
     $user_data = array();
@@ -166,7 +166,7 @@
   <?php if(isset($instrument_lookup)):?>
   var instrument_lookup_<?= $group_id ?> = <?= json_encode($instrument_lookup); ?>;
   <?php endif; ?>
-  <?php if(isset($proposal_lookup)): ?>
-  var proposal_lookup_<?= $group_id ?> = <?= json_encode($proposal_lookup); ?>;
+  <?php if(isset($project_lookup)): ?>
+  var project_lookup_<?= $group_id ?> = <?= json_encode($project_lookup); ?>;
   <?php endif; ?>
 </script>

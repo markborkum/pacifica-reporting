@@ -41,7 +41,7 @@ var load_compliance_report = function(destination_object, month, year){
     var start_date = moment().year(year).month(month - 1).date(1).hour(0).minute(0).seconds(0);
     var end_date = moment(start_date);
     end_date.add(1, "months").subtract(1, "days");
-    var report_url = "/compliance/get_booking_report/proposal/";
+    var report_url = "/compliance/get_booking_report/project/";
     report_url += start_date.format("YYYY-MM-DD") + "/";
     report_url += end_date.format("YYYY-MM-DD");
     report_url += "/json";
@@ -57,10 +57,10 @@ var load_compliance_report = function(destination_object, month, year){
             data: response.booking_results,
             fields: [
                 {
-                    name: "proposal_id", title: "Proposal ID", width: "8%",
+                    name: "project_id", title: "Project ID", width: "8%",
                     cellRenderer: function(value, item) {
                         return $("<td>", {
-                            "class": "proposal_id_container " + item.proposal_color_class,
+                            "class": "project_id_container " + item.project_color_class,
                             "text": value
                         });
                     },
@@ -80,7 +80,7 @@ var load_compliance_report = function(destination_object, month, year){
                     name: "project_type", title: "Project Type", width: "15%"
                 },
                 {
-                    name: "proposal_pi", title: "Principal Investigator",
+                    name: "project_pi", title: "Principal Investigator",
                     headercss: "compliance_table_header", width: "15%"
                 },
                 {
@@ -118,9 +118,9 @@ var load_compliance_report = function(destination_object, month, year){
             paging: false,
             data: response.no_booking_results,
             fields: [
-                { name: "proposal_id", title: "Proposal ID", type: "text" },
+                { name: "project_id", title: "Project ID", type: "text" },
                 { name: "project_type", title: "Project Type", type: "text" },
-                { name: "proposal_pi", title: "Principal Investigator", type: "text" },
+                { name: "project_pi", title: "Principal Investigator", type: "text" },
                 { name: "actual_start_date", title: "Actual Start Date", type: "complianceDateField" },
                 { name: "actual_end_date", title: "Actual End Date", type: "complianceDateField" },
                 // { name: "closed_date", title: "Closing Date", type: "complianceDateField" },

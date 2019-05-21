@@ -79,11 +79,11 @@
     padding-right: 1em;
 }
 
-.proposal_type_upper {
+.project_type_upper {
     text-transform: uppercase;
 }
 
-.proposal_type_title {
+.project_type_title {
     text-transform: capitalize;
 }
 
@@ -98,7 +98,7 @@
     background-color: rgb(240, 130, 127) !important;
 }
 
-.new_proposal_line {
+.new_project_line {
     border-top: 2px solid #888 !important;
 }
 
@@ -110,7 +110,7 @@
     border-collapse: collapse !important;
 }
 
-.proposal_id_container, .instrument_id_container {
+.project_id_container, .instrument_id_container {
     font-weight: 600;
 }
 

@@ -189,7 +189,7 @@ header.secondary .page_header {
     border: 3px solid #aaa;
     border-radius: 6px;
     height: 31px;
-    width: 85%;
+    width: 100%;
     padding: 8px 0 5px 20px;
     transition: box-shadow 0.3s, border 0.3s;
     color: #222;
@@ -348,20 +348,17 @@ header.secondary .page_header {
 }
 
 .group_name_edit_container input[type="text"] {
-    padding: 0;
-    padding-left: 10px;
-    width: 85%;
-    /*border-radius: 6px 0px 0px 6px;*/
+    padding: 0 200px 0 10px;
+    width: 100%;
 }
 
 .right_side_button {
     position: absolute;
     top: 0;
-    right: 3px;
+    right: 0;
     height: 31px;
     border: 3px solid #aaa;
     border-radius: 0 6px 6px 0px;
-    margin-left: -3px;
     width: 140px;
     text-align: center;
 }

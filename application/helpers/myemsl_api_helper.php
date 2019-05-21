@@ -57,17 +57,17 @@ function get_instrument_details($instrument_id)
 }
 
 /**
- *  Directly retrieves proposal info from md server
+ *  Directly retrieves project info from md server
  *
- * @param integer $proposal_id proposal id of the item in question
+ * @param integer $project_id project id of the item in question
  *
  * @return array
  *
  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
-function get_proposal_details($proposal_id)
+function get_project_details($project_id)
 {
-    return get_details('proposal', $proposal_id);
+    return get_details('project', $project_id);
 }
 
 /**
@@ -84,7 +84,7 @@ function get_details($object_type, $object_id)
 {
     $object_map = array(
         'instrument' => array('url' => 'instrumentinfo/by_instrument_id'),
-        'proposal' => array('url' => 'proposalinfo/by_proposal_id'),
+        'project' => array('url' => 'projectinfo/by_project_id'),
         'user' => array('url' => 'userinfo/by_id')
     );
     $url = $object_map[$object_type]['url'];
@@ -104,7 +104,7 @@ function get_details($object_type, $object_id)
  * things make for acceptable search criteria
  *
  * @param string $object_type type of object to be hinted
- *                            (instrument/proposal/user)
+ *                            (instrument/project/user)
  *
  * @return array simple array with search criteria
  *               descriptions for display
@@ -113,7 +113,7 @@ function add_objects_instructions($object_type)
 {
     $object_examples = array(
                         'instrument' => array(),
-                        'proposal'   => array(),
+                        'project'   => array(),
                         'user'       => array(),
                        );
     $object_examples['instrument'] = array(
@@ -121,9 +121,9 @@ function add_objects_instructions($object_type)
                                       "'34075' returns the instrument having an ID of '34075' in the EUS database",
                                       "'nmr nittany' returns anything with 'nmr' and 'nittany' somewhere in the name or description",
                                      );
-    $object_examples['proposal']   = array(
-                                      "'phos' returns a list of all proposals having the term 'phos' somewhere in the title or description",
-                                      "'49164' returns a proposal having an ID of '49164' in the EUS database",
+    $object_examples['project']   = array(
+                                      "'phos' returns a list of all projects having the term 'phos' somewhere in the title or description",
+                                      "'49164' returns a project having an ID of '49164' in the EUS database",
                                      );
     $object_examples['user']       = array(
                                       "'jones' returns a list of EUS users having 'jones' somewhere in their first name, last name or email",

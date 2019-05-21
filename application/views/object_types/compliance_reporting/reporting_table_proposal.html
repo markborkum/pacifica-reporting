@@ -1,11 +1,11 @@
 <div class="search_results_display">
   <div class="booking_results_header">
-    Proposals / Instruments with Booking Data
+    Projects / Instruments with Booking Data
   </div>
   <table class="compliance_table">
     <thead>
       <tr style="border-top: 1px solid rgb(103, 103, 103);">
-        <th>Proposal ID</th>
+        <th>Project ID</th>
         <th>Instrument ID</th>
         <th>Instrument</th>
         <th>Number of Bookings</th>
@@ -15,26 +15,26 @@
     <tbody>
     <?php $instrument_group_cache = $this->compliance->get_group_id_cache(); ?>
 
-    <?php foreach($results_collection as $proposal_id => $booking_info): ?>
-      <?php $line_class = "new_proposal_line"; ?>
-      <?php $proposal_file_count = 0; ?>
+    <?php foreach($results_collection as $project_id => $booking_info): ?>
+      <?php $line_class = "new_project_line"; ?>
+      <?php $project_file_count = 0; ?>
       <?php $code_yellow = FALSE; ?>
       <?php foreach($booking_info as $inst_id => $info): ?>
         <?php $code_yellow = empty($info['file_count']) || $code_yellow ? TRUE : FALSE; ?>
-        <?php $proposal_file_count += $info['file_count']; ?>
+        <?php $project_file_count += $info['file_count']; ?>
       <?php endforeach; ?>
       <?php foreach($booking_info as $inst_id => $info): ?>
       <tr class="<?= $line_class ?>">
         <?php $inst_color_class = $info['file_count'] > 0 ? " green" : " red"; ?>
-        <?php if($code_yellow && $proposal_file_count <= 0): ?>
+        <?php if($code_yellow && $project_file_count <= 0): ?>
           <?php $color_class = " red"; ?>
-        <?php elseif(!$code_yellow && $proposal_file_count > 0): ?>
+        <?php elseif(!$code_yellow && $project_file_count > 0): ?>
           <?php $color_class = " green"; ?>
         <?php else: ?>
           <?php $color_class = " yellow"; ?>
         <?php endif; ?>
-        <?php $proposal_title = $this->compliance->get_proposal_name($proposal_id); ?>
-        <td class="proposal_id_container<?= $color_class ?>" title="<?= $proposal_title ?>"><?= !empty($line_class) ? $proposal_id : "" ?></td>
+        <?php $project_title = $this->compliance->get_project_name($project_id); ?>
+        <td class="project_id_container<?= $color_class ?>" title="<?= $project_title ?>"><?= !empty($line_class) ? $project_id : "" ?></td>
         <td class="instrument_id_container<?= $inst_color_class ?>"><?= $inst_id ?></td>
         <td><span class="instrument_group"><?= $group_name_lookup[$instrument_group_cache[$inst_id]]; ?></span><p class="instrument_name"><?= $this->compliance->get_instrument_name($inst_id); ?></p></td>
         <td><?= $info['booking_count']; ?></td>
@@ -48,12 +48,12 @@
 </div>
 
 <div class="search_results_display">
-  <div class="booking_results_header">Proposals with No Bookings or Data</div>
+  <div class="booking_results_header">Projects with No Bookings or Data</div>
   <table class="compliance_table">
     <thead>
       <tr style="border-top: 1px solid rgb(103, 103, 103);">
-        <th>Proposal Type</th>
-        <th>Proposal ID</th>
+        <th>Project Type</th>
+        <th>Project ID</th>
         <th class="date_right">Actual Start Date</th>
         <th class="date_right">Actual End Date</th>
         <th class="date_right">Closing Date</th>
@@ -61,15 +61,15 @@
       </tr>
     </thead>
     <tbody>
-      <?php foreach($unused_proposals as $prop_entry): ?>
+      <?php foreach($unused_projects as $prop_entry): ?>
         <?php $sd = strtotime($prop_entry['actual_start_date']) ? new DateTime($prop_entry['actual_start_date']) : ''; ?>
         <?php $ed = strtotime($prop_entry['actual_end_date']) ? new DateTime($prop_entry['actual_end_date']) : ''; ?>
         <?php $cd = strtotime($prop_entry['closed_date']) ? new DateTime($prop_entry['closed_date']) : '&mdash; &mdash; &mdash; &mdash;'; ?>
         <?php $chd = strtotime($prop_entry['last_change_date']) ? new DateTime($prop_entry['last_change_date']) : '&mdash; &mdash; &mdash; &mdash;'; ?>
       <tr>
-        <?php $pt_class = $prop_entry['proposal_type'] == 'emsl' ? ' class="proposal_type_upper"' : ' class="proposal_type_title"'; ?>
-        <td<?= $pt_class ?>><?= $prop_entry['proposal_type'] ?></td>
-        <td title="<?= $prop_entry['title'] ?>"><?= $prop_entry['proposal_id'] ?></td>
+        <?php $pt_class = $prop_entry['project_type'] == 'emsl' ? ' class="project_type_upper"' : ' class="project_type_title"'; ?>
+        <td<?= $pt_class ?>><?= $prop_entry['project_type'] ?></td>
+        <td title="<?= $prop_entry['title'] ?>"><?= $prop_entry['project_id'] ?></td>
         <td class="date_right"><?= is_string($sd) ? $sd : $sd->format('F d, Y') ?></td>
         <td class="date_right"><?= is_string($ed) ? $ed : $ed->format('F d, Y') ?></td>
         <td class="date_right"><?= is_string($cd) ? $cd : $cd->format('F d, Y') ?></td>

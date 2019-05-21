@@ -57,13 +57,13 @@ class Compliance_model extends CI_Model
         $this->eusDB = $this->load->database('eus', true);
         $this->instrument_cache = array();
         $this->instrument_group_cache = array();
-        $this->proposal_cache = array();
+        $this->project_cache = array();
     }
 
     /**
      * Get information about specific transactions from metadata_server_base_url
      *
-     * @param string   $object_type    proposal or instrument
+     * @param string   $object_type    project or instrument
      * @param array    $id_list        list of object id's to search framework
      * @param datetime $start_time_obj earliest time to retrieve
      * @param datetime $end_time_obj   latest time to retrieve
@@ -74,7 +74,7 @@ class Compliance_model extends CI_Model
      */
     public function retrieve_uploads_for_object_list($object_type, $id_list, $start_time_obj = false, $end_time_obj = false)
     {
-        $allowed_object_types = array('instrument', 'proposal');
+        $allowed_object_types = array('instrument', 'project');
         if (!in_array($object_type, $allowed_object_types)) {
             return false;
         }
@@ -101,16 +101,16 @@ class Compliance_model extends CI_Model
     }
 
     /**
-     * Get information regarding active proposals from the EUS database
+     * Get information regarding active projects from the EUS database
      *
      * @param datetime $start_date_obj the initial date in the period
      * @param datetime $end_date_obj   the final date in the period
      *
-     * @return array list of activity, by proposal id and instrument_id
+     * @return array list of activity, by project id and instrument_id
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function retrieve_active_proposal_list_from_eus($start_date_obj, $end_date_obj)
+    public function retrieve_active_project_list_from_eus($start_date_obj, $end_date_obj)
     {
         // get month boundaries
         $first_of_month = $start_date_obj->modify('first day of this month');
@@ -120,32 +120,32 @@ class Compliance_model extends CI_Model
         $booking_stats_columns = [
             'COUNT(bs.`BOOKING_STATS_ID`) as booking_count',
             'bs.`RESOURCE_ID` as instrument_id',
-            'bs.`PROPOSAL_ID` as proposal_id',
-            'IFNULL( REPLACE ( `up`.`PROPOSAL_TYPE`, \'_\', \' \' ), IFNULL( uct.CALL_TYPE, \'N/A\' ) ) AS project_type',
+            'bs.`PROJECT_ID` as project_id',
+            'IFNULL( REPLACE ( `up`.`PROJECT_TYPE`, \'_\', \' \' ), IFNULL( uct.CALL_TYPE, \'N/A\' ) ) AS project_type',
             'MIN(bs.`MONTH`) as query_month',
             'MIN(bs.`DATE_START`) as date_start',
             'MAX(bs.`DATE_FINISH`) as date_finish',
-            'users.`NAME_FM` as proposal_pi'
+            'users.`NAME_FM` as project_pi'
         ];
-        $excluded_proposal_types = [
+        $excluded_project_types = [
             'resource_owner'
         ];
 
 
         $booking_stats_query = $this->eusDB->select($booking_stats_columns)->from("ERS_BOOKING_STATS bs")
-            ->join('UP_PROPOSALS up', 'up.PROPOSAL_ID = bs.PROPOSAL_ID')
+            ->join('UP_PROJECTS up', 'up.PROJECT_ID = bs.PROJECT_ID')
             ->join('UP_CALLS uc', 'up.CALL_ID = uc.CALL_ID', 'left')
             ->join('UP_CALL_TYPES uct', 'uc.CALL_TYPE_ID = uct.CALL_TYPE_ID', 'left')
-            ->join("(SELECT PERSON_ID, PROPOSAL_ID FROM UP_PROPOSAL_MEMBERS WHERE PROPOSAL_AUTHOR_SW = 'Y') pm", 'bs.`PROPOSAL_ID` = pm.`PROPOSAL_ID`')
+            ->join("(SELECT PERSON_ID, PROJECT_ID FROM UP_PROJECT_MEMBERS WHERE PROJECT_AUTHOR_SW = 'Y') pm", 'bs.`PROJECT_ID` = pm.`PROJECT_ID`')
             ->join('UP_USERS users', 'users.`PERSON_ID` = pm.`PERSON_ID`')
-            ->where('NOT ISNULL(bs.`PROPOSAL_ID`)')
+            ->where('NOT ISNULL(bs.`PROJECT_ID`)')
             ->group_start()
-                ->where_not_in('up.`PROPOSAL_TYPE`', $excluded_proposal_types)
-                ->or_where('up.`PROPOSAL_TYPE` IS NULL')
+                ->where_not_in('up.`PROJECT_TYPE`', $excluded_project_types)
+                ->or_where('up.`PROJECT_TYPE` IS NULL')
             ->group_end()
-            ->group_by(array('bs.`PROPOSAL_ID`', 'bs.`RESOURCE_ID`'))
+            ->group_by(array('bs.`PROJECT_ID`', 'bs.`RESOURCE_ID`'))
             ->having('MIN(bs.`MONTH`)', $first_of_month->format('Y-m-d'))
-            ->order_by('bs.`PROPOSAL_ID`, bs.`RESOURCE_ID`')
+            ->order_by('bs.`PROJECT_ID`, bs.`RESOURCE_ID`')
             ->get();
 
             // echo $this->eusDB->last_query();
@@ -153,7 +153,7 @@ class Compliance_model extends CI_Model
 
         $usage = array(
             'by_instrument' => [],
-            'by_proposal' => []
+            'by_project' => []
         );
         $instrument_group_lookup = [];
 
@@ -172,19 +172,19 @@ class Compliance_model extends CI_Model
                 'booking_count' => $row->booking_count,
                 'instrument_id' => $inst_id,
                 'instrument_group_id' => $group_id,
-                'proposal_id' => $row->proposal_id,
+                'project_id' => $row->project_id,
                 'project_type' => strpos($row->project_type, 'EMSL') === false ? ucwords(strtolower($row->project_type), " ") : $row->project_type,
                 'date_start' => $record_start_date,
                 'date_finish' => $record_end_date,
-                'proposal_pi' => $row->proposal_pi,
+                'project_pi' => $row->project_pi,
                 'transactions_list' => array(),
                 'file_count' => 0
             );
             $inst_group_comp[] = $group_id;
-            $usage['by_proposal'][$row->proposal_id][$inst_id] = $entry;
+            $usage['by_project'][$row->project_id][$inst_id] = $entry;
         }
-        $ungrouped = $usage['by_proposal'];
-        foreach ($ungrouped as $proposal_id => $inst_entries) {
+        $ungrouped = $usage['by_project'];
+        foreach ($ungrouped as $project_id => $inst_entries) {
             $new_entry = array();
             foreach ($inst_entries as $inst_id => $entry) {
                 if (empty($new_entry)) {
@@ -200,44 +200,44 @@ class Compliance_model extends CI_Model
                         ? $entry['date_finish'] : $new_entry['date_finish'];
                 };
             }
-            $usage['by_proposal'][$proposal_id][$inst_id] = $new_entry;
+            $usage['by_project'][$project_id][$inst_id] = $new_entry;
         }
 
         $usage['instrument_group_compilation'] = array_unique($inst_group_comp);
-        // $usage['unbooked_proposals'] = $prop_query->result_array();
+        // $usage['unbooked_projects'] = $prop_query->result_array();
         return $usage;
     }
 
-    public function get_unbooked_proposals($start_date_obj, $end_date_obj, $exclusion_list = [])
+    public function get_unbooked_projects($start_date_obj, $end_date_obj, $exclusion_list = [])
     {
-        $excluded_proposal_types = [
+        $excluded_project_types = [
             'resource_owner'
         ];
         // get month boundaries
         $first_of_month = $start_date_obj->modify('first day of this month');
         $end_of_month = $end_date_obj->modify('last day of this month');
 
-        $excluded_proposal_types = array_map('strtolower', ['resource_owner']);
-        //get active proposals for MONTH
-        $proposal_columns = [
-            'prop.`PROPOSAL_ID` as proposal_id',
-            'IFNULL( REPLACE ( `prop`.`PROPOSAL_TYPE`, \'_\', \' \' ), IFNULL( uct.CALL_TYPE, \'N/A\' ) ) AS project_type',
+        $excluded_project_types = array_map('strtolower', ['resource_owner']);
+        //get active projects for MONTH
+        $project_columns = [
+            'prop.`PROJECT_ID` as project_id',
+            'IFNULL( REPLACE ( `prop`.`PROJECT_TYPE`, \'_\', \' \' ), IFNULL( uct.CALL_TYPE, \'N/A\' ) ) AS project_type',
             'prop.`TITLE` as title',
             'prop.`ACTUAL_START_DATE` as actual_start_date',
             'prop.`ACTUAL_END_DATE` as actual_end_date',
             'prop.`CLOSED_DATE as closed_date',
-            'users.`NAME_FM` as proposal_pi'
+            'users.`NAME_FM` as project_pi'
         ];
 
-        $prop_query = $this->eusDB->select($proposal_columns)->from('UP_PROPOSALS prop')
-            ->join("(SELECT PERSON_ID, PROPOSAL_ID FROM UP_PROPOSAL_MEMBERS WHERE PROPOSAL_AUTHOR_SW = 'Y') pm", 'prop.`PROPOSAL_ID` = pm.`PROPOSAL_ID`')
+        $prop_query = $this->eusDB->select($project_columns)->from('UP_PROJECTS prop')
+            ->join("(SELECT PERSON_ID, PROJECT_ID FROM UP_PROJECT_MEMBERS WHERE PROJECT_AUTHOR_SW = 'Y') pm", 'prop.`PROJECT_ID` = pm.`PROJECT_ID`')
             ->join('UP_USERS users', 'users.`PERSON_ID` = pm.`PERSON_ID`')
             ->join('UP_CALLS uc', 'prop.CALL_ID = uc.CALL_ID', 'left')
             ->join('UP_CALL_TYPES uct', 'uc.CALL_TYPE_ID = uct.CALL_TYPE_ID', 'left')
-            ->where_not_in('prop.`PROPOSAL_ID`', $exclusion_list)
+            ->where_not_in('prop.`PROJECT_ID`', $exclusion_list)
             ->group_start()
-                ->where_not_in('prop.`PROPOSAL_TYPE`', $excluded_proposal_types)
-                ->or_where('prop.`PROPOSAL_TYPE` IS NULL')
+                ->where_not_in('prop.`PROJECT_TYPE`', $excluded_project_types)
+                ->or_where('prop.`PROJECT_TYPE` IS NULL')
             ->group_end()
             ->where('prop.`WITHDRAWN_DATE` IS NULL')
             ->where('prop.`DENIED_DATE` IS NULL')
@@ -253,7 +253,7 @@ class Compliance_model extends CI_Model
                 ->or_where('prop.`CLOSED_DATE` >=', $first_of_month->format('Y-m-d'))
                 ->or_where('prop.`CLOSED_DATE` IS NULL')
             ->group_end()
-            ->order_by('prop.`PROPOSAL_TYPE`, (prop.`PROPOSAL_ID` * 1) DESC')
+            ->order_by('prop.`PROJECT_TYPE`, (prop.`PROJECT_ID` * 1) DESC')
             ->get();
 
         // echo $this->eusDB->last_query();
@@ -342,38 +342,38 @@ class Compliance_model extends CI_Model
     }
 
     /**
-     * Get the proposal name from the id
+     * Get the project name from the id
      *
-     * @param integer $proposal_id the proposal_id to lookup
+     * @param integer $project_id the project_id to lookup
      *
-     * @return string the name of the proposal
+     * @return string the name of the project
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_proposal_name($proposal_id)
+    public function get_project_name($project_id)
     {
-        if (array_key_exists($proposal_id, $this->proposal_cache)) {
-            return $this->proposal_cache[$proposal_id];
+        if (array_key_exists($project_id, $this->project_cache)) {
+            return $this->project_cache[$project_id];
         }
-        $proposal_url = "{$this->metadata_url_base}/proposals?";
+        $project_url = "{$this->metadata_url_base}/projects?";
         $url_args_array = array(
-            '_id' => $proposal_id,
+            '_id' => $project_id,
             'recursion_depth' => 0
         );
-        $proposal_name = "Unknown Proposal {$proposal_id}";
-        $proposal_url .= http_build_query($url_args_array, '', '&');
-        $query = Requests::get($proposal_url, array('Accept' => 'application/json'));
+        $project_name = "Unknown Project {$project_id}";
+        $project_url .= http_build_query($url_args_array, '', '&');
+        $query = Requests::get($project_url, array('Accept' => 'application/json'));
         if ($query->status_code == 200 && $query->body != '[]') {
             $results = json_decode($query->body, true);
-            $proposal_entry = array_shift($results);
-            $proposal_name = $proposal_entry['title'];
-            $this->proposal_cache[$proposal_id] = $proposal_name;
+            $project_entry = array_shift($results);
+            $project_name = $project_entry['title'];
+            $this->project_cache[$project_id] = $project_name;
         }
-        return $proposal_name;
+        return $project_name;
     }
 
     /**
-     * Get the proposal name from the id
+     * Get the project name from the id
      *
      * @param integer $instrument_id the instrument_id to lookup
      *
@@ -434,7 +434,7 @@ class Compliance_model extends CI_Model
     /**
      * Compare EUS bookings and Pacifica data streams for compliance
      *
-     * @param string   $object_type             object type to base report on (proposal or instrument)
+     * @param string   $object_type             object type to base report on (project or instrument)
      * @param array    $eus_object_type_records set of records from the ERS Booking table
      * @param datetime $start_time              earliest time to consider
      * @param datetime $end_time                latest time to consider
@@ -477,17 +477,17 @@ class Compliance_model extends CI_Model
             );
             foreach ($transactions_list as $transaction_id => $trans_info) {
                 // $my_group_id = $this->get_group_id($trans_info['instrument_id']);
-                $proposal_id = strval($trans_info['proposal_id']);
+                $project_id = strval($trans_info['project_id']);
                 $instrument_id = intval($trans_info['instrument_id']);
-                if (!array_key_exists($proposal_id, $booking_stats_cache)) {
-                    $booking_stats_cache[$proposal_id] = array();
+                if (!array_key_exists($project_id, $booking_stats_cache)) {
+                    $booking_stats_cache[$project_id] = array();
                 }
                 if (!array_key_exists($instrument_id, $booking_stats_cache)) {
-                    $booking_stats_cache[$proposal_id][$instrument_id] = $stats_template;
+                    $booking_stats_cache[$project_id][$instrument_id] = $stats_template;
                 }
-                $booking_stats_cache[$proposal_id][$instrument_id]['data_file_count']
+                $booking_stats_cache[$project_id][$instrument_id]['data_file_count']
                     += $trans_info['file_count'];
-                $booking_stats_cache[$proposal_id][$instrument_id]['transaction_list'][$trans_info['upload_date']][]
+                $booking_stats_cache[$project_id][$instrument_id]['transaction_list'][$trans_info['upload_date']][]
                     = array(
                         'transaction_id' => $transaction_id,
                         'file_count' => intval($trans_info['file_count']),
@@ -496,23 +496,23 @@ class Compliance_model extends CI_Model
             }
         }
 
-        foreach ($object_list as $proposal_id => $inst_id_list) {
+        foreach ($object_list as $project_id => $inst_id_list) {
             foreach ($inst_id_list as $inst_id => $record) {
                 $inst_group_id = $record['instrument_group_id'];
-                $proposal_id = strval($record['proposal_id']);
+                $project_id = strval($record['project_id']);
                 $earliest_date = clone($record['date_start']);
                 // $earliest_date->modify('-1 week');
                 $latest_date = clone($record['date_finish']);
                 $latest_date->modify('+3 weeks');
                 //check the transaction record for matching entries
-                $eus_objects[$proposal_id][$inst_id]['date_start'] = $record['date_start']->format('Y-m-d');
-                $eus_objects[$proposal_id][$inst_id]['date_finish'] = $record['date_finish']->format('Y-m-d');
-                if (isset($booking_stats_cache[$proposal_id][$inst_id])) {
-                    $transactions = $booking_stats_cache[$proposal_id][$inst_id]['transaction_list'];
+                $eus_objects[$project_id][$inst_id]['date_start'] = $record['date_start']->format('Y-m-d');
+                $eus_objects[$project_id][$inst_id]['date_finish'] = $record['date_finish']->format('Y-m-d');
+                if (isset($booking_stats_cache[$project_id][$inst_id])) {
+                    $transactions = $booking_stats_cache[$project_id][$inst_id]['transaction_list'];
                     foreach ($transactions as $upload_date => $txn_entries) {
                         foreach ($txn_entries as $txn_entry) {
                             if ($txn_entry['upload_date_obj'] >= $earliest_date && $txn_entry['upload_date_obj'] <= $latest_date) {
-                                $eus_objects[$proposal_id][$inst_id]['file_count'] += $txn_entry['file_count'];
+                                $eus_objects[$project_id][$inst_id]['file_count'] += $txn_entry['file_count'];
                             }
                         }
                     }
@@ -561,33 +561,33 @@ class Compliance_model extends CI_Model
         $instrument_group_cache = $this->compliance->get_group_id_cache();
         $group_name_lookup = $this->get_group_name_lookup();
         $booking_results = [];
-        foreach ($mapping_data as $proposal_id => $booking_info) {
-            $proposal_file_count = 0;
+        foreach ($mapping_data as $project_id => $booking_info) {
+            $project_file_count = 0;
             $code_yellow = false;
-            // pre-scan for proposal-level coloring
+            // pre-scan for project-level coloring
             foreach ($booking_info as $instrument_id => $info) {
                 $code_yellow = empty($info['file_count']) || $code_yellow ? true : false;
-                $proposal_file_count += $info['file_count'];
+                $project_file_count += $info['file_count'];
             }
             foreach ($booking_info as $instrument_id => $info) {
                 $inst_color_class = $info['file_count'] > 0 ? "green" : "red";
-                $proposal_color_class = "yellow";
-                if ($code_yellow && $proposal_file_count <= 0) {
-                    $proposal_color_class = "red";
-                } elseif (!$code_yellow && $proposal_file_count > 0) {
-                    $proposal_color_class = "green";
+                $project_color_class = "yellow";
+                if ($code_yellow && $project_file_count <= 0) {
+                    $project_color_class = "red";
+                } elseif (!$code_yellow && $project_file_count > 0) {
+                    $project_color_class = "green";
                 }
                 $booking_results[] = [
-                    'proposal_id' => $proposal_id,
-                    'proposal_title' => $this->get_proposal_name($proposal_id),
+                    'project_id' => $project_id,
+                    'project_title' => $this->get_project_name($project_id),
                     'project_type' => $info['project_type'],
                     'instrument_id' => $instrument_id,
                     'instrument_group' => $group_name_lookup[$instrument_group_cache[$instrument_id]],
-                    'proposal_pi' => $info['proposal_pi'],
+                    'project_pi' => $info['project_pi'],
                     'instrument_name' => $this->get_instrument_name($instrument_id),
                     'booking_count' => $info['booking_count'],
                     'file_count' => $info['file_count'],
-                    'proposal_color_class' => $proposal_color_class,
+                    'project_color_class' => $project_color_class,
                     'instrument_color_class' => $inst_color_class
                 ];
             }

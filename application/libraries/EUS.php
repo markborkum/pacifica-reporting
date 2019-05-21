@@ -71,9 +71,9 @@ class EUS
         $this->CI = &get_instance();
 
         define('INST_TABLE', 'instruments');
-        define('INST_PROPOSAL_XREF', 'proposal_instruments');
-        define('PROPOSALS_TABLE', 'proposals');
-        define('PROPOSAL_MEMBERS', 'proposal_members');
+        define('INST_PROJECT_XREF', 'project_instruments');
+        define('PROJECTS_TABLE', 'projects');
+        define('PROJECT_MEMBERS', 'project_members');
         define('USERS_TABLE', 'users');
 
         if (!$this->CI->load->database('eus_for_myemsl')) {
@@ -216,16 +216,16 @@ class EUS
 
     /**
      *  Retrieve a filtered list of instruments that are associated
-     *  with a given EUS proposal
+     *  with a given EUS project
      *
-     *  @param string $eus_proposal_id proposal id in question
+     *  @param string $eus_project_id project id in question
      *  @param string $filter          search term string
      *
      *  @return array
      *
      *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_instruments_for_proposal($eus_proposal_id, $filter = '')
+    public function get_instruments_for_project($eus_project_id, $filter = '')
     {
         $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
 
@@ -239,15 +239,15 @@ class EUS
         $closing_date->modify('-6 months');
 
         $where_array = array(
-        'proposal_id' => $eus_proposal_id,
+        'project_id' => $eus_project_id,
         'actual_end_date <' => $closing_date->format('Y-m-d')
         );
         $DB_ers->where($where_array);
 
-        $prop_exists = $DB_ers->count_all_results(PROPOSALS_TABLE) > 0 ? TRUE : FALSE;
+        $prop_exists = $DB_ers->count_all_results(PROJECTS_TABLE) > 0 ? TRUE : FALSE;
 
         if (!$prop_exists) {
-            $result_array['message'] = "No proposal with ID = {$eus_proposal_id} was found";
+            $result_array['message'] = "No project with ID = {$eus_project_id} was found";
 
             return $result_array;
         }
@@ -259,7 +259,7 @@ class EUS
         );
 
         $DB_ers->select($select_array)->from(INST_TABLE.' i');
-        $DB_ers->join(INST_PROPOSAL_XREF.' pi', 'i.instrument_id = pi.instrument_id');
+        $DB_ers->join(INST_PROJECT_XREF.' pi', 'i.instrument_id = pi.instrument_id');
 
         if (!empty($filter)) {
             $DB_ers->like('i.eus_display_name', $filter);
@@ -270,12 +270,12 @@ class EUS
         if ($inst_query && $inst_query->num_rows() > 0) {
             $plural_mod = $inst_query->num_rows() > 1 ? 's' : '';
             $result_array['success'] = TRUE;
-            $result_array['message'] = $inst_query->num_rows()." instrument{$plural_mod} located for proposal {$eus_proposal_id}";
+            $result_array['message'] = $inst_query->num_rows()." instrument{$plural_mod} located for project {$eus_project_id}";
             foreach ($inst_query->result() as $row) {
                 $result_array['instruments'][$row->instrument_id] = $row->eus_display_name;
             }
         } else {
-            $result_array['message'] = "No instruments located for proposal {$eus_proposal_id}";
+            $result_array['message'] = "No instruments located for project {$eus_project_id}";
         }
 
         return $result_array;
@@ -291,7 +291,7 @@ class EUS
      *
      *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_proposals_for_instrument($eus_instrument_id, $filter = '')
+    public function get_projects_for_instrument($eus_instrument_id, $filter = '')
     {
         $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
 
@@ -306,61 +306,61 @@ class EUS
 
         if (!$inst_exists) {
             $result_array['message'] = 'No instrument with ID = '.$eus_instrument_id.' was found';
-            $result_array['proposals'] = array();
+            $result_array['projects'] = array();
 
             return $result_array;
         }
         $today = new DateTime();
 
-        $select_array = array('pi.proposal_id', 'p.title as proposal_name');
+        $select_array = array('pi.project_id', 'p.title as project_name');
         $DB_ers->select($select_array)->where('pi.instrument_id', $eus_instrument_id)->order_by('p.title');
         $DB_ers->where('p.closed_date is null')->where('p.actual_end_date >=', $today->format('Y-m-d'));
-        $DB_ers->from(INST_PROPOSAL_XREF.' as pi');
-        $DB_ers->join(PROPOSALS_TABLE.' as p', 'p.proposal_id = pi.proposal_id');
+        $DB_ers->from(INST_PROJECT_XREF.' as pi');
+        $DB_ers->join(PROJECTS_TABLE.' as p', 'p.project_id = pi.project_id');
         if (!empty($filter)) {
             $DB_ers->like('p.title', $filter);
         }
-        $proposal_query = $DB_ers->get();
+        $project_query = $DB_ers->get();
 
-        $proposal_list = array();
-        if ($proposal_query && $proposal_query->num_rows() > 0) {
-            $plural_mod = $proposal_query->num_rows > 1 ? 's' : '';
+        $project_list = array();
+        if ($project_query && $project_query->num_rows() > 0) {
+            $plural_mod = $project_query->num_rows > 1 ? 's' : '';
             $result_array['success'] = TRUE;
-            $result_array['message'] = $proposal_query->num_rows()." proposal{$plural_mod} located for instrument {$eus_instrument_id}";
-            foreach ($proposal_query->result() as $row) {
-                $clean_proposal_name = trim(str_replace("\n", ' ', $row->proposal_name));
-                $proposal_list[$row->proposal_id] = $clean_proposal_name;
+            $result_array['message'] = $project_query->num_rows()." project{$plural_mod} located for instrument {$eus_instrument_id}";
+            foreach ($project_query->result() as $row) {
+                $clean_project_name = trim(str_replace("\n", ' ', $row->project_name));
+                $project_list[$row->project_id] = $clean_project_name;
             }
         } else {
-            $result_array['message'] = 'No proposals located for instrument '.$eus_instrument_id;
+            $result_array['message'] = 'No projects located for instrument '.$eus_instrument_id;
         }
-        $result_array['items'] = $proposal_list;
+        $result_array['items'] = $project_list;
 
         return $result_array;
     }
 
     /**
-     *  Retrieve the title of the proposal having the specified ID
+     *  Retrieve the title of the project having the specified ID
      *
-     *  @param string $eus_proposal_id specified proposal id
+     *  @param string $eus_project_id specified project id
      *
      *  @return string
      *
      *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_proposal_name($eus_proposal_id)
+    public function get_project_name($eus_project_id)
     {
         $result = FALSE;
         $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
-        $query = $DB_ers->select('title as proposal_name')->get_where(PROPOSALS_TABLE, array('proposal_id' => strval($eus_proposal_id)), 1);
+        $query = $DB_ers->select('title as project_name')->get_where(PROJECTS_TABLE, array('project_id' => strval($eus_project_id)), 1);
         if ($query && $query->num_rows() > 0) {
-            $result = $query->row()->proposal_name;
+            $result = $query->row()->project_name;
         }
         return $result;
     }
 
     /**
-     *  Retrieves a list of EUS items (instruments/proposals/users)
+     *  Retrieves a list of EUS items (instruments/projects/users)
      *  based on object type and a series of ID's to use in a
      *  *where_in* clause. Can also be restricted to only the set of
      *  objects that are directly associated with the current user
@@ -378,9 +378,9 @@ class EUS
     {
         $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
         $is_emsl_staff = $this->CI->is_emsl_staff;
-        $proposals_available = FALSE;
+        $projects_available = FALSE;
         if(!$is_emsl_staff) {
-            $proposals_available = $this->get_proposals_for_user($this->CI->user_id);
+            $projects_available = $this->get_projects_for_user($this->CI->user_id);
         }
 
 
@@ -398,8 +398,8 @@ class EUS
         $results = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result_array() as $row) {
-                if(!$is_emsl_staff && $object_type == 'proposal') {
-                    if(in_array($row['id'], $proposals_available)) {
+                if(!$is_emsl_staff && $object_type == 'project') {
+                    if(in_array($row['id'], $projects_available)) {
                         $results[$row['id']] = $row;
                     }
                 }else{
@@ -479,7 +479,7 @@ class EUS
     }
 
     /**
-     *  Retrieve all the proposals that are associated with
+     *  Retrieve all the projects that are associated with
      *  a given person ID
      *
      *  @param integer $eus_user_id person id to search
@@ -488,21 +488,21 @@ class EUS
      *
      *  @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_proposals_for_user($eus_user_id)
+    public function get_projects_for_user($eus_user_id)
     {
         $is_emsl_staff = $this->CI->is_emsl_staff;
         $DB_ers = $this->CI->load->database('eus_for_myemsl', TRUE);
-        $select_array = array('proposal_id');
+        $select_array = array('project_id');
         $DB_ers->select($select_array)->where('active', 'Y');
         if(!$is_emsl_staff) {
             $DB_ers->where('person_id', $eus_user_id);
         }
 
-        $query = $DB_ers->distinct()->get(PROPOSAL_MEMBERS);
+        $query = $DB_ers->distinct()->get(PROJECT_MEMBERS);
         $results = array();
         if ($query && $query->num_rows() > 0) {
             foreach ($query->result() as $row) {
-                $results[] = $row->proposal_id;
+                $results[] = $row->project_id;
             }
         }
 
@@ -512,35 +512,35 @@ class EUS
     /**
      * Backing function that talks to the local clone
      * of the EUS database to get a current list
-     * of proposals and their info when given a
-     * particular fragment of the proposal name.
+     * of projects and their info when given a
+     * particular fragment of the project name.
      *
-     * @param string $proposal_name_fragment the search term to use
-     * @param string $active                 active/inactive proposal
+     * @param string $project_name_fragment the search term to use
+     * @param string $active                 active/inactive project
      *                                       switch (active/inactive)
      *
-     * @used-by Group::get_proposals
+     * @used-by Group::get_projects
      *
-     * @return array hierarchical array of proposal_id's
+     * @return array hierarchical array of project_id's
      *               with their accompanying data underneath
      */
-    public function get_proposals_by_name($proposal_name_fragment, $is_active = 'active')
+    public function get_projects_by_name($project_name_fragment, $is_active = 'active')
     {
         $DB_eus = $this->CI->load->database('eus_for_myemsl', TRUE);
         $DB_eus->select(
             array(
-            'proposal_id', 'title', 'group_id',
+            'project_id', 'title', 'group_id',
             'actual_start_date as start_date',
             'actual_end_date as end_date')
         );
         $is_emsl_staff = $this->CI->is_emsl_staff;
         if(!$is_emsl_staff) {
-            $proposals_available = $this->get_proposals_for_user($this->user_id);
-            $DB_eus->where_in('proposal_id', $proposals_available);
+            $projects_available = $this->get_projects_for_user($this->user_id);
+            $DB_eus->where_in('project_id', $projects_available);
         }
         $DB_eus->where('closed_date');
-        $DB_eus->where('title ILIKE', "%{$proposal_name_fragment}%");
-        $query = $DB_eus->get('proposals');
+        $DB_eus->where('title ILIKE', "%{$project_name_fragment}%");
+        $query = $DB_eus->get('projects');
 
         $results = array();
 
@@ -556,7 +556,7 @@ class EUS
                     continue;
                 }
 
-                $results[$row->proposal_id] = array(
+                $results[$row->project_id] = array(
                 'title' => trim($row->title, '.'),
                 'currently_active' => $currently_active ? 'yes' : 'no',
                 'start_date' => $start_date ? $start_date->format('Y-m-d') : '---',

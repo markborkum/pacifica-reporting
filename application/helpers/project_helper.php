@@ -30,16 +30,16 @@ if (!defined('BASEPATH')) {
 }
 
 /**
- * [get_proposals_by_name description]
+ * [get_projects_by_name description]
  *
  * @param string  $name_fragment search terms for the search
- * @param boolean $active        is the proposal active or not
+ * @param boolean $active        is the project active or not
  *
  * @return void
  *
  * @author Ken Auberry <kenneth.auberry@pnnl.gov>
  */
-function get_proposals_by_name($name_fragment, $active)
+function get_projects_by_name($name_fragment, $active)
 {
     $CI =& get_instance();
     $CI->load->library('PHPRequests');

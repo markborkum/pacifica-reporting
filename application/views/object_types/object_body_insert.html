@@ -26,9 +26,9 @@
       <?php $side = array_shift($graph_sides); ?>
       <div id='instrument_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_2_across stats_graph_<?= $side ?>'></div>
     <?php endif; ?>
-    <?php if($object_type != 'proposal'): ?>
+    <?php if($object_type != 'project'): ?>
       <?php $side = array_shift($graph_sides); ?>
-      <div id='proposal_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_2_across stats_graph_<?= $side ?>'></div>
+      <div id='project_stats_graph_<?= $object_id ?>' class='stats_graph stats_graph_2_across stats_graph_<?= $side ?>'></div>
     <?php endif; ?>
     <?php if($object_type != 'user'): ?>
       <?php $side = array_shift($graph_sides); ?>

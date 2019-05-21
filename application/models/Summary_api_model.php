@@ -74,7 +74,7 @@ class Summary_api_model extends CI_Model
                                               ),
                           'summary_totals' => array(
                                                'upload_stats'      => array(
-                                                                       'proposal'   => array(),
+                                                                       'project'   => array(),
                                                                        'instrument' => array(),
                                                                        'user'       => array(),
                                                                       ),
@@ -163,7 +163,7 @@ class Summary_api_model extends CI_Model
     private function _generate_summary_totals($group_type, $id_list, $start_date, $end_date, $time_basis_type)
     {
         $time_basis = str_replace('_time', '', $time_basis_type);
-        $allowed_group_types = array('instrument', 'proposal', 'user');
+        $allowed_group_types = array('instrument', 'project', 'user');
         if (in_array($group_type, $allowed_group_types)) {
             $transaction_url = "{$this->policy_url_base}/reporting/transaction_summary/{$time_basis}/";
             $transaction_url .= "{$group_type}/".$start_date->format('Y-m-d H:i:s')."/";

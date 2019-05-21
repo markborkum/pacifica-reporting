@@ -65,7 +65,7 @@ class Ajax extends Baseline_api_controller
         $this->load->model('Group_info_model', 'gm');
         $this->load->model('Myemsl_model', 'myemsl');
         $this->load->helper(array('network','search_term','inflector','time', 'myemsl'));
-        $this->accepted_object_types = array('instrument', 'user', 'proposal');
+        $this->accepted_object_types = array('instrument', 'user', 'project');
         $this->accepted_time_basis_types = array('submit_time', 'create_time', 'modified_time');
         $this->local_resources_folder = $this->config->item('local_resources_folder');
     }
@@ -255,7 +255,7 @@ class Ajax extends Baseline_api_controller
             $time_range = 'custom';
         }
         $object_type = singular($object_type);
-        $accepted_object_types = array('instrument', 'proposal', 'user');
+        $accepted_object_types = array('instrument', 'project', 'user');
 
         $valid_date_range = $this->gm->earliest_latest_data_for_list($object_type, $group_info['item_list'], $time_basis);
         $my_times = fix_time_range($time_range, $start_date, $end_date, $valid_date_range);
