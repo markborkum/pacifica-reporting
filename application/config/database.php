@@ -85,8 +85,8 @@ $db['default'] = array(
 // );
 
 $db['eus'] = array(
-  'hostname' => 'docker.for.mac.localhost',
-  'port' => 33306,
+  'hostname' => 'eusi.emsl.pnl.gov',
+  'port' => 3306,
   'username' => getenv('EUSDB_USER'),
   'password' => getenv('EUSDB_PASSWORD'),
   'database' => getenv('EUSDB_NAME'),
