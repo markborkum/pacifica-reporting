@@ -97,7 +97,6 @@ class Summary_api_model extends CI_Model
     public function detailed_transaction_list($transaction_list)
     {
         $transaction_url = "{$this->policy_url_base}/reporting/transaction_details/{$this->user_id}";
-        // echo $transaction_url;
         $query = Requests::post(
             $transaction_url,
             array('Content-Type' => 'application/json'),

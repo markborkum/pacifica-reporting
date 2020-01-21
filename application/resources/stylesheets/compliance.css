@@ -114,12 +114,7 @@
     font-weight: 600;
 }
 
-.instrument_name {
-    font-size: 0.8em;
-    margin: 0;
-}
-
-.instrument_group {
+.instrument_group, .instrument_name {
     font-weight: 600;
 }
 

@@ -36,7 +36,7 @@
         <?php $project_title = $this->compliance->get_project_name($project_id); ?>
         <td class="project_id_container<?= $color_class ?>" title="<?= $project_title ?>"><?= !empty($line_class) ? $project_id : "" ?></td>
         <td class="instrument_id_container<?= $inst_color_class ?>"><?= $inst_id ?></td>
-        <td><span class="instrument_group"><?= $group_name_lookup[$instrument_group_cache[$inst_id]]; ?></span><p class="instrument_name"><?= $this->compliance->get_instrument_name($inst_id); ?></p></td>
+        <td><span class="instrument_name"><?= $this->compliance->get_instrument_name($inst_id); ?></span></td>
         <td><?= $info['booking_count']; ?></td>
         <td><?= $info['file_count']; ?></td>
       </tr>

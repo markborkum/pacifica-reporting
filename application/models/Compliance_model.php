@@ -396,7 +396,7 @@ class Compliance_model extends CI_Model
         if ($query->status_code == 200 && $query->body != '[]') {
             $results = json_decode($query->body, true);
             $instrument_entry = array_shift($results);
-            $instrument_name = $instrument_entry['name_short'];
+            $instrument_name = $instrument_entry['name'];
             $this->instrument_cache[$instrument_id] = $instrument_name;
         }
         return $instrument_name;
@@ -576,12 +576,15 @@ class Compliance_model extends CI_Model
                 } elseif (!$code_yellow && $project_file_count > 0) {
                     $project_color_class = "green";
                 }
+                $instrument_group = array_key_exists($instrument_id, $instrument_group_cache) ?
+                    $group_name_lookup[$instrument_group_cache[$instrument_id]] :
+                    "None";
                 $booking_results[] = [
                     'project_id' => $project_id,
                     'project_title' => $this->get_project_name($project_id),
                     'project_type' => $info['project_type'],
                     'instrument_id' => $instrument_id,
-                    'instrument_group' => $group_name_lookup[$instrument_group_cache[$instrument_id]],
+                    'instrument_group' => $instrument_group,
                     'project_pi' => $info['project_pi'],
                     'instrument_name' => $this->get_instrument_name($instrument_id),
                     'booking_count' => $info['booking_count'],

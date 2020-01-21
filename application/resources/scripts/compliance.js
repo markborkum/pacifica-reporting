@@ -91,10 +91,6 @@ var load_compliance_report = function(destination_object, month, year){
                             "class": "instrument_group_container",
                         })
                             .append($("<span>", {
-                                "class": "instrument_group",
-                                "text": item.instrument_group
-                            }))
-                            .append($("<p>", {
                                 "class": "instrument_name",
                                 "text": item.instrument_name
                             }));
@@ -130,6 +126,13 @@ var load_compliance_report = function(destination_object, month, year){
 
     })
         .complete(function(){
+            if($('#export_csv_button').length == 0){
+                $('#search_term_container').append('<input type="button" value="Export as CSV" class="search_button export_csv_button" id="export_csv_button"/>');
+                $('#export_csv_button').click(function(){
+                    var csv_url = report_url.replace("/json", "/csv");
+                    location.href= csv_url;
+                });
+            }
             $("#compliance_loading_screen").fadeOut();
             $(".time_period_options").enable();
         });
