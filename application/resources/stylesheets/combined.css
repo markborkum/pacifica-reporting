@@ -205,6 +205,30 @@ button:hover, .buttons input[type="button"]:hover {
     bottom: auto;
 }
 
+.update_timestamp_text {
+    font-size: 1.2em;
+    opacity: 0;
+    padding-top: 0.5em;
+    padding-right: 0.5em
+}
+
+
+span.info-icon {
+    opacity: 0.4;
+}
+
+span.info-icon:hover {
+    opacity: 1.0;
+    transition: opacity 1.5s;
+}
+
+span.info-icon:hover + .update_timestamp_text {
+    display: block;
+    opacity: 1.0;
+    transition: all 1.5s;
+}
+
+
 .page_header {
     width: 100%;
     background-color: rgb(61, 101, 149);
@@ -659,4 +683,12 @@ div.form_container td {
     position:relative;
     width: 80%;
     margin: 1em auto;
+}
+
+.info-icon-background-ring {
+    color: #d1d9ed;
+}
+
+.info-icon-background {
+    color: #0c3fc3;
 }

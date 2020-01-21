@@ -14,6 +14,8 @@
 
     <script src="/resources/scripts/jquery-ui/jquery-ui.min.js" type="text/javascript"></script>
     <link rel="stylesheet" type="text/css" href="/resources/scripts/jquery-ui/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="/project_resources/stylesheets/font-awesome.min.css" />
+
 
     <!-- local JS -->
     <script type="text/javascript" src="/resources/scripts/utility_functions.js"></script>
