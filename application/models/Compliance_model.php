@@ -504,7 +504,6 @@ class Compliance_model extends CI_Model
 
         $url = "{$this->metadata_url_base}/transactioninfo/multisearch?";
         $url .= http_build_query($url_args_array, '', '&');
-        echo $url;
         $transactions_list_query = Requests::get($url, array('Accept' => 'application/json'));
         if ($transactions_list_query->status_code == 200) {
             $transactions_list = json_decode($transactions_list_query->body, true);
