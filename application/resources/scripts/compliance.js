@@ -30,6 +30,8 @@ $(function(){
         );
     });
 
+    $.ajaxSetup({timeout:30000});
+
 
 });
 

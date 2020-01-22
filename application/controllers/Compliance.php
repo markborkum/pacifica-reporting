@@ -25,7 +25,8 @@
 
  defined('BASEPATH') or exit('No direct script access allowed');
  require_once 'Baseline_api_controller.php';
-
+ ini_set('max_execution_time', 0);
+ ini_set('memory_limit', '2048M');
  /**
   *  Group is a CI controller class that extends Baseline_controller
   *

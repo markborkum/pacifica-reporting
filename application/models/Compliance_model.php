@@ -225,21 +225,21 @@ class Compliance_model extends CI_Model
             }
         }
 
-        $ungrouped = $usage['by_project'];
-        foreach ($ungrouped as $project_id => $inst_entries) {
-            $new_entry = array();
-            foreach ($inst_entries as $inst_id => $entry) {
-                if (empty($new_entry)) {
-                    $new_entry = $entry;
-                    $new_entry['instruments_scheduled'] = array($new_entry['instrument_id']);
-                    unset($new_entry['instrument_id']);
-                } else {
-                    $new_entry['booking_count'] += $entry['booking_count'];
-                    $new_entry['instruments_scheduled'][] = $entry['instrument_id'];
-                };
-            }
-            $usage['by_project'][$project_id][$inst_id] = $new_entry;
-        }
+        // $ungrouped = $usage['by_project'];
+        // foreach ($ungrouped as $project_id => $inst_entries) {
+        //     $new_entry = array();
+        //     foreach ($inst_entries as $inst_id => $entry) {
+        //         if (empty($new_entry)) {
+        //             $new_entry = $entry;
+        //             $new_entry['instruments_scheduled'] = array($new_entry['instrument_id']);
+        //             unset($new_entry['instrument_id']);
+        //         } else {
+        //             $new_entry['booking_count'] += $entry['booking_count'];
+        //             $new_entry['instruments_scheduled'][] = $entry['instrument_id'];
+        //         };
+        //     }
+        //     $usage['by_project'][$project_id][$inst_id] = $new_entry;
+        // }
 
         $usage['instrument_group_compilation'] = array_unique($inst_group_comp);
         // $usage['unbooked_projects'] = $prop_query->result_array();
@@ -504,6 +504,7 @@ class Compliance_model extends CI_Model
 
         $url = "{$this->metadata_url_base}/transactioninfo/multisearch?";
         $url .= http_build_query($url_args_array, '', '&');
+        echo $url;
         $transactions_list_query = Requests::get($url, array('Accept' => 'application/json'));
         if ($transactions_list_query->status_code == 200) {
             $transactions_list = json_decode($transactions_list_query->body, true);

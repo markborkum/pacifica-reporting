@@ -466,7 +466,8 @@ function GetUnique(inputArray)
 
 $(function() {
     $.ajaxSetup({
-        contentType: "application/json"
+        contentType: "application/json",
+        timeout: 30000
     });
     // Make monochrome colors and set them as default for all pies
     Highcharts.getOptions().plotOptions.pie.colors = (function() {
