@@ -204,6 +204,8 @@ class Compliance extends Baseline_api_controller
             header("Content-Type: text/json");
             $response = [
                 'booking_results' => $booking_results,
+                'start_time' => $start_time,
+                'end_time' => $end_time
             ];
             print(json_encode($response));
         } else {

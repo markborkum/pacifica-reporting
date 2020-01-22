@@ -178,8 +178,12 @@ class Compliance_model extends CI_Model
 
         }
         ksort($counts);
+        $entry_count = 0;
+        $inst_group_comp = [];
         foreach ($row_info as $project_id => $inst_list) {
+            $entry_count += 1;
             foreach ($inst_list as $inst_id_str => $booking_stats_info) {
+                // var_dump($booking_stats_info);
                 $inst_id = intval($inst_id_str);
                 if (!array_key_exists($inst_id, $instrument_group_lookup)) {
                     $group_id = $this->get_group_id($inst_id);
@@ -200,7 +204,6 @@ class Compliance_model extends CI_Model
                     'file_count' => 0
                 ];
                 $inst_group_comp[] = $group_id;
-
                 foreach ($booking_stats_info as $booking_stats_id => $row) {
                     $record_start_date = new DateTime($row->date_start);
                     $record_end_date = new DateTime($row->date_finish);
@@ -211,12 +214,15 @@ class Compliance_model extends CI_Model
                         $entry['date_finish'] = $record_end_date;
                     }
 
-                    $entry['booking_count'] =+ 1;
+                    $entry['booking_count'] += 1;
+                    $entry['project_pi'] = $row->project_pi;
                     $entry['project_type'] = strpos($row->project_type, 'EMSL') === false ? ucwords(strtolower($row->project_type), " ") : $row->project_type;
                     $entry['date_start'] = $record_start_date < $entry['date_start'] ? $record_start_date : $entry['date_start'];
                     $entry['date_finish'] = $record_end_date > $entry['date_finish'] ? $record_end_date : $entry['date_finish'];
+                    // echo "\n\n\n* * * * *\n inst_id => ".$inst_id." proj_id => ".$project_id."\n";
+                    // var_dump($entry);
                 }
-                $usage['by_project'][$row->project_id][$inst_id] = $entry;
+                $usage['by_project'][$project_id][$inst_id] = $entry;
             }
         }
 

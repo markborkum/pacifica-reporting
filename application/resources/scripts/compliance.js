@@ -35,6 +35,9 @@ $(function(){
 
 var load_compliance_report = function(destination_object, month, year){
     $("#compliance_loading_screen").show();
+    $("#booking_results_error").hide();
+    $("#search_results_display").fadeOut();
+    $("#booking_results_display").empty();
     $(".time_period_options").disable();
     $("#report_loading_status").spin();
 
@@ -46,7 +49,19 @@ var load_compliance_report = function(destination_object, month, year){
     report_url += end_date.format("YYYY-MM-DD");
     report_url += "/json";
 
-    $.get(report_url, function(response) {
+    var booking_report_return = $.get(report_url, function(response) {
+        var reference_period = moment(response.start_time).format("MMMM YYYY");
+        var error_message = '';
+        if(response.booking_results.length == 0){
+            error_message = "No Results Located for Reporting Period<br />" + reference_period;
+        }else{
+            error_message = '';
+        }
+        $("#booking_results_error").html(error_message);
+        if(error_message.length > 0){
+            return;
+        }
+        $("#compliance_loading_screen").hide();
         $(".search_results_display").show();
         $(".booking_results_header").show();
         $("#booking_results_display").jsGrid({
@@ -54,34 +69,33 @@ var load_compliance_report = function(destination_object, month, year){
             width: "100%",
             sorting: true,
             paging: false,
+            filtering: false,
             data: response.booking_results,
             fields: [
                 {
-                    name: "project_id", title: "Project ID", width: "8%",
+                    name: "project_id", title: "Project ID", width: "8%", type: "text", headercss: "compliance_table_header",
                     cellRenderer: function(value, item) {
                         return $("<td>", {
                             "class": "project_id_container " + item.project_color_class,
                             "text": value
                         });
-                    },
-                    headercss: "compliance_table_header"
+                    }
                 },
                 {
-                    name: "instrument_id", title: "Instrument ID", width: "9%",
+                    name: "instrument_id", title: "Instrument ID", width: "9%", type: "text", headercss: "compliance_table_header",
                     cellRenderer: function(value, item) {
                         return $("<td>", {
                             "class": "instrument_id_container " + item.instrument_color_class,
                             "text": value
                         });
-                    },
-                    headercss: "compliance_table_header"
+                    }
                 },
                 {
-                    name: "project_type", title: "Project Type", width: "15%"
+                    name: "project_type", title: "Project Type", type: "text", width: "15%"
                 },
                 {
                     name: "project_pi", title: "Principal Investigator",
-                    headercss: "compliance_table_header", width: "15%"
+                    type: "text", headercss: "compliance_table_header", width: "15%"
                 },
                 {
                     name: "instrument_group", title: "Instrument", type: "text", headercss: "compliance_table_header",
@@ -124,18 +138,23 @@ var load_compliance_report = function(destination_object, month, year){
             ]
         });
 
-    })
-        .complete(function(){
-            if($('#export_csv_button').length == 0){
-                $('#search_term_container').append('<input type="button" value="Export as CSV" class="search_button export_csv_button" id="export_csv_button"/>');
-                $('#export_csv_button').click(function(){
-                    var csv_url = report_url.replace("/json", "/csv");
-                    location.href= csv_url;
-                });
-            }
-            $("#compliance_loading_screen").fadeOut();
-            $(".time_period_options").enable();
-        });
+    });
+    booking_report_return.done(function(jqxhr, text_status, a){
+        if($('#export_csv_button').length == 0){
+            $('#search_term_container').append('<input type="button" value="Export as CSV" class="search_button export_csv_button" id="export_csv_button"/>');
+            $('#export_csv_button').click(function(){
+                var csv_url = report_url.replace("/json", "/csv");
+                location.href= csv_url;
+            });
+        }
+    });
+    booking_report_return.always(function(jqxhr, text_status, a){
+        $(".time_period_options").enable();
+        if($("#booking_results_error").text().length > 0){
+            $("#compliance_loading_screen").hide();
+            $("#booking_results_error").slideDown('400');
+        }
+    });
 };
 
 var generate_year_select_options = function(parent_obj, min_date, max_date, selected_year){

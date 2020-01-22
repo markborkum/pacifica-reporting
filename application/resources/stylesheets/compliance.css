@@ -52,6 +52,21 @@
     margin-top: 0;
 }
 
+.booking_results_error_type {
+    text-align: center;
+    font-size: 1.5em;
+    line-height: 150%;
+    padding: 1em;
+    border: rgb(195, 138, 8) 3px solid;
+    border-top: none;
+    border-radius: 0 0 0.5em 0.5em;
+    width: 50%;
+    margin: auto;
+    background: rgba(195, 138, 8, 0.6);
+    color: white;
+    font-weight: bold;
+}
+
 .has-error ~ .select2 .select2-selection {
     transition: all 0.5s;
     border-color: rgb(185, 74, 72) !important;
