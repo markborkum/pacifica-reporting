@@ -118,13 +118,13 @@ class Compliance_model extends CI_Model
 
         //get booking stats
         $booking_stats_columns = [
-            'COUNT(bs.`BOOKING_STATS_ID`) as booking_count',
+            'bs.`BOOKING_STATS_ID` as booking_stats_id',
             'bs.`RESOURCE_ID` as instrument_id',
             'bs.`PROPOSAL_ID` as project_id',
             'IFNULL( REPLACE ( `up`.`PROPOSAL_TYPE`, \'_\', \' \' ), IFNULL( uct.CALL_TYPE, \'N/A\' ) ) AS project_type',
-            'MIN(bs.`MONTH`) as query_month',
-            'MIN(bs.`DATE_START`) as date_start',
-            'MAX(bs.`DATE_FINISH`) as date_finish',
+            'bs.`MONTH` as query_month',
+            'bs.`DATE_START` as date_start',
+            'bs.`DATE_FINISH` as date_finish',
             'users.`NAME_FM` as project_pi'
         ];
         $excluded_project_types = [
@@ -143,8 +143,8 @@ class Compliance_model extends CI_Model
             ->where_not_in('up.`PROPOSAL_TYPE`', $excluded_project_types)
             ->or_where('up.`PROPOSAL_TYPE` IS NULL')
             ->group_end()
-            ->group_by(array('bs.`PROPOSAL_ID`', 'bs.`RESOURCE_ID`'))
-            ->having('MIN(bs.`MONTH`)', $first_of_month->format('Y-m-d'))
+            ->where('bs.`MONTH`', $first_of_month->format('Y-m-d'))
+            ->where_in('bs.`USAGE_CD`', ['REMOTE', 'ONSITE'])
             ->order_by('bs.`PROPOSAL_ID`, bs.`RESOURCE_ID`')
             ->get();
 
@@ -152,11 +152,12 @@ class Compliance_model extends CI_Model
             // exit();
 
         $usage = array(
-            'by_instrument' => [],
             'by_project' => []
         );
+        $counts = [];
+        $row_info = [];
         $instrument_group_lookup = [];
-        foreach ($booking_stats_query->result() as $row) {
+        foreach($booking_stats_query->result() as $row) {
             $inst_id = intval($row->instrument_id);
             if (!array_key_exists($inst_id, $instrument_group_lookup)) {
                 $group_id = $this->get_group_id($inst_id);
@@ -167,21 +168,58 @@ class Compliance_model extends CI_Model
             $record_start_date = new DateTime($row->date_start);
             $record_end_date = new DateTime($row->date_finish);
 
-            $entry = array(
-                'booking_count' => $row->booking_count,
-                'instrument_id' => $inst_id,
-                'instrument_group_id' => $group_id,
-                'project_id' => $row->project_id,
-                'project_type' => strpos($row->project_type, 'EMSL') === false ? ucwords(strtolower($row->project_type), " ") : $row->project_type,
-                'date_start' => $record_start_date,
-                'date_finish' => $record_end_date,
-                'project_pi' => $row->project_pi,
-                'transactions_list' => array(),
-                'file_count' => 0
-            );
-            $inst_group_comp[] = $group_id;
-            $usage['by_project'][$row->project_id][$inst_id] = $entry;
+            if(!array_key_exists($row->project_id, $row_info)) {
+                $row_info[$row->project_id] = [];
+            }
+            if(!array_key_exists($inst_id, $row_info[$row->project_id])) {
+                $row_info[$row->project_id][$inst_id] = [];
+            }
+            $row_info[$row->project_id][$inst_id][$row->booking_stats_id] = $row;
+
         }
+        ksort($counts);
+        foreach ($row_info as $project_id => $inst_list) {
+            foreach ($inst_list as $inst_id_str => $booking_stats_info) {
+                $inst_id = intval($inst_id_str);
+                if (!array_key_exists($inst_id, $instrument_group_lookup)) {
+                    $group_id = $this->get_group_id($inst_id);
+                    $instrument_group_lookup[$inst_id] = $group_id;
+                }
+                $group_id = $instrument_group_lookup[$inst_id];
+
+                $entry = [
+                    'booking_count' => 0,
+                    'instrument_id' => $inst_id,
+                    'instrument_group_id' => $group_id,
+                    'project_id' => $project_id,
+                    'project_type' => '',
+                    'date_start' => '',
+                    'date_finish' => '',
+                    'project_pi' => '',
+                    'transactions_list' => [],
+                    'file_count' => 0
+                ];
+                $inst_group_comp[] = $group_id;
+
+                foreach ($booking_stats_info as $booking_stats_id => $row) {
+                    $record_start_date = new DateTime($row->date_start);
+                    $record_end_date = new DateTime($row->date_finish);
+                    if (!$entry['date_start']) {
+                        $entry['date_start'] = $record_start_date;
+                    }
+                    if (!$entry['date_finish']) {
+                        $entry['date_finish'] = $record_end_date;
+                    }
+
+                    $entry['booking_count'] =+ 1;
+                    $entry['project_type'] = strpos($row->project_type, 'EMSL') === false ? ucwords(strtolower($row->project_type), " ") : $row->project_type;
+                    $entry['date_start'] = $record_start_date < $entry['date_start'] ? $record_start_date : $entry['date_start'];
+                    $entry['date_finish'] = $record_end_date > $entry['date_finish'] ? $record_end_date : $entry['date_finish'];
+                }
+                $usage['by_project'][$row->project_id][$inst_id] = $entry;
+            }
+        }
+
         $ungrouped = $usage['by_project'];
         foreach ($ungrouped as $project_id => $inst_entries) {
             $new_entry = array();
@@ -193,10 +231,6 @@ class Compliance_model extends CI_Model
                 } else {
                     $new_entry['booking_count'] += $entry['booking_count'];
                     $new_entry['instruments_scheduled'][] = $entry['instrument_id'];
-                    $new_entry['date_start'] = $entry['date_start'] < $new_entry['date_start']
-                        ? $entry['date_start'] : $new_entry['date_start'];
-                    $new_entry['date_finish'] = $entry['date_finish'] > $new_entry['date_finish']
-                        ? $entry['date_finish'] : $new_entry['date_finish'];
                 };
             }
             $usage['by_project'][$project_id][$inst_id] = $new_entry;
