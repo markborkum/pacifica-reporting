@@ -157,7 +157,7 @@ class Compliance_model extends CI_Model
         $counts = [];
         $row_info = [];
         $instrument_group_lookup = [];
-        foreach($booking_stats_query->result() as $row) {
+        foreach ($booking_stats_query->result() as $row) {
             $inst_id = intval($row->instrument_id);
             if (!array_key_exists($inst_id, $instrument_group_lookup)) {
                 $group_id = $this->get_group_id($inst_id);
@@ -168,14 +168,13 @@ class Compliance_model extends CI_Model
             $record_start_date = new DateTime($row->date_start);
             $record_end_date = new DateTime($row->date_finish);
 
-            if(!array_key_exists($row->project_id, $row_info)) {
+            if (!array_key_exists($row->project_id, $row_info)) {
                 $row_info[$row->project_id] = [];
             }
-            if(!array_key_exists($inst_id, $row_info[$row->project_id])) {
+            if (!array_key_exists($inst_id, $row_info[$row->project_id])) {
                 $row_info[$row->project_id][$inst_id] = [];
             }
             $row_info[$row->project_id][$inst_id][$row->booking_stats_id] = $row;
-
         }
         ksort($counts);
         $entry_count = 0;
