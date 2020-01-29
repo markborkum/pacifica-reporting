@@ -199,8 +199,7 @@ class Compliance_model extends CI_Model
                     'date_start' => '',
                     'date_finish' => '',
                     'project_pi' => '',
-                    'transactions_list' => [],
-                    'file_count' => 0
+                    'upload_count' => 0
                 ];
                 $inst_group_comp[] = $group_id;
                 foreach ($booking_stats_info as $booking_stats_id => $row) {
@@ -221,6 +220,8 @@ class Compliance_model extends CI_Model
                     // echo "\n\n\n* * * * *\n inst_id => ".$inst_id." proj_id => ".$project_id."\n";
                     // var_dump($entry);
                 }
+                $entry['date_start'] = $entry['date_start']->format('Y-m-d');
+                $entry['date_finish'] = $entry['date_finish']->format('Y-m-d');
                 $usage['by_project'][$project_id][$inst_id] = $entry;
             }
         }
@@ -487,11 +488,10 @@ class Compliance_model extends CI_Model
         $start_time,
         $end_time
     ) {
-        $object_list = $eus_object_type_records["by_{$object_type}"];
+        $raw_eus_objects = $eus_object_type_records["by_{$object_type}"];
         $inst_group_list = $eus_object_type_records["instrument_group_compilation"];
         $group_name_lookup = $this->get_group_name_lookup();
         $this->instrument_group_cache = $this->get_group_id_cache();
-        $eus_objects = $object_list;
 
         $booking_stats_cache = array();
         $start_time->modify('-1 week');
@@ -502,61 +502,31 @@ class Compliance_model extends CI_Model
             'end_time' => $end_time->format('Y-m-d')
         );
 
-        $url = "{$this->metadata_url_base}/transactioninfo/multisearch?";
-        $url .= http_build_query($url_args_array, '', '&');
-        $transactions_list_query = Requests::get($url, array('Accept' => 'application/json'));
-        if ($transactions_list_query->status_code == 200) {
-            $transactions_list = json_decode($transactions_list_query->body, true);
-            $stats_template = array(
-                'booking_count' => 0,
-                'data_file_count' => 0,
-                'instruments_scheduled' => array(),
-                'transaction_list' => array()
-            );
-            foreach ($transactions_list as $transaction_id => $trans_info) {
-                // $my_group_id = $this->get_group_id($trans_info['instrument_id']);
-                $project_id = strval($trans_info['project_id']);
-                $instrument_id = intval($trans_info['instrument_id']);
-                if (!array_key_exists($project_id, $booking_stats_cache)) {
-                    $booking_stats_cache[$project_id] = array();
+        $url = "{$this->metadata_url_base}/transactioninfo/summary/{$start_time->format('Y-m-d')}/{$end_time->format('Y-m-d')}";
+
+        $transaction_summary_query = Requests::get($url, array('Accept' => 'application/json'));
+        $transaction_summary = [];
+        $eus_objects = [];
+        if ($transaction_summary_query->status_code == 200) {
+            $transaction_summary = json_decode($transaction_summary_query->body, true);
+
+            foreach ($raw_eus_objects as $project_id => $instrument_listing) {
+                foreach ($instrument_listing as $instrument_id => $booking_record) {
+                    if (isset($transaction_summary[$project_id][$instrument_id])) {
+                        $transaction_record = $transaction_summary[$project_id][$instrument_id];
+                        $booking_record['upload_count'] = $transaction_record['transaction_count'];
+                    } else {
+                        $booking_record['upload_count'] = 0;
+                    }
+                    $eus_objects[$project_id][$instrument_id] = $booking_record;
                 }
-                if (!array_key_exists($instrument_id, $booking_stats_cache)) {
-                    $booking_stats_cache[$project_id][$instrument_id] = $stats_template;
-                }
-                $booking_stats_cache[$project_id][$instrument_id]['data_file_count']
-                    += $trans_info['file_count'];
-                $booking_stats_cache[$project_id][$instrument_id]['transaction_list'][$trans_info['upload_date']][]
-                    = array(
-                        'transaction_id' => $transaction_id,
-                        'file_count' => intval($trans_info['file_count']),
-                        'upload_date_obj' => new DateTime($trans_info['upload_date'])
-                    );
             }
+        } elseif ($transaction_summary_query->status_code / 100 == 4) {
+            //Some kind of input error
+        } elseif ($transaction_summary_query->status_code / 100 == 5) {
+            //Some kind of server side error
         }
 
-        foreach ($object_list as $project_id => $inst_id_list) {
-            foreach ($inst_id_list as $inst_id => $record) {
-                $inst_group_id = $record['instrument_group_id'];
-                $project_id = strval($record['project_id']);
-                $earliest_date = clone($record['date_start']);
-                // $earliest_date->modify('-1 week');
-                $latest_date = clone($record['date_finish']);
-                $latest_date->modify('+3 weeks');
-                //check the transaction record for matching entries
-                $eus_objects[$project_id][$inst_id]['date_start'] = $record['date_start']->format('Y-m-d');
-                $eus_objects[$project_id][$inst_id]['date_finish'] = $record['date_finish']->format('Y-m-d');
-                if (isset($booking_stats_cache[$project_id][$inst_id])) {
-                    $transactions = $booking_stats_cache[$project_id][$inst_id]['transaction_list'];
-                    foreach ($transactions as $upload_date => $txn_entries) {
-                        foreach ($txn_entries as $txn_entry) {
-                            if ($txn_entry['upload_date_obj'] >= $earliest_date && $txn_entry['upload_date_obj'] <= $latest_date) {
-                                $eus_objects[$project_id][$inst_id]['file_count'] += $txn_entry['file_count'];
-                            }
-                        }
-                    }
-                }
-            }
-        }
         return $eus_objects;
     }
 
@@ -600,19 +570,19 @@ class Compliance_model extends CI_Model
         $group_name_lookup = $this->get_group_name_lookup();
         $booking_results = [];
         foreach ($mapping_data as $project_id => $booking_info) {
-            $project_file_count = 0;
+            $project_upload_count = 0;
             $code_yellow = false;
             // pre-scan for project-level coloring
             foreach ($booking_info as $instrument_id => $info) {
-                $code_yellow = empty($info['file_count']) || $code_yellow ? true : false;
-                $project_file_count += $info['file_count'];
+                $code_yellow = empty($info['upload_count']) || $code_yellow ? true : false;
+                $project_upload_count += $info['upload_count'];
             }
             foreach ($booking_info as $instrument_id => $info) {
-                $inst_color_class = $info['file_count'] > 0 ? "green" : "red";
+                $inst_color_class = $info['upload_count'] > 0 ? "green" : "red";
                 $project_color_class = "yellow";
-                if ($code_yellow && $project_file_count <= 0) {
+                if ($code_yellow && $project_upload_count <= 0) {
                     $project_color_class = "red";
-                } elseif (!$code_yellow && $project_file_count > 0) {
+                } elseif (!$code_yellow && $project_upload_count > 0) {
                     $project_color_class = "green";
                 }
                 $instrument_group = array_key_exists($instrument_id, $instrument_group_cache) ?
@@ -627,7 +597,7 @@ class Compliance_model extends CI_Model
                     'project_pi' => $info['project_pi'],
                     'instrument_name' => $this->get_instrument_name($instrument_id),
                     'booking_count' => $info['booking_count'],
-                    'file_count' => $info['file_count'],
+                    'upload_count' => $info['upload_count'],
                     'project_color_class' => $project_color_class,
                     'instrument_color_class' => $inst_color_class
                 ];

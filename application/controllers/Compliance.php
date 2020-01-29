@@ -75,8 +75,9 @@ class Compliance extends Baseline_api_controller
            '/resources/scripts/select2-4/dist/css/select2.css',
            '/project_resources/stylesheets/combined.css',
            '/project_resources/stylesheets/selector.css',
-           '/project_resources/stylesheets/compliance.css',
-           '/project_resources/scripts/jsgrid/jsgrid.min.css'
+           '/project_resources/stylesheets/jsgrid_custom.css',
+           '/project_resources/scripts/jsgrid/jsgrid.min.css',
+           '/project_resources/stylesheets/compliance.css'
         ];
         $this->page_data['load_prototype'] = false;
         $this->page_data['load_jquery'] = true;
@@ -149,13 +150,15 @@ class Compliance extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_booking_report($object_type, $start_time, $end_time, $output_type = 'screen')
+    public function get_booking_report($object_type, $start_time, $end_time)
     {
-        if (!in_array($object_type, array('instrument', 'project'))) {
-            return false;
-        }
-        $valid_output_types = array('screen', 'csv');
-        $output_type = !in_array($output_type, $valid_output_types) ? 'screen' : $output_type;
+        $requested_type = $this->input->get_request_header('Accept', true);
+        $valid_requested_types = [
+            "text/csv" => "csv",
+            "text/json" => "json",
+            "application/json" => "json"
+        ];
+        $output_type = array_key_exists($requested_type, $valid_requested_types) ? $valid_requested_types[$requested_type] : 'json';
 
         $start_time_obj = strtotime($start_time) ? new DateTime($start_time) : new DateTime('first day of this month');
         $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : new DateTime('last day of this month');
@@ -163,17 +166,8 @@ class Compliance extends Baseline_api_controller
         $eus_booking_records
             = $this->compliance->retrieve_active_project_list_from_eus($start_time_obj, $end_time_obj);
 
-        $group_name_lookup = $this->compliance->get_group_name_lookup();
         $mappings = $this->compliance->cross_reference_bookings_and_data($object_type, $eus_booking_records, clone $start_time_obj, clone $end_time_obj);
         ksort($mappings);
-
-        $page_data = [
-            'results_collection' => $mappings,
-            'group_name_lookup' => $group_name_lookup,
-            'object_type' => $object_type,
-            'start_date' => $start_time_obj->format('Y-m-d'),
-            'end_date' => $end_time_obj->format('Y-m-d')
-        ];
 
         if ($output_type == 'csv') {
             $filename = "Compliance_report_by_project_".$start_time_obj->format('Y-m').".csv";
@@ -184,33 +178,30 @@ class Compliance extends Baseline_api_controller
             $handle = fopen('php://output', 'w');
             $field_names = array(
                 "project_id","instrument_id","instrument_name",
-                "number_of_bookings","data_file_count"
+                "number_of_bookings","number_of_uploads"
             );
             fputcsv($handle, $field_names);
             foreach ($mappings as $project_id => $entry) {
                 foreach ($entry as $instrument_id => $info) {
                     $data = [
                         $project_id, $instrument_id,
-                        // $group_name_lookup[$info['instrument_group_id']],
                         $this->compliance->get_instrument_name($instrument_id),
-                        $info['booking_count'], $info['file_count']
+                        $info['booking_count'], $info['transaction_count']
                     ];
                     fputcsv($handle, $data);
                 }
             }
             fclose($handle);
             exit();
-        } elseif ($output_type = 'json') {
+        } else { //must be json format instead
             $booking_results = $this->compliance->format_bookings_for_jsgrid($mappings);
-            header("Content-Type: text/json");
+            header("Content-Type: application/json");
             $response = [
                 'booking_results' => $booking_results,
                 'start_time' => $start_time,
                 'end_time' => $end_time
             ];
             print(json_encode($response));
-        } else {
-            $this->load->view('object_types/compliance_reporting/reporting_table_project.html', $page_data);
         }
     }
 

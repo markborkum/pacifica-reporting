@@ -53,11 +53,11 @@ var load_compliance_report = function(destination_object, month, year){
 
     var booking_report_return = $.get(report_url, function(response) {
         var reference_period = moment(response.start_time).format("MMMM YYYY");
-        var error_message = '';
+        var error_message = "";
         if(response.booking_results.length == 0){
             error_message = "No Results Located for Reporting Period<br />" + reference_period;
         }else{
-            error_message = '';
+            error_message = "";
         }
         $("#booking_results_error").html(error_message);
         if(error_message.length > 0){
@@ -71,15 +71,33 @@ var load_compliance_report = function(destination_object, month, year){
             width: "100%",
             sorting: true,
             paging: false,
-            filtering: false,
+            filtering: true,
             data: response.booking_results,
+            controller : {
+                loadData : function(filter) {
+                    result = response.booking_results;
+                    for (var prop in filter) {
+                        if (filter[prop] && filter[prop].length > 0) {
+                            result = $.grep(response.booking_results, function (item) {
+                                var regexp = new RegExp(filter[prop], "gi");
+                                if (String(item[prop]).match(regexp)) {
+                                    return item;
+                                }
+                            });
+                            break;
+                        }
+                    }
+                    return result;
+                },
+            },
             fields: [
                 {
                     name: "project_id", title: "Project ID", width: "8%", type: "text", headercss: "compliance_table_header",
                     cellRenderer: function(value, item) {
                         return $("<td>", {
                             "class": "project_id_container " + item.project_color_class,
-                            "text": value
+                            "text": value,
+                            "title": item.project_title
                         });
                     }
                 },
@@ -100,24 +118,15 @@ var load_compliance_report = function(destination_object, month, year){
                     type: "text", headercss: "compliance_table_header", width: "15%"
                 },
                 {
-                    name: "instrument_group", title: "Instrument", type: "text", headercss: "compliance_table_header",
-                    width: "40%",
-                    cellRenderer: function(value, item) {
-                        return $("<td>", {
-                            "class": "instrument_group_container",
-                        })
-                            .append($("<span>", {
-                                "class": "instrument_name",
-                                "text": item.instrument_name
-                            }));
-                    }
+                    name: "instrument_name", title: "Instrument", type: "text", headercss: "compliance_table_header",
+                    width: "40%"
                 },
                 {
-                    name: "booking_count", title: "Number of Bookings", type: "number",
+                    name: "booking_count", title: "Number of Bookings",
                     headercss: "compliance_table_header", width: "10%", align: "center"
                 },
                 {
-                    name: "file_count", title: "Data File Count", type: "number",
+                    name: "upload_count", title: "Data Uploads Count",
                     headercss: "compliance_table_header", width: "10%", align: "center"
                 }
             ]
