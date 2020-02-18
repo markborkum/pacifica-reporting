@@ -150,15 +150,13 @@ class Compliance extends Baseline_api_controller
      *
      * @author Ken Auberry <kenneth.auberry@pnnl.gov>
      */
-    public function get_booking_report($object_type, $start_time, $end_time)
+    public function get_booking_report($object_type, $start_time, $end_time, $output_type = 'screen')
     {
-        $requested_type = $this->input->get_request_header('Accept', true);
-        $valid_requested_types = [
-            "text/csv" => "csv",
-            "text/json" => "json",
-            "application/json" => "json"
-        ];
-        $output_type = array_key_exists($requested_type, $valid_requested_types) ? $valid_requested_types[$requested_type] : 'json';
+        if (!in_array($object_type, array('instrument', 'project'))) {
+            return false;
+        }
+        $valid_output_types = array('screen', 'csv');
+        $output_type = !in_array($output_type, $valid_output_types) ? 'screen' : $output_type;
 
         $start_time_obj = strtotime($start_time) ? new DateTime($start_time) : new DateTime('first day of this month');
         $end_time_obj = strtotime($end_time) ? new DateTime($end_time) : new DateTime('last day of this month');
@@ -186,7 +184,7 @@ class Compliance extends Baseline_api_controller
                     $data = [
                         $project_id, $instrument_id,
                         $this->compliance->get_instrument_name($instrument_id),
-                        $info['booking_count'], $info['transaction_count']
+                        $info['booking_count'], $info['upload_count']
                     ];
                     fputcsv($handle, $data);
                 }

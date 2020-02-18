@@ -292,7 +292,6 @@ class Group extends Baseline_api_controller
             $results = $this->summary->detailed_transaction_list($transaction_list);
             $this->page_data['transaction_info'] = $results;
             $this->page_data['status_site_base_url'] = $this->status_site_base_url;
-
             $this->load->view('object_types/transaction_details_insert.html', $this->page_data);
         } else {
             echo "";
@@ -425,6 +424,7 @@ class Group extends Baseline_api_controller
         if (!$latest_data || empty($group_info)) {
             $this->page_data['results_message'] = 'No Data Available for this group of '.plural(ucwords($object_type));
             $this->page_data['object_id_list'] = [];
+            $this->page_data['times'] = [];
             $this->load->view('object_types/group_body_insert.html', $this->page_data);
             return;
         }

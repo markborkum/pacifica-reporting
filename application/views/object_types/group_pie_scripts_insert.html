@@ -1,7 +1,10 @@
 <?php
     extract($transaction_info);
-    $my_transaction_list = array_unique(call_user_func_array('array_merge', array_values($day_graph['by_date']['transactions_by_day'])));
-    sort($my_transaction_list);
+    $my_transaction_list = [];
+    if($day_graph['by_date']['transactions_by_day']) {
+      $my_transaction_list = array_unique(call_user_func_array('array_merge', array_values($day_graph['by_date']['transactions_by_day'])));
+      sort($my_transaction_list);
+    }
 ?>
 <script type="text/javascript">
   $(function () {

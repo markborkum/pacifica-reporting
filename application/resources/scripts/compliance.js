@@ -150,20 +150,20 @@ var load_compliance_report = function(destination_object, month, year){
         });
 
     });
-    booking_report_return.done(function(jqxhr, text_status, a){
-        if($('#export_csv_button').length == 0){
-            $('#search_term_container').append('<input type="button" value="Export as CSV" class="search_button export_csv_button" id="export_csv_button"/>');
-            $('#export_csv_button').click(function(){
+    booking_report_return.done(function(){
+        if($("#export_csv_button").length == 0){
+            $("#search_term_container").append("<input type=\"button\" value=\"Export as CSV\" class=\"search_button export_csv_button\" id=\"export_csv_button\"/>");
+            $("#export_csv_button").click(function(){
                 var csv_url = report_url.replace("/json", "/csv");
                 location.href= csv_url;
             });
         }
     });
-    booking_report_return.always(function(jqxhr, text_status, a){
+    booking_report_return.always(function(){
         $(".time_period_options").enable();
         if($("#booking_results_error").text().length > 0){
             $("#compliance_loading_screen").hide();
-            $("#booking_results_error").slideDown('400');
+            $("#booking_results_error").slideDown("400");
         }
     });
 };

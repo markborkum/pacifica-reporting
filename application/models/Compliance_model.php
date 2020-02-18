@@ -143,7 +143,8 @@ class Compliance_model extends CI_Model
             ->where_not_in('up.`PROPOSAL_TYPE`', $excluded_project_types)
             ->or_where('up.`PROPOSAL_TYPE` IS NULL')
             ->group_end()
-            ->where('bs.`MONTH`', $first_of_month->format('Y-m-d'))
+            ->where('bs.`MONTH`>=', $first_of_month->format('Y-m-d'))
+            ->where('bs.`MONTH`<=', $end_of_month->format('Y-m-d'))
             ->where_in('bs.`USAGE_CD`', ['REMOTE', 'ONSITE'])
             ->order_by('bs.`PROPOSAL_ID`, bs.`RESOURCE_ID`')
             ->get();
