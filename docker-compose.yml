@@ -40,7 +40,7 @@ services:
       - 8080:8080
     volumes:
       # - /srv:/srv
-      - /Users/d3k857/Downloads/srv:/srv
+      - /Users/bork374/Downloads/srv:/srv
 
   proxyserver:
     container_name: reporting_proxyserver

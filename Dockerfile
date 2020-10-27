@@ -4,7 +4,7 @@ RUN rm /etc/apt/preferences.d/no-debian-php
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install apt-utils && \
     DEBIAN_FRONTEND=noninteractive apt-get -y install php5-pgsql libpq-dev && \
-    DEBIAN_FRONTEND=noninteractive apt-get -y install php5-mysql mysql-client libmysqlclient-dev &&\
+    DEBIAN_FRONTEND=noninteractive apt-get -y install php5-mysql default-mysql-client default-libmysqlclient-dev &&\
     DEBIAN_FRONTEND=noninteractive apt-get -y install postgresql-client-common
 
 RUN docker-php-ext-install mysqli mysql pdo pdo_mysql pgsql
